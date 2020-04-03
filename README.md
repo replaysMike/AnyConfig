@@ -41,6 +41,6 @@ var isEnabled = ConfigurationManager.AppSettings<bool>["IsEnabled"];
 
 ## Advanced Usage
 
-See the [wiki](https://github.com/replaysMike/AnyConfig.wiki)
+See the [wiki](https://github.com/replaysMike/AnyConfig/wiki)
 
 
