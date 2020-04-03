@@ -24,9 +24,15 @@ Simplest usage is using the dedicated generics interface:
 var isEnabled = Config.Get<bool>("IsEnabled");
 ```
 
-You can also create a configuration class:
+You can also bind your own configuration class:
 ```csharp
-var configuration = Config.Get<MyTestConfiguration>();
+var testConfiguration = Config.Get<MyTestConfiguration>();
+```
+
+Grab an IConfiguration for .net core without any Microsoft extensions:
+```csharp
+var config = Config.GetConfiguration();
+var testConfiguration = config.Get<MyTestConfiguration>();
 ```
 
 If you need, use the legacy ConfigurationManager too:
