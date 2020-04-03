@@ -1,0 +1,6 @@
+{
+  "BoolSetting": true,
+  "StringSetting": "TestValue",
+  "IntSetting": 1,
+  "TestConnection": "host=localhost;"
+}

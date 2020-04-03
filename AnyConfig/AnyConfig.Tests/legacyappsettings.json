@@ -1,0 +1,17 @@
+{
+  "AppSettings": {
+    "BoolSetting": true,
+    "StringSetting": "TestValue",
+    "IntSetting": 1,
+    "TestConfigurationObject": {
+      "Name": "TestName",
+      "Value": "TestValue"
+    }
+  },
+  "ConnectionStrings": [
+    {
+      "name": "TestConnection",
+      "connectionString": "host=localhost;"
+    }
+  ]
+}
