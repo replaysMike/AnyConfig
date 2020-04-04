@@ -7,7 +7,7 @@ AnyConfig makes configuration on solutions which mix .Net Core and .Net Framewor
 
 ## Installation
 ```Powershell
-PM> Install-Package AnyConfig
+PM> Install-Package Any-Config
 ```
 
 ## Features
