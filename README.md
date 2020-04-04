@@ -35,14 +35,24 @@ var config = Config.GetConfiguration();
 var testConfiguration = config.Get<MyTestConfiguration>();
 ```
 
-If you need, use the legacy ConfigurationManager too:
+If you need, use the legacy ConfigurationManager:
 ```csharp
 var isEnabled = ConfigurationManager.AppSettings["IsEnabled"];
 ```
 
-The built-in ConfigurationManager even supports generics:
+The built-in ConfigurationManager supports generics:
 ```csharp
-var isEnabled = ConfigurationManager.AppSettings<bool>["IsEnabled"];
+var isEnabled = ConfigurationManager.AppSettings["IsEnabled"].As<bool>();
+```
+
+It also supports reading from json:
+```csharp
+ConfigurationManager.ConfigurationFilename = "appsettings.json";
+var isEnabled = ConfigurationManager.AppSettings["IsEnabled"].As<bool>();
+// appsettings.json
+{
+  "IsEnabled": true
+}
 ```
 
 ## Advanced Usage
