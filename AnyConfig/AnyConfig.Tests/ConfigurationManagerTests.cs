@@ -71,7 +71,6 @@ namespace AnyConfig.Tests
         [Test]
         public void Should_Load_ConfigurationManagerFromJson()
         {
-            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Json;
             ConfigurationManager.ConfigurationFilename = "legacyappsettings.json";
             ConfigurationManager.Reload();
             var connectionString = ConfigurationManager.ConnectionStrings["TestConnection"];
@@ -122,7 +121,6 @@ namespace AnyConfig.Tests
         public void Should_LoadRootAppSettings_ConfigurationManagerFromJson()
         {
             ConfigurationManager.ResetDefaults();
-            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Json;
             ConfigurationManager.ConfigurationFilename = "legacyrootappsettings.json";
             ConfigurationManager.Reload();
             var connectionString = ConfigurationManager.AppSettings["TestConnection"];

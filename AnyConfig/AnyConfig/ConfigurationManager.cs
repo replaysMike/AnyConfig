@@ -2,6 +2,7 @@
 using AnyConfig.Models;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -113,10 +114,13 @@ namespace AnyConfig
                 // reset all cached data
                 ResetCachedData();
 
+                // attempt to detect source type based on file extension if specified
+                var configurationSource = AutoDetectSource(ConfigurationFilename, ConfigurationSource);
+
                 // resolve configuration file
                 LegacyConfiguration config;
                 var resolver = new ConfigurationResolver();
-                switch (ConfigurationSource)
+                switch (configurationSource)
                 {
                     case ConfigurationManagerSource.Xml:
                         config = resolver.ResolveLegacyConfigurationFromXml(ConfigurationFilename);
@@ -126,6 +130,7 @@ namespace AnyConfig
                         break;
                     case ConfigurationManagerSource.Auto:
                     default:
+                        // auto-detect based on available detected file
                         config = resolver.ResolveLegacyConfigurationFromXml(ConfigurationFilename) ?? resolver.ResolveLegacyConfigurationFromJson(ConfigurationFilename);
                         break;
                 }
@@ -135,6 +140,25 @@ namespace AnyConfig
             {
                 _loadLock.Release();
             }
+        }
+
+        private static ConfigurationManagerSource AutoDetectSource(string filename, ConfigurationManagerSource configurationSource)
+        {
+            if (configurationSource == ConfigurationManagerSource.Auto && !string.IsNullOrEmpty(filename))
+            {
+                var fileExtension = Path.GetExtension(filename).ToLower();
+                switch (fileExtension)
+                {
+                    case ".json":
+                        configurationSource = ConfigurationManagerSource.Json;
+                        break;
+                    case ".xml":
+                    case ".config":
+                        configurationSource = ConfigurationManagerSource.Xml;
+                        break;
+                }
+            }
+            return configurationSource;
         }
 
         private static void ResetCachedData()
