@@ -1,4 +1,11 @@
 # AnyConfig
+
+[![nuget](https://img.shields.io/nuget/v/Any-Config.svg)](https://www.nuget.org/packages/Any-Config/)
+[![nuget](https://img.shields.io/nuget/dt/Any-Config.svg)](https://www.nuget.org/packages/Any-Config/)
+[![Build status](https://ci.appveyor.com/api/projects/status/gfwjabg1pta7em94?svg=true)](https://ci.appveyor.com/project/MichaelBrown/AnyConfig)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d708cfcc471f415b950cfd27e1829dd9)](https://www.codacy.com/manual/replaysMike/AnyConfig?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=replaysMike/AnyConfig&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/d708cfcc471f415b950cfd27e1829dd9)](https://www.codacy.com/app/replaysMike/Any-Config?utm_source=github.com&utm_medium=referral&utm_content=replaysMike/AnySerializer&utm_campaign=Badge_Coverage)
+
 A .net configuration library to make configuration of multi-target applications easier.
 
 ## Description
@@ -7,7 +14,7 @@ AnyConfig makes configuration on solutions which mix .Net Core and .Net Framewor
 
 ## Installation
 ```Powershell
-PM> Install-Package AnyConfig
+PM> Install-Package Any-Config
 ```
 
 ## Features
@@ -35,14 +42,24 @@ var config = Config.GetConfiguration();
 var testConfiguration = config.Get<MyTestConfiguration>();
 ```
 
-If you need, use the legacy ConfigurationManager too:
+If you need, use the legacy ConfigurationManager:
 ```csharp
 var isEnabled = ConfigurationManager.AppSettings["IsEnabled"];
 ```
 
-The built-in ConfigurationManager even supports generics:
+The built-in ConfigurationManager supports generics:
 ```csharp
-var isEnabled = ConfigurationManager.AppSettings<bool>["IsEnabled"];
+var isEnabled = ConfigurationManager.AppSettings["IsEnabled"].As<bool>();
+```
+
+It also supports reading from json:
+```csharp
+ConfigurationManager.ConfigurationFilename = "appsettings.json";
+var isEnabled = ConfigurationManager.AppSettings["IsEnabled"].As<bool>();
+// appsettings.json
+{
+  "IsEnabled": true
+}
 ```
 
 ## Advanced Usage
