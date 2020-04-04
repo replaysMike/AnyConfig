@@ -169,9 +169,9 @@ namespace AnyConfig
 
         private LegacyConfiguration ProcessNode(XmlNode node, LegacyConfiguration config)
         {
-            switch (node.Name)
+            switch (node.Name.ToLower())
             {
-                case "connectionStrings":
+                case "connectionstrings":
                     foreach (XmlNode connectionStringNode in node.SelectNodes("add"))
                     {
                         config.Configuration.ConnectionStrings.Add(new ConnectionStringPair
@@ -186,7 +186,7 @@ namespace AnyConfig
                         });
                     }
                     break;
-                case "appSettings":
+                case "appsettings":
                     foreach (XmlNode appSettingsNode in node.SelectNodes("add"))
                     {
                         config.Configuration.AppSettings.Add(new AppSettingPair
@@ -194,6 +194,40 @@ namespace AnyConfig
                             Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
                             Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText,
                         });
+                    }
+                    break;
+                case "anyconfig":
+                    // custom anyconfig root appsettings. They are stored as groups with a single element
+                    foreach (XmlNode appSettingsNode in node.SelectNodes("add"))
+                    {
+                        var groupSettings = new List<AnyConfigAppSettingPair>();
+                        config.Configuration.AnyConfigGroups.Add(new AnyConfigGroup
+                        {
+                            GroupName = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
+                            Settings = new List<AnyConfigAppSettingPair> { new AnyConfigAppSettingPair() { Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText, Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText } },
+                        });
+                    }
+
+                    // custom anyconfig grouped appsettings
+                    foreach (XmlNode anyConfigNode in node.ChildNodes)
+                    {
+                        var groupSettings = new List<AnyConfigAppSettingPair>();
+                        foreach (XmlNode appSettingsNode in anyConfigNode.SelectNodes("add"))
+                        {
+                            groupSettings.Add(new AnyConfigAppSettingPair
+                            {
+                                Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
+                                Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText,
+                            });
+                        }
+                        if (groupSettings.Any())
+                        {
+                            config.Configuration.AnyConfigGroups.Add(new AnyConfigGroup
+                            {
+                                GroupName = anyConfigNode.Name,
+                                Settings = groupSettings,
+                            });
+                        }
                     }
                     break;
                 default:

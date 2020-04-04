@@ -20,6 +20,7 @@ namespace AnyConfig
         private static Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>> _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
         private static Lazy<GenericNameValueCollection> _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
         private static Lazy<ReadOnlyDictionary<string, string>> _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
+        private static Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>> _cachedAnyConfigGroupedAppSettings = new Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>>(() => GetAnyConfigGroupedAppSettings());
 
         /// <summary>
         /// The source configuration to load
@@ -52,6 +53,11 @@ namespace AnyConfig
         public static ReadOnlyDictionary<string, string> AppSettingsAsDictionary => _cachedAppSettingsDictionary.Value;
 
         /// <summary>
+        /// AnyConfig grouped settings
+        /// </summary>
+        public static ReadOnlyDictionary<string, AnyConfigAppSettingCollection> AnySettings => _cachedAnyConfigGroupedAppSettings.Value;
+
+        /// <summary>
         /// Get a custom configuration section
         /// </summary>
         /// <param name="sectionName"></param>
@@ -63,6 +69,42 @@ namespace AnyConfig
                 .Select(x => x.Configuration)
                 .FirstOrDefault();
         }
+
+        /// <summary>
+        /// Get a configuration value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key name</param>
+        /// <returns></returns>
+        public static T Get<T>(string key) => Get<T>(key, true);
+
+        /// <summary>
+        /// Get a configuration value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">Key name</param>
+        /// <param name="throwsException">True to throw an exception if setting is not found</param>
+        /// <returns></returns>
+        public static T Get<T>(string key, bool throwsException) => _legacyConfiguration.Value.Configuration.Get<T>(key, throwsException);
+
+        /// <summary>
+        /// Get a configuration value from an AnyConfig custom group
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="groupName"></param>
+        /// <param name="key">Key name</param>
+        /// <returns></returns>
+        public static T Get<T>(string groupName, string key) => Get<T>(groupName, key, true);
+
+        /// <summary>
+        /// Get a configuration value from an AnyConfig custom group
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="groupName"></param>
+        /// <param name="key">Key name</param>
+        /// <param name="throwsException">True to throw an exception if setting is not found</param>
+        /// <returns></returns>
+        public static T Get<T>(string groupName, string key, bool throwsException) => _legacyConfiguration.Value.Configuration.Get<T>(groupName, key, throwsException);
 
         /// <summary>
         /// Force reset of the configuration to default values
@@ -104,6 +146,11 @@ namespace AnyConfig
         private static ReadOnlyDictionary<string, string> GetAppSettingsAsDictionary()
         {
             return new ReadOnlyDictionary<string, string>(_legacyConfiguration.Value.Configuration.AppSettings.ToDictionary(x => x.Key, x => x.Value));
+        }
+
+        private static ReadOnlyDictionary<string, AnyConfigAppSettingCollection> GetAnyConfigGroupedAppSettings()
+        {
+            return new ReadOnlyDictionary<string, AnyConfigAppSettingCollection>(_legacyConfiguration.Value.Configuration.AnyConfigGroups.ToDictionary(x => x.GroupName, x => new AnyConfigAppSettingCollection(x.Settings)));
         }
 
         private static LegacyConfiguration LoadConfiguration()
@@ -167,6 +214,7 @@ namespace AnyConfig
             _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
             _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
             _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
+            _cachedAnyConfigGroupedAppSettings = new Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>>(() => GetAnyConfigGroupedAppSettings());
         }
     }
 }

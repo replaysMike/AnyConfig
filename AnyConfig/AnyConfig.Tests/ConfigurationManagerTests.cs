@@ -138,5 +138,37 @@ namespace AnyConfig.Tests
             Assert.AreEqual("Second", customEnum);
             Assert.AreEqual("2", customEnumNumeric);
         }
+
+        [Test]
+        public void Should_Load_ConfigurationManagerFromXml_AnyConfigGroups()
+        {
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Xml;
+            ConfigurationManager.Reload();
+            var rootName = ConfigurationManager.Get<string>("rootName");
+            var settingName = ConfigurationManager.Get<string>("settings", "name");
+            var settingIsEnabled = ConfigurationManager.Get<bool>("settings", "isEnabled");
+            var configName = ConfigurationManager.Get<string>("config", "name");
+            var configIsEnabled = ConfigurationManager.Get<bool>("config", "isEnabled");
+
+            // there are 2 groups, and a single root element (which appears as a group)
+            Assert.AreEqual(3, ConfigurationManager.AnySettings.Count);
+
+            // root settings
+            Assert.AreEqual("rootValue1", rootName);
+            Assert.AreEqual("rootValue1", ConfigurationManager.AnySettings["rootName"]);
+
+            // settings section
+            Assert.AreEqual("value1", ConfigurationManager.AnySettings["settings"]["name"].As<string>());
+            Assert.AreEqual(true, ConfigurationManager.AnySettings["settings"]["isEnabled"].As<bool>());
+            Assert.AreEqual("value1", settingName);
+            Assert.AreEqual(true, settingIsEnabled);
+
+            // config section
+            Assert.AreEqual("othervalue1", ConfigurationManager.AnySettings["config"]["name"].As<string>());
+            Assert.AreEqual(false, ConfigurationManager.AnySettings["config"]["isEnabled"].As<bool>());
+            Assert.AreEqual("othervalue1", configName);
+            Assert.AreEqual(false, configIsEnabled);
+        }
     }
 }

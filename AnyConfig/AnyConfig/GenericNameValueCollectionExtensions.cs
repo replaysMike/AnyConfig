@@ -13,6 +13,9 @@ namespace AnyConfig
         /// <returns></returns>
         public static T As<T>(this StringValue value)
         {
+            if (value.Value == null)
+                return default;
+
             var type = typeof(T);
             switch (type.Name)
             {
