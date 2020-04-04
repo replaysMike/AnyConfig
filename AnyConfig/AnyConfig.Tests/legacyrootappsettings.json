@@ -2,5 +2,7 @@
   "BoolSetting": true,
   "StringSetting": "TestValue",
   "IntSetting": 1,
-  "TestConnection": "host=localhost;"
+  "TestConnection": "host=localhost;",
+  "CustomEnumSetting": "Second",
+  "CustomEnumNumericSetting": 2
 }

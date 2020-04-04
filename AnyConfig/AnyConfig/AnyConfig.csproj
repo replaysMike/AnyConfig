@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
+    <Product>AnyConfig</Product>
+    <ProductName>AnyConfig</ProductName>
     <Authors>Michael Brown</Authors>
     <Company>Refactor Software</Company>
     <Description>A .net configuration library to make configuration of multi-target applications easier</Description>
@@ -11,6 +13,7 @@
     <PackageReleaseNotes>A .net configuration library to make configuration of multi-target applications easier</PackageReleaseNotes>
     <Version>1.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>Any-Config</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

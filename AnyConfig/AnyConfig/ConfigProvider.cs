@@ -37,7 +37,7 @@ namespace AnyConfig
         {
             if (string.IsNullOrEmpty(path))
                 path = Directory.GetCurrentDirectory();
-            var filePath = Path.Combine(Path.GetDirectoryName(path), appSettingsJson);
+            var filePath = Path.Combine(path, appSettingsJson);
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The configuration file named '{filePath}' was not found.");
 

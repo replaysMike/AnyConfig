@@ -1,7 +1,7 @@
-﻿using AnyConfig.Models;
+﻿using AnyConfig.Collections;
+using AnyConfig.Models;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -13,13 +13,17 @@ namespace AnyConfig
     /// </summary>
     public static class ConfigurationManager
     {
-        private static SemaphoreSlim _loadLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _loadLock = new SemaphoreSlim(1, 1);
         private static Lazy<LegacyConfiguration> _legacyConfiguration = new Lazy<LegacyConfiguration>(() => LoadConfiguration());
+        private static Lazy<ConnectionStringSettingsCollection> _cachedConnectionStrings = new Lazy<ConnectionStringSettingsCollection>(() => GetConnectionStrings());
+        private static Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>> _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
+        private static Lazy<GenericNameValueCollection> _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
+        private static Lazy<ReadOnlyDictionary<string, string>> _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
 
         /// <summary>
         /// The source configuration to load
         /// </summary>
-        public static ConfigurationManagerSource ConfigurationSource = ConfigurationManagerSource.Auto;
+        public static ConfigurationManagerSource ConfigurationSource { get; set; } = ConfigurationManagerSource.Auto;
 
         /// <summary>
         /// The configuration filename
@@ -29,22 +33,22 @@ namespace AnyConfig
         /// <summary>
         /// Connection strings
         /// </summary>
-        public static ConnectionStringSettingsCollection ConnectionStrings => GetConnectionStrings();
+        public static ConnectionStringSettingsCollection ConnectionStrings => _cachedConnectionStrings.Value;
 
         /// <summary>
         /// Connection strings
         /// </summary>
-        public static Dictionary<string, ConnectionStringSetting> ConnectionStringsAsDictionary => GetConnectionStringsAsDictionary();
+        public static ReadOnlyDictionary<string, ConnectionStringSetting> ConnectionStringsAsDictionary => _cachedConnectionStringsDictionary.Value;
 
         /// <summary>
         /// Application settings
         /// </summary>
-        public static NameValueCollection AppSettings => GetAppSettings();
+        public static GenericNameValueCollection AppSettings => _cachedAppSettings.Value;
 
         /// <summary>
         /// Application settings
         /// </summary>
-        public static Dictionary<string, string> AppSettingsAsDictionary => GetAppSettingsAsDictionary();
+        public static ReadOnlyDictionary<string, string> AppSettingsAsDictionary => _cachedAppSettingsDictionary.Value;
 
         /// <summary>
         /// Get a custom configuration section
@@ -60,10 +64,20 @@ namespace AnyConfig
         }
 
         /// <summary>
-        /// Force reset the configuration manager cache
+        /// Force reset of the configuration to default values
         /// </summary>
-        public static void ResetCache()
+        public static void ResetDefaults()
         {
+            ConfigurationSource = ConfigurationManagerSource.Auto;
+            ConfigurationFilename = null;
+        }
+
+        /// <summary>
+        /// Force reload of the configuration
+        /// </summary>
+        public static void Reload()
+        {
+            ResetCachedData();
             _legacyConfiguration = new Lazy<LegacyConfiguration>(() => LoadConfiguration());
         }
 
@@ -72,23 +86,23 @@ namespace AnyConfig
             return new ConnectionStringSettingsCollection(GetConnectionStringsAsDictionary());
         }
 
-        private static Dictionary<string, ConnectionStringSetting> GetConnectionStringsAsDictionary()
+        private static ReadOnlyDictionary<string, ConnectionStringSetting> GetConnectionStringsAsDictionary()
         {
-            return _legacyConfiguration.Value.Configuration.ConnectionStrings.ToDictionary(x => x.Name, x => x.ConnectionStringSetting);
+            return new ReadOnlyDictionary<string, ConnectionStringSetting>(_legacyConfiguration.Value.Configuration.ConnectionStrings.ToDictionary(x => x.Name, x => x.ConnectionStringSetting));
         }
 
-        private static NameValueCollection GetAppSettings()
+        private static GenericNameValueCollection GetAppSettings()
         {
-            return _legacyConfiguration.Value.Configuration.AppSettings.Aggregate(new NameValueCollection(), (seed, current) =>
+            return new GenericNameValueCollection(_legacyConfiguration.Value.Configuration.AppSettings.Aggregate(new GenericNameValueCollection(), (seed, current) =>
             {
                 seed.Add(current.Key, current.Value);
                 return seed;
-            });
+            }));
         }
 
-        private static Dictionary<string, string> GetAppSettingsAsDictionary()
+        private static ReadOnlyDictionary<string, string> GetAppSettingsAsDictionary()
         {
-            return _legacyConfiguration.Value.Configuration.AppSettings.ToDictionary(x => x.Key, x => x.Value);
+            return new ReadOnlyDictionary<string, string>(_legacyConfiguration.Value.Configuration.AppSettings.ToDictionary(x => x.Key, x => x.Value));
         }
 
         private static LegacyConfiguration LoadConfiguration()
@@ -96,6 +110,9 @@ namespace AnyConfig
             _loadLock.Wait();
             try
             {
+                // reset all cached data
+                ResetCachedData();
+
                 // resolve configuration file
                 LegacyConfiguration config;
                 var resolver = new ConfigurationResolver();
@@ -118,6 +135,14 @@ namespace AnyConfig
             {
                 _loadLock.Release();
             }
+        }
+
+        private static void ResetCachedData()
+        {
+            _cachedConnectionStrings = new Lazy<ConnectionStringSettingsCollection>(() => GetConnectionStrings());
+            _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
+            _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
+            _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
         }
     }
 }

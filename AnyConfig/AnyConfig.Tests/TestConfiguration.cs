@@ -5,6 +5,8 @@
         public bool BoolSetting { get; set; }
         public string StringSetting { get; set; }
         public int IntSetting { get; set; }
+        public CustomEnum CustomEnumSetting { get; set; }
+        public CustomEnum CustomEnumNumericSetting { get; set; }
 
         [LegacyConfigurationName(prependChildrenName: "TestConfigurationObject", childrenMapped: true)]
         public TestConfigurationObject TestConfigurationObject { get; set; }
@@ -23,7 +25,14 @@
             return typedObj.BoolSetting.Equals(BoolSetting)
                 && typedObj.StringSetting.Equals(StringSetting)
                 && typedObj.IntSetting.Equals(IntSetting)
+                && typedObj.CustomEnumSetting.Equals(CustomEnumSetting)
+                && typedObj.CustomEnumNumericSetting.Equals(CustomEnumNumericSetting)
                 && typedObj.TestConfigurationObject.Equals(TestConfigurationObject);
+        }
+
+        public override string ToString()
+        {
+            return $"BoolSetting={BoolSetting},StringSetting={StringSetting},IntSetting={IntSetting},CustomEnumSetting={CustomEnumSetting},CustomEnumNumericSetting={CustomEnumNumericSetting},\"TestConfigurationObject={TestConfigurationObject}\"";
         }
     }
 
@@ -45,5 +54,17 @@
 
             return typedObj.Name.Equals(Name) && typedObj.Value.Equals(Value);
         }
+
+        public override string ToString()
+        {
+            return $"Name={Name},Value={Value}";
+        }
+    }
+
+    public enum CustomEnum
+    {
+        First = 1,
+        Second = 2,
+        Third = 3
     }
 }

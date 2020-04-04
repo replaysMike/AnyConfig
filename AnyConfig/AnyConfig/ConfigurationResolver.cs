@@ -3,10 +3,9 @@ using AnyConfig.Json;
 using AnyConfig.Models;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using TypeSupport;
 using TypeSupport.Extensions;
 
@@ -20,7 +19,7 @@ namespace AnyConfig
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private readonly Assembly _entryAssembly;
-        private static Assembly _registeredEntryAssembly;
+        private static Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
         private LegacyConfigurationLoader _legacyConfigurationLoader;
 
         /// <summary>
@@ -29,29 +28,31 @@ namespace AnyConfig
         /// <param name="entryAssembly"></param>
         public static void RegisterEntryAssembly(Assembly entryAssembly)
         {
-            _registeredEntryAssembly = entryAssembly;
+            lock (_registeredEntryAssemblies)
+            {
+                var runtime = RuntimeEnvironment.DetectRuntime(entryAssembly);
+                if (!_registeredEntryAssemblies.ContainsKey(runtime.DetectedRuntimeFrameworkDescription))
+                    _registeredEntryAssemblies.Add(runtime.DetectedRuntimeFrameworkDescription, entryAssembly);
+            }
         }
 
         /// <summary>
         /// The detected runtime framework
         /// </summary>
-        public RuntimeFramework DetectedRuntimeFramework { get; private set; } = RuntimeFramework.DotNetFramework;
-
-        /// <summary>
-        /// The detected OS platform
-        /// </summary>
-        public string DetectedRuntimePlatform { get; private set; }
-
-        /// <summary>
-        /// The detected runtime framework as per OS
-        /// </summary>
-        public string DetectedRuntimeFrameworkDescription { get; private set; }
+        public RuntimeInfo DetectedRuntime { get; private set; } = new RuntimeInfo();
 
         /// <summary>
         /// Create a configuration resolver, the entry assembly will be used for locating the configuration
         /// </summary>
-        public ConfigurationResolver() : this(_registeredEntryAssembly ?? Assembly.GetEntryAssembly())
+        public ConfigurationResolver()
         {
+            var runtime = RuntimeEnvironment.DetectRuntime();
+            lock (_registeredEntryAssemblies)
+            {
+                if (_registeredEntryAssemblies.ContainsKey(runtime.DetectedRuntimeFrameworkDescription))
+                    _entryAssembly = _registeredEntryAssemblies[runtime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
+            }
         }
 
         /// <summary>
@@ -61,8 +62,8 @@ namespace AnyConfig
         public ConfigurationResolver(Assembly entryAssembly)
         {
             _entryAssembly = entryAssembly;
-            _legacyConfigurationLoader = new LegacyConfigurationLoader(entryAssembly);
-            DetectRuntime();
+            var runtime = RuntimeEnvironment.DetectRuntime(_entryAssembly);
+            _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace AnyConfig
         public T ResolveConfiguration<T>()
         {
             // if on the .net core platform, resolve a configuration from appsettings.json
-            switch (DetectedRuntimeFramework)
+            switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration<T>();
@@ -93,7 +94,7 @@ namespace AnyConfig
         {
             var nameOfSection = sectionName ?? typeof(T).Name;
             // if on the .net core platform, resolve a configuration from appsettings.json
-            switch (DetectedRuntimeFramework)
+            switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration<T>(null, nameOfSection);
@@ -193,15 +194,20 @@ namespace AnyConfig
         /// <returns></returns>
         public IConfigurationRoot GetConfiguration(string filename = null, string sectionName = null)
         {
-            if (!string.IsNullOrEmpty(filename))
-            {
-                filename = Path.GetFullPath(filename);
-                if (!File.Exists(filename))
-                    throw new FileNotFoundException($"Could not find configuration file '{filename}'");
-            }
             var configFile = filename ?? DotNetCoreSettingsFilename;
+            if (!string.IsNullOrEmpty(configFile))
+            {
+                configFile = Path.GetFullPath(configFile);
+                if (!File.Exists(configFile))
+                {
+                    if (_entryAssembly != null)
+                        configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename ?? DotNetCoreSettingsFilename);
+                    if (!File.Exists(configFile))
+                        throw new FileNotFoundException($"Could not find configuration file '{configFile}'");
+                }
+            }
             // for .net core configs such as appsettings.json we can serialize from json directly
-            return ConfigProvider.GetConfiguration(configFile, _entryAssembly.Location);
+            return ConfigProvider.GetConfiguration(Path.GetFileName(configFile), Path.GetDirectoryName(configFile));
         }
 
         private T LoadDotNetCoreConfiguration<T>(string filename = null, string sectionName = null)
@@ -213,7 +219,7 @@ namespace AnyConfig
             var nameOfSection = sectionName ?? typeof(T).Name;
             var configSection = configuration.GetSection(nameOfSection);
             if (configSection == null)
-                throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntimeFramework}' framework.");
+                throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
 
             var value = JsonSerializer.Deserialize<T>(configSection.Value);
 
@@ -276,30 +282,6 @@ namespace AnyConfig
                     property.PropertyInfo.SetValue(returnObject, value, null);
             }
             return returnObject;
-        }
-
-        private void DetectRuntime()
-        {
-            string framework = null;
-            DetectedRuntimePlatform = RuntimeInformation.OSDescription;
-            DetectedRuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription;
-
-#if NETFRAMEWORK
-            if (_entryAssembly == null)
-            {
-                var appDomain = AppDomain.CurrentDomain.SetupInformation;
-                var configFile = appDomain.ConfigurationFile;
-                DetectedRuntimeFramework = RuntimeFramework.DotNetFramework;
-                framework = appDomain.TargetFrameworkName;
-            }
-#endif
-            // if we have a known entry assembly, use that as it may be more reliable
-            if (framework == null)
-                framework = _entryAssembly?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-            if (framework?.Contains(".NETCoreApp") == true) // ".NETCoreApp,Version=v2.1"
-                DetectedRuntimeFramework = RuntimeFramework.DotNetCore;
-            if (framework?.Contains(".NETFramework") == true) // ".NETFramework,Version=v4.8"
-                DetectedRuntimeFramework = RuntimeFramework.DotNetFramework;
         }
 
         private string GetAssemblyName()

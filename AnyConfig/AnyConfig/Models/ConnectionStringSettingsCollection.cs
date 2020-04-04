@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace AnyConfig.Models
 {
@@ -24,6 +25,11 @@ namespace AnyConfig.Models
         public ConnectionStringSettingsCollection(Dictionary<string, ConnectionStringSetting> values)
         {
             _values = values;
+
+        }
+        public ConnectionStringSettingsCollection(ReadOnlyDictionary<string, ConnectionStringSetting> values)
+        {
+            _values = new Dictionary<string, ConnectionStringSetting>(values);
         }
     }
 }

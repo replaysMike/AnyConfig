@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// AnyConfig Configuration
+    /// </summary>
     public static class Config
     {
         /// <summary>

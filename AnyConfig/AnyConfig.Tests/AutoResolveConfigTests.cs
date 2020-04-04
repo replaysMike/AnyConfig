@@ -20,6 +20,8 @@ namespace AnyConfig.Tests
                 BoolSetting = true,
                 StringSetting = "TestValue",
                 IntSetting = 1,
+                CustomEnumSetting = CustomEnum.Second,
+                CustomEnumNumericSetting = CustomEnum.Second,
                 TestConfigurationObject = new TestConfigurationObject
                 {
                     Name = "TestName",

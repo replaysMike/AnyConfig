@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TypeSupport;
 using TypeSupport.Extensions;
@@ -37,23 +38,29 @@ namespace AnyConfig.Json
             return value;
         }
 
-        private static T DeserializeNode<T>(T value, JsonNode node)
+        private static object DeserializeNode(Type type, object value, JsonNode node)
         {
-            var extendedType = typeof(T).GetExtendedType();
+            var extendedType = type.GetExtendedType();
             var properties = extendedType.Properties;
 
-            foreach(var childNode in node.ChildNodes)
+            foreach (var childNode in node.ChildNodes)
             {
+                var property = properties.FirstOrDefault(x => x.Name == childNode.Name);
+                if (property == null)
+                    continue;
                 switch (childNode.ValueType)
                 {
                     case PrimitiveTypes.Object:
                         var factory = new ObjectFactory();
                         var obj = factory.CreateEmptyObject(value.GetProperty(childNode.Name).PropertyType);
-                        obj = DeserializeNode(obj, childNode);
+                        obj = DeserializeNode(value.GetProperty(childNode.Name).PropertyType, obj, childNode);
                         value.SetPropertyValue(childNode.Name, obj);
                         break;
                     case PrimitiveTypes.String:
-                        value.SetPropertyValue(childNode.Name, childNode.Value);
+                        if (property.Type.IsEnum == true)
+                            value.SetPropertyValue(childNode.Name, Enum.Parse(property.Type, childNode.Value));
+                        else
+                            value.SetPropertyValue(childNode.Name, childNode.Value);
                         break;
                     case PrimitiveTypes.Integer:
                         value.SetPropertyValue(childNode.Name, int.Parse(childNode.Value));
@@ -74,6 +81,11 @@ namespace AnyConfig.Json
             }
 
             return value;
+        }
+
+        private static T DeserializeNode<T>(T value, JsonNode node)
+        {
+            return (T)DeserializeNode(typeof(T), value, node);
         }
     }
 }
