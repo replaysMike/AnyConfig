@@ -25,7 +25,8 @@ namespace AnyConfig.Tests
             var intSetting = ConfigurationManager.AppSettings["IntSetting"];
             var customEnum = ConfigurationManager.AppSettings["CustomEnumSetting"];
             var customEnumNumeric = ConfigurationManager.AppSettings["CustomEnumNumericSetting"];
-            var section = ConfigurationManager.GetSection("nlog") as NLog.Config.XmlLoggingConfiguration;
+            var section = ConfigurationManager.GetSection("nlog");
+            var sectionTyped = section.As<NLog.Config.XmlLoggingConfiguration>();
 
             // connection strings
             Assert.AreEqual("TestConnection", connectionString.Name);
@@ -40,11 +41,13 @@ namespace AnyConfig.Tests
 
 #if NETFRAMEWORK
             // Custom section loading
-            Assert.NotNull(section);
-            Assert.AreEqual(1, section.AllTargets.Count);
-            Assert.AreEqual(1, section.LoggingRules.Count);
-            Assert.AreEqual("trace", section.AllTargets.First().Name);
-            Assert.AreEqual("*", section.LoggingRules.First().LoggerNamePattern);
+            Assert.NotNull(sectionTyped);
+            Assert.AreEqual(typeof(NLog.Config.XmlLoggingConfiguration), sectionTyped.GetType());
+            Assert.AreEqual(1, sectionTyped.AllTargets.Count);
+            Assert.AreEqual(1, sectionTyped.LoggingRules.Count);
+            Assert.AreEqual("trace", sectionTyped.AllTargets.First().Name);
+            Assert.AreEqual("*", sectionTyped.LoggingRules.First().LoggerNamePattern);
+
 #else
             // nlog configuration section not available in .net core
 #endif
