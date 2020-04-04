@@ -1,4 +1,11 @@
 # AnyConfig
+
+[![nuget](https://img.shields.io/nuget/v/Any-Config.svg)](https://www.nuget.org/packages/Any-Config/)
+[![nuget](https://img.shields.io/nuget/dt/Any-Config.svg)](https://www.nuget.org/packages/Any-Config/)
+[![Build status](https://ci.appveyor.com/api/projects/status/gfwjabg1pta7em94?svg=true)](https://ci.appveyor.com/project/MichaelBrown/AnyConfig)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d708cfcc471f415b950cfd27e1829dd9)](https://www.codacy.com/manual/replaysMike/AnyConfig?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=replaysMike/AnyConfig&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/d708cfcc471f415b950cfd27e1829dd9)](https://www.codacy.com/app/replaysMike/Any-Config?utm_source=github.com&utm_medium=referral&utm_content=replaysMike/AnySerializer&utm_campaign=Badge_Coverage)
+
 A .net configuration library to make configuration of multi-target applications easier.
 
 ## Description
