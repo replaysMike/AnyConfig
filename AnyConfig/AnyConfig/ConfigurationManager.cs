@@ -64,10 +64,17 @@ namespace AnyConfig
         /// <returns></returns>
         public static object GetSection(string sectionName)
         {
-            return _legacyConfiguration.Value.Configuration.ConfigSections
+            var section = _legacyConfiguration.Value.Configuration.ConfigSections
                 .Where(x => x.Name.Equals(sectionName))
-                .Select(x => x.Configuration)
                 .FirstOrDefault();
+
+            if (section?.TypeValue == typeof(RequiresJsonSerialization))
+            {
+                // we don't know the intended type, so return the data that contains everything required to understand serialization requirements
+                return section;
+            }
+
+            return section?.Configuration;
         }
 
         /// <summary>

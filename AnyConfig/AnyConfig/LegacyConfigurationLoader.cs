@@ -81,6 +81,7 @@ namespace AnyConfig
                 var json = File.ReadAllText(filename);
                 var appSettings = new List<Models.AppSettingPair>();
                 var connectionStrings = new List<Models.ConnectionStringPair>();
+                var configSections = new List<Models.ConfigSectionPair>();
                 var jsonParser = new JsonParserV4();
                 var nodes = jsonParser.Parse(json);
                 foreach (var node in nodes.ChildNodes)
@@ -119,9 +120,19 @@ namespace AnyConfig
                         if (!appSettings.Any(x => x.Key == node.Name))
                             appSettings.Add(new AppSettingPair { Key = node.Name, Value = node.Value });
                     }
+                    else if(node.ValueType == PrimitiveTypes.Object)
+                    {
+                        configSections.Add(new ConfigSectionPair { 
+                            Name = node.Name, 
+                            Configuration = node.Json,
+                            Type = "RequiresJsonSerialization",
+                            TypeValue = typeof(RequiresJsonSerialization)
+                        });
+                    }
                 }
                 legacyConfiguration.Configuration.AppSettings = appSettings;
                 legacyConfiguration.Configuration.ConnectionStrings = connectionStrings;
+                legacyConfiguration.Configuration.ConfigSections = configSections;
             }
             catch (Exception)
             {

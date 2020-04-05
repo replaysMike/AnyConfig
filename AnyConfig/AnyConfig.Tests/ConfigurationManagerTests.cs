@@ -173,5 +173,23 @@ namespace AnyConfig.Tests
             Assert.AreEqual("othervalue1", configName);
             Assert.AreEqual(false, configIsEnabled);
         }
+
+        [Test]
+        public void Should_Load_ConfigurationManagerCustomSectionFromJson()
+        {
+            ConfigurationManager.ConfigurationFilename = "appsettings.json";
+            ConfigurationManager.Reload();
+            var testConfiguration = ConfigurationManager.GetSection("TestConfiguration").As<TestConfiguration>();
+
+            Assert.NotNull(testConfiguration);
+            Assert.AreEqual(true, testConfiguration.BoolSetting);
+            Assert.AreEqual("TestValue", testConfiguration.StringSetting);
+            Assert.AreEqual(1, testConfiguration.IntSetting);
+            Assert.AreEqual(CustomEnum.Second, testConfiguration.CustomEnumSetting);
+            Assert.AreEqual(CustomEnum.Second, testConfiguration.CustomEnumNumericSetting);
+            Assert.NotNull(testConfiguration.TestConfigurationObject);
+            Assert.AreEqual("TestName", testConfiguration.TestConfigurationObject.Name);
+            Assert.AreEqual("TestValue", testConfiguration.TestConfigurationObject.Value);
+        }
     }
 }
