@@ -27,6 +27,8 @@ namespace AnyConfig.Tests.Json
     }}
 }}
 ";
+            // fix line ending encoding on AppVeyor tests
+            expectedFormattedJson = expectedFormattedJson.Replace("\r\n", "\n").Replace("\n", "\r\n");
             Assert.AreEqual(expectedFormattedJson, formattedXml);
         }
     }

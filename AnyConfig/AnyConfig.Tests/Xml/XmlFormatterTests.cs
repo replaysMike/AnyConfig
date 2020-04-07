@@ -24,6 +24,8 @@ namespace AnyConfig.Tests.Xml
     </ChildObject>
 </TestObject>
 ";
+            // fix line ending encoding on AppVeyor tests
+            expectedFormattedXml = expectedFormattedXml.Replace("\r\n", "\n").Replace("\n", "\r\n");
             Assert.AreEqual(expectedFormattedXml, formattedXml);
         }
     }
