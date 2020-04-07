@@ -6,6 +6,10 @@ using System.Linq;
 
 namespace AnyConfig.Models
 {
+    /// <summary>
+    /// Stores AnyConfig grouped appsettings
+    /// This class can be implicitly used as a StringValue to enable both [key]=>value and [group][key]=>value lookups
+    /// </summary>
     public class AnyConfigAppSettingCollection : IEquatable<StringValue>, IEquatable<string>
     {
         private readonly ReadOnlyCollection<AnyConfigAppSettingPair> _values;
@@ -28,6 +32,11 @@ namespace AnyConfig.Models
         public AnyConfigAppSettingCollection(ReadOnlyCollection<AnyConfigAppSettingPair> values)
         {
             _values = new ReadOnlyCollection<AnyConfigAppSettingPair>(values);
+        }
+
+        public override int GetHashCode()
+        {
+            return _values.GetHashCode();
         }
 
         public override bool Equals(object obj)

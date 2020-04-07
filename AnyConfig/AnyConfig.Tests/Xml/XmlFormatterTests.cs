@@ -1,8 +1,5 @@
 ﻿using AnyConfig.Xml;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AnyConfig.Tests.Xml
 {
