@@ -82,7 +82,7 @@ namespace AnyConfig
                 var appSettings = new List<Models.AppSettingPair>();
                 var connectionStrings = new List<Models.ConnectionStringPair>();
                 var configSections = new List<Models.ConfigSectionPair>();
-                var jsonParser = new JsonParserV4();
+                var jsonParser = new JsonParser();
                 var nodes = jsonParser.Parse(json);
                 foreach (var node in nodes.ChildNodes)
                 {
@@ -124,8 +124,8 @@ namespace AnyConfig
                     {
                         configSections.Add(new ConfigSectionPair { 
                             Name = node.Name, 
-                            Configuration = node.Json,
-                            Type = "RequiresJsonSerialization",
+                            Configuration = node.OriginalText,
+                            Type = nameof(RequiresJsonSerialization),
                             TypeValue = typeof(RequiresJsonSerialization)
                         });
                     }
@@ -271,6 +271,18 @@ namespace AnyConfig
                         {
                             throw new ConfigurationException($"Unable to configure configSection named '{configSectionDeclaration.Name}'. See the inner exception for more details.", ex);
                         }
+                    }
+                    else
+                    {
+                        // unknown config type, it needs to be deserialized
+                        var configSection = new ConfigSectionPair
+                        {
+                            Configuration = node.OuterXml,
+                            Name = node.Name,
+                            Type = nameof(RequiresXmlSerialization),
+                            TypeValue = typeof(RequiresXmlSerialization)
+                        };
+                        config.Configuration.ConfigSections.Add(configSection);
                     }
                     break;
             }

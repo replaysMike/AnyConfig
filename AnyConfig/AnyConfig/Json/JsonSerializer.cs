@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TypeSupport;
 using TypeSupport.Extensions;
 
@@ -11,26 +9,76 @@ namespace AnyConfig.Json
     {
         public static string Serialize<T>(T value)
         {
-            return string.Empty;
+            throw new NotImplementedException($"Json serialization is not currently supported.");
         }
 
+        /// <summary>
+        /// Deserialize json string to type <seealso cref="T"/>
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize</typeparam>
+        /// <param name="json">Json string</param>
+        /// <returns></returns>
         public static T Deserialize<T>(string json)
         {
-            return Deserialize<T>(json, typeof(T).Name);
+            return Deserialize<T>(json, string.Empty);
         }
 
-        public static T Deserialize<T>(string json, string objectName)
+        /// <summary>
+        /// Deserialize json string to type <seealso cref="T"/>
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize</typeparam>
+        /// <param name="json">Json string</param>
+        /// <returns></returns>
+        public static object Deserialize(string json, Type type)
         {
-            var jsonParser = new JsonParserV4();
-            var rootNode = jsonParser.Parse(json);
+            return Deserialize(json, string.Empty, type);
+        }
+
+        /// <summary>
+        /// Deserialize json string to type <seealso cref="T"/>
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize</typeparam>
+        /// <param name="json">Json string</param>
+        /// <param name="jsonNodeName">Name of type to deserialize</param>
+        /// <returns></returns>
+        public static T Deserialize<T>(string json, string jsonNodeName)
+        {
+            var parser = new JsonParser();
+            var rootNode = parser.Parse(json);
             var factory = new ObjectFactory();
             var value = factory.CreateEmptyObject<T>();
 
             foreach (var node in rootNode.ChildNodes)
             {
-                if (node.Name.Equals(objectName))
+                if (string.IsNullOrEmpty(jsonNodeName) || node.Name.Equals(jsonNodeName))
                 {
                     value = DeserializeNode<T>(value, node);
+                    break;
+                }
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Deserialize json string to type <seealso cref="type"/>
+        /// </summary>
+        /// <param name="json">Json string</param>
+        /// <param name="jsonNodeName">Name of json node to deserialize</param>
+        /// <param name="type">The type to deserialize</param>
+        /// <returns></returns>
+        public static object Deserialize(string json, string jsonNodeName, Type type)
+        {
+            var parser = new JsonParser();
+            var rootNode = parser.Parse(json);
+            var factory = new ObjectFactory();
+            var value = factory.CreateEmptyObject(type);
+
+            foreach (var node in rootNode.ChildNodes)
+            {
+                if (string.IsNullOrEmpty(jsonNodeName) || node.Name.Equals(jsonNodeName))
+                {
+                    value = DeserializeNode(type, value, node);
                     break;
                 }
             }

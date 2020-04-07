@@ -41,7 +41,7 @@ namespace AnyConfig
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The configuration file named '{filePath}' was not found.");
 
-            var jsonParser = new JsonParserV4();
+            var jsonParser = new JsonParser();
             var rootNode = jsonParser.Parse(File.ReadAllText(filePath));
 
             var configuration = new ConfigurationRoot();
@@ -476,7 +476,7 @@ namespace AnyConfig
             if (File.Exists(filename))
             {
                 var json = System.IO.File.ReadAllText(filename);
-                var parser = new JsonParserV4();
+                var parser = new JsonParser();
                 var objects = parser.Parse(json);
                 var val = objects.SelectValueByName(optionName);
                 result = ConvertStringToNativeType<T>(val, defaultValue);
@@ -491,7 +491,7 @@ namespace AnyConfig
             if (File.Exists(filename))
             {
                 var json = System.IO.File.ReadAllText(filename);
-                var parser = new JsonParserV4();
+                var parser = new JsonParser();
                 var objects = parser.Parse(json);
                 var val = objects.SelectValueByName(optionName);
                 result = ConvertStringToNativeType(valueType, val, defaultValue);

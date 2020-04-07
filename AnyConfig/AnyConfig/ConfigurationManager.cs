@@ -68,7 +68,7 @@ namespace AnyConfig
                 .Where(x => x.Name.Equals(sectionName))
                 .FirstOrDefault();
 
-            if (section?.TypeValue == typeof(RequiresJsonSerialization))
+            if (section?.TypeValue == typeof(RequiresJsonSerialization) || section?.TypeValue == typeof(RequiresXmlSerialization))
             {
                 // we don't know the intended type, so return the data that contains everything required to understand serialization requirements
                 return section;

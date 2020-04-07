@@ -8,6 +8,12 @@
     <None Remove="appsettings.json" />
     <None Remove="legacyappsettings.json" />
     <None Remove="legacyrootappsettings.json" />
+    <None Remove="ParsingData\AllTypesResponse.json" />
+    <None Remove="ParsingData\ArrayResponse.json" />
+    <None Remove="ParsingData\ComplexResponse.json" />
+    <None Remove="ParsingData\RootArrayResponse.json" />
+    <None Remove="ParsingData\RootObjectResponse.json" />
+    <None Remove="ParsingData\SimpleResponse.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +26,15 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ParsingData\AllTypesResponse.json" />
+    <EmbeddedResource Include="ParsingData\ArrayResponse.json" />
+    <EmbeddedResource Include="ParsingData\ComplexResponse.json" />
+    <EmbeddedResource Include="ParsingData\RootArrayResponse.json" />
+    <EmbeddedResource Include="ParsingData\RootObjectResponse.json" />
+    <EmbeddedResource Include="ParsingData\SimpleResponse.json" />
   </ItemGroup>
 
   <ItemGroup>

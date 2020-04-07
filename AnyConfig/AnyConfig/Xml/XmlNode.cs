@@ -1,66 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
-namespace AnyConfig.Json
+namespace AnyConfig.Xml
 {
-    /// <summary>
-    /// A JSON node element
-    /// </summary>
-    public class JsonNode
+    public class XmlNode
     {
-        private JsonFormatter _jsonFormatter;
-        
+        private XmlFormatter _xmlFormatter;
+
         /// <summary>
         /// The name of the node
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
-        /// The type of node
+        /// CData string
         /// </summary>
-        public JsonNodeType NodeType { get; set; }
-        
+        public string CData { get; set; }
+
         /// <summary>
         /// The position in the raw string this node begins
         /// </summary>
         public int OpenPosition { get; set; }
-        
+
         /// <summary>
         /// The position in the raw string this node ends
         /// </summary>
         public int ClosePosition { get; set; }
-        
+
         /// <summary>
         /// The raw length of the string this node occupies
         /// </summary>
         public int Length => ClosePosition - OpenPosition;
-        
+
         /// <summary>
         /// All child nodes inherited by this node
         /// </summary>
-        public List<JsonNode> ChildNodes { get; set; }
-        
+        public List<XmlNode> ChildNodes { get; set; } = new List<XmlNode>();
+
+        /// <summary>
+        /// All child nodes inherited by this node
+        /// </summary>
+        public List<XmlAttribute> Attributes { get; set; } = new List<XmlAttribute>();
+
         /// <summary>
         /// The parent mode
         /// </summary>
-        public JsonNode ParentNode { get; set; }
-        
+        public XmlNode ParentNode { get; set; }
+
+        /// <summary>
+        /// The XML declaration header
+        /// </summary>
+        public XmlNode DeclarationNode { get; set; }
+
         /// <summary>
         /// The value of the node
         /// </summary>
         public string Value { get; set; }
-        
+
         /// <summary>
-        /// The data type of the value
+        /// The inner string that makes up the node without XML children
         /// </summary>
-        public PrimitiveTypes ValueType { get; set; }
-        
+        public string InnerContent { get; set; }
+
         /// <summary>
-        /// The raw string that makes up the node
+        /// The inner string that makes up the node
         /// </summary>
-        public string OriginalText { get; set; }
-        
+        public string InnerText { get; set; }
+
+        /// <summary>
+        /// The outer string that makes up the node
+        /// </summary>
+        public string OuterText { get; set; }
+
         /// <summary>
         /// True if this node has been validated
         /// </summary>
@@ -82,18 +95,17 @@ namespace AnyConfig.Json
         public string ExternalPathLocation { get; set; }
 
         /// <summary>
-        /// For array types, get all values for the array
+        /// Get all values for an array
         /// </summary>
-        public List<string> ArrayValues
+        public List<XmlNode> ArrayValues
         {
             get
             {
-                if (NodeType == JsonNodeType.Array)
-                {
-                    return ChildNodes.Select(x => x.Value).ToList();
-                }
-
-                return null;
+                return ChildNodes
+                    .GroupBy(x => x.Name)
+                    .Where(x => x.Count() > 1)
+                    .SelectMany(x => x)
+                    .ToList();
             }
         }
 
@@ -111,31 +123,23 @@ namespace AnyConfig.Json
         {
             get
             {
+                if (string.IsNullOrEmpty(Name))
+                    return string.Empty;
+
                 var buildPath = string.Empty;
                 buildPath += GetParentPath(buildPath, this);
                 return buildPath;
             }
         }
 
-        public JsonNode() : this(string.Empty, JsonNodeType.Object)
+        public XmlNode() : this(string.Empty)
         {
         }
 
-        public JsonNode(string name) : this(name, JsonNodeType.Object)
+        public XmlNode(string name)
         {
-        }
-
-        public JsonNode(JsonNodeType nodeType)
-            : this("", nodeType)
-        {
-        }
-
-        public JsonNode(string name, JsonNodeType nodeType)
-        {
-            _jsonFormatter = new JsonFormatter();
+            _xmlFormatter = new XmlFormatter();
             Name = name;
-            NodeType = nodeType;
-            ChildNodes = new List<JsonNode>();
         }
 
         /// <summary>
@@ -143,19 +147,11 @@ namespace AnyConfig.Json
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public JsonNode SelectNodeByName(string name)
+        public XmlNode SelectNodeByName(string name)
         {
-            return ChildNodes.Where(x => x.Name == name).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Select a child node's value by its name
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public string SelectValueByName(string name)
-        {
-            return ChildNodes.Where(x => x.Name == name).Select(y => y.Value).FirstOrDefault();
+            return ChildNodes
+                .Where(x => x.Name == name)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -164,7 +160,7 @@ namespace AnyConfig.Json
         /// <typeparam name="TResult"></typeparam>
         /// <param name="lambda"></param>
         /// <returns></returns>
-        public TResult SelectChild<TResult>(Func<JsonNode, TResult> lambda)
+        public TResult SelectChild<TResult>(Func<XmlNode, TResult> lambda)
         {
             return lambda(this);
         }
@@ -175,14 +171,14 @@ namespace AnyConfig.Json
         /// <typeparam name="TResult"></typeparam>
         /// <param name="lambda"></param>
         /// <returns></returns>
-        public IEnumerable<TResult> SelectChildren<TResult>(Func<JsonNode, IEnumerable<TResult>> lambda)
+        public IEnumerable<TResult> SelectChildren<TResult>(Func<XmlNode, IEnumerable<TResult>> lambda)
         {
             return lambda(this);
-        } 
+        }
 
-        public string ToJsonString()
+        public string ToXmlString()
         {
-            return _jsonFormatter.ToJsonString(this);
+            return _xmlFormatter.ToXmlString(this);
         }
 
         /// <summary>
@@ -192,26 +188,23 @@ namespace AnyConfig.Json
         /// <param name="node"></param>
         /// <param name="withArrayHints">True to show the array position</param>
         /// <returns></returns>
-        private string GetParentPath(string path, JsonNode node, bool withArrayHints = false)
+        private string GetParentPath(string path, XmlNode node, bool withArrayHints = false)
         {
             if (node != null)
             {
-                if (string.IsNullOrEmpty(node.Name))
+                if (node.ArrayPosition.HasValue && withArrayHints)
                 {
                     // show the array element position if requested
-                    if (withArrayHints)
+                    if (node.ParentNode != null)
                     {
-                        if (node.ParentNode != null && node.ParentNode.ValueType == PrimitiveTypes.Array)
-                        {
-                            if (node.ArrayPosition != null) // just in case
-                                path = "[" + node.ArrayPosition.Value + "]" + path;
-                            else
-                                path = "[]" + path;
-                        }
+                        if (node.ArrayPosition != null) // just in case
+                            path = "[" + node.ArrayPosition.Value + "]" + path;
                         else
-                        {
+                            path = "[]" + path;
+                    }
+                    else
+                    {
 
-                        }
                     }
                 }
                 else
@@ -224,6 +217,6 @@ namespace AnyConfig.Json
             return path;
         }
 
-        public override string ToString() => string.Format("{3}{4}{0} {1}, {2} children.", string.IsNullOrEmpty(Name) ? "()" : Name, NodeType.ToString(), ChildNodes.Count, IsDefined ? "" : "!", IsValidated ? "" : "*");
+        public override string ToString() => string.Format("{2}{3}{0} {1}, {2} children.", string.IsNullOrEmpty(Name) ? "()" : Name, ChildNodes.Count, IsDefined ? "" : "!", IsValidated ? "" : "*");
     }
 }

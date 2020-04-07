@@ -3,7 +3,7 @@
     /// <summary>
     /// Type that requires serialization
     /// </summary>
-    public class RequiresJsonSerialization
+    public class RequiresXmlSerialization
     {
     }
 }

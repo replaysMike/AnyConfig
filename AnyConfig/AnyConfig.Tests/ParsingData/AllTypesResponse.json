@@ -1,0 +1,12 @@
+﻿{
+  "intValue": 1,
+  "stringValue": "string",
+  "boolValue": true,
+  "numberValue": 3.1415,
+  "objectValue": {
+    "subIdValue": 2,
+    "subStringValue": "string2"
+  },
+  "arrayValue": [ 1, 2, 3, 4, 5 ],
+  "nullValue": null
+}

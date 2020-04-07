@@ -56,7 +56,7 @@ namespace AnyConfig.Json
         /// <returns></returns>
         public static string Prettify(string json)
         {
-            var parser = new JsonParserV4();
+            var parser = new JsonParser();
             var node = parser.Parse(json);
 
             return new JsonFormatter().ToJsonString(node);
@@ -69,7 +69,7 @@ namespace AnyConfig.Json
         /// <returns></returns>
         public string PrettifyJson(string json)
         {
-            var parser = new JsonParserV4();
+            var parser = new JsonParser();
             var node = parser.Parse(json);
 
             return ToJsonString(node);
@@ -83,7 +83,6 @@ namespace AnyConfig.Json
         public string ToJsonString(JsonNode node)
         {
             var sb = new StringBuilder();
-
 
             return IterateNodes(node, sb, 0).ToString();
         }
@@ -101,36 +100,36 @@ namespace AnyConfig.Json
                 if (childNode.NodeType == JsonNodeType.Value)
                 {
                     if(string.IsNullOrEmpty(childNode.Name))
-                        sb.Append(String.Format("{0}", FormatValue(childNode.ValueType, childNode.Value)));
+                        sb.Append(FormatValue(childNode.ValueType, childNode.Value));
                     else
-                        sb.Append(String.Format("\"{0}\": {1}", childNode.Name, FormatValue(childNode.ValueType, childNode.Value)));
+                        sb.Append($"\"{childNode.Name}\": {FormatValue(childNode.ValueType, childNode.Value)}");
                 }
                 else if (childNode.NodeType == JsonNodeType.Object)
                 {
                     if(string.IsNullOrEmpty(childNode.Name))
-                        sb.Append(String.Format("{{{0}", GetLineEnding()));
+                        sb.Append($"{{{GetLineEnding()}");
                     else
-                        sb.Append(String.Format("\"{0}\": {{{1}", childNode.Name, GetLineEnding()));
+                        sb.Append($"\"{childNode.Name}\": {{{GetLineEnding()}");
                     sb = IterateNodes(childNode, sb, depth);
                     sb = Tabs(sb, depth);
-                    sb.Append(String.Format("}}"));
+                    sb.Append("}");
                 }
                 else if (childNode.NodeType == JsonNodeType.Array)
                 {
-                    sb.Append(String.Format("\"{0}\": [{1}", childNode.Name, GetLineEnding()));
+                    sb.Append($"\"{childNode.Name}\": [{GetLineEnding()}");
                     sb = IterateNodes(childNode, sb, depth);
                     sb = Tabs(sb, depth);
-                    sb.Append(String.Format("]"));
+                    sb.Append("]");
                 }
                 if (childCount < node.ChildNodes.Count)
-                    sb.Append("," + GetLineEnding());
+                    sb.Append($",{GetLineEnding()}");
                 else
                     sb.Append(GetLineEnding());
 
                 depth--;
             }
             if (node.ParentNode == null && depth == 0)
-                sb.Append("}" + GetLineEnding());
+                sb.Append($"}}{GetLineEnding()}");
 
             return sb;
         }
@@ -155,7 +154,7 @@ namespace AnyConfig.Json
         private string FormatValue(PrimitiveTypes dataType, string value)
         {
             if (dataType == PrimitiveTypes.String)
-                return String.Format("\"{0}\"", value);
+                return $"\"{value}\"";
             else if (dataType == PrimitiveTypes.Null)
                 return "null";
             else

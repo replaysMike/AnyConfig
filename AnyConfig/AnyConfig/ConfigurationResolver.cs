@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using TypeSupport;
 using TypeSupport.Extensions;
+using AnyConfig.Xml;
 
 namespace AnyConfig
 {
@@ -235,6 +236,7 @@ namespace AnyConfig
             var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
             if (propertyLegacyAttribute != null)
                 return (T)MapTypeProperties(extendedType, propertyLegacyAttribute.PrependChildrenName);
+
             return (T)MapTypeProperties(extendedType);
         }
 
@@ -248,6 +250,20 @@ namespace AnyConfig
         private object MapTypeProperties(ExtendedType configurationClassType, string prependPropertyName = null)
         {
             var returnObject = new ObjectFactory().CreateEmptyObject(configurationClassType);
+
+            var legacyCustomSection = ConfigurationManager.GetSection(configurationClassType.Name);
+            if (legacyCustomSection != null)
+            {
+                if (legacyCustomSection.GetType() == typeof(ConfigSectionPair))
+                {
+                    var configSectionPair = legacyCustomSection as ConfigSectionPair;
+                    if (configSectionPair.TypeValue == typeof(RequiresXmlSerialization))
+                    {
+                        returnObject = XmlSerializer.Deserialize(configSectionPair.Configuration.ToString(), configurationClassType.Type);
+                        return returnObject;
+                    }
+                }
+            }
 
             foreach (var property in configurationClassType.Properties)
             {

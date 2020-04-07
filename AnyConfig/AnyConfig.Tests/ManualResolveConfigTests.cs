@@ -40,6 +40,29 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_Load_Xml_SimpleConfig()
+        {
+            // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.Reload();
+
+            var simpleConfig = new SimpleConfiguration
+            {
+                BoolSetting = true,
+                StringSetting = "TestValue",
+                IntSetting = 1,
+                Child = new ChildSimpleConfiguration
+                {
+                    Name = "TestName",
+                    Value = "TestValue"
+                }
+            };
+
+            var config = Config.GetFromXml<SimpleConfiguration>();
+            Assert.AreEqual(simpleConfig, config);
+        }
+
+        [Test]
         public void Should_Load_Json_Config()
         {
             var config = Config.GetFromJson<TestConfiguration>();

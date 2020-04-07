@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AnyConfig.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,31 +10,46 @@ namespace AnyConfig.Json
     /// <summary>
     /// Json v4 parser
     /// </summary>
-    public class JsonParserV4 : IJsonParser
+    public class JsonParser : IJsonParser
     {
-        private JsonFormatter jsonFormatter;
+        /// <summary>
+        /// The original string passed to the parser
+        /// </summary>
+        public string OriginalText { get; private set; }
 
-        public string Json { get; private set; }
-
-        public bool IsValidJson
+        /// <summary>
+        /// True if json is valid
+        /// </summary>
+        public bool IsValid
         {
-            get { return IsValid(Json); }
+            get { return IsValidJson(OriginalText); }
         }
 
         /// <summary>
-        /// Create a json V4 parser
+        /// Create a Json V4 parser
         /// </summary>
-        public JsonParserV4()
+        public JsonParser()
         {
-            jsonFormatter = new JsonFormatter();
         }
 
-        public static bool IsValid(string json)
+        /// <summary>
+        /// True if a valid json is parsed
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        public static bool IsValidJson(string json)
         {
-            var parser = new JsonParserV4();
-            var node = parser.Parse(json);
-            if (node != null)
-                return true;
+            try
+            {
+                var parser = new JsonParser();
+                var node = parser.Parse(json);
+                if (node != null)
+                    return true;
+            }
+            catch (Exception)
+            {
+                // invalid json
+            }
 
             return false;
         }
@@ -41,31 +57,37 @@ namespace AnyConfig.Json
         public JsonNode Parse(string json)
         {
             // Convert into a JSNode document
-            Json = EnsureRooted(json);
+            OriginalText = EnsureRooted(json);
 
             // determine the type of root node: Object or Array
 
-            var rootNode = GetNextBlock(Json, 0, null);
+            var rootNode = GetNextBlock(OriginalText, 0, null);
 
             //Optionally, we could validate some things here
 
             return rootNode;
         }
 
+        /// <summary>
+        /// Ensure the json block is contained in an empty json block as per the standard { }
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
         private string EnsureRooted(string json)
         {
-            var sb = new StringBuilder();
             if (!json.Trim().StartsWith("{"))
             {
-                sb.Append("{");
+                var sb = new StringBuilder();
+                sb.Append($"{{{Environment.NewLine}");
                 sb.Append(json);
-                sb.Append("}");
+                if (json.EndsWith(Environment.NewLine))
+                    sb.Append($"}}{Environment.NewLine}");
+                else
+                    sb.Append($"{Environment.NewLine}}}{Environment.NewLine}");
+                return sb.ToString();
             }
-            else
-            {
-                sb.Append(json);
-            }
-            return sb.ToString();
+
+            return json;
         }
 
         /// <summary>
@@ -87,8 +109,6 @@ namespace AnyConfig.Json
             var blockOpenPosition = 0;
             var fieldName = string.Empty;
             var isColonFound = false;
-            
-
 
             // read until we find an open and close quote
             for (var i = pos; i < json.Length; i++)
@@ -116,7 +136,7 @@ namespace AnyConfig.Json
                     if (json[i] == '{')
                     {
                         // process start of new object
-                        if(parentBlock != null)
+                        if (parentBlock != null)
                             parentBlock.OpenPosition = i;
                         blockOpenPosition = i;
                         blockCount++;
@@ -132,7 +152,8 @@ namespace AnyConfig.Json
                                 parentBlock.ClosePosition = i + 1;
                             break;
                         }
-                    } else if (!isColonFound && json[i] == '[')
+                    }
+                    else if (!isColonFound && json[i] == '[')
                     {
                         // an array start element was found.
                         // we should only look for this in the root of the json data
@@ -142,7 +163,7 @@ namespace AnyConfig.Json
                         parentBlock.ValueType = PrimitiveTypes.Array;
                         // set the json contents
                         if (parentBlock.OpenPosition >= 0 && parentBlock.Length > 0)
-                            parentBlock.Json = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
+                            parentBlock.OriginalText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
                         i = parentBlock.ClosePosition - 1;
                         break;
                     }
@@ -163,7 +184,7 @@ namespace AnyConfig.Json
                 {
                     i += 1; // read past the colon char
                     isColonFound = false; // reset this bit
-                   
+
                     //if (fieldName.Equalsa ("MediaType"))
                     //    Debugger.Break();
                     // what follows is either an array, object or value type.
@@ -193,7 +214,7 @@ namespace AnyConfig.Json
                     currentBlock.Name = fieldName;
 
                     if (currentBlock.OpenPosition >= 0 && currentBlock.Length > 0)
-                        currentBlock.Json = json.Substring(currentBlock.OpenPosition, currentBlock.Length).Trim();
+                        currentBlock.OriginalText = json.Substring(currentBlock.OpenPosition, currentBlock.Length).Trim();
 
                     if (parentBlock != null)
                     {
@@ -206,18 +227,13 @@ namespace AnyConfig.Json
                 }
             }
 
-
-            if (string.IsNullOrEmpty(parentBlock.Json))
+            if (string.IsNullOrEmpty(parentBlock.OriginalText))
             {
                 if (parentBlock != null && parentBlock.Length > 0)
-                    //parentBlock.Json = json.Substring(parentBlock.OpenPosition, parentBlock.ClosePosition - parentBlock.OpenPosition).Trim();
-                    parentBlock.Json = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
+                    parentBlock.OriginalText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
                 else
                 {
-                    // missing end brace? we can try returning the result this way
-                    //parentBlock.Json = json.Substring(parentBlock.OpenPosition, json.Length - parentBlock.OpenPosition).Trim();
-                    // for better debugging error detection, lets just blow up here for now.
-                    throw new Exception("Error: End of Block not found.");
+                    throw new ParseException("Error: End of Block not found. Double check your json for formatting errors.");
                 }
             }
 
@@ -329,10 +345,10 @@ namespace AnyConfig.Json
             var isInteger = isNumber && isWholeValue;
 
             // if number had a decimal place, it doesn't count. (thanks to weird Json data types!)
-            NumberFormatInfo nfi = new CultureInfo( "en-US", false ).NumberFormat;
+            NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
             if (isNumber && isWholeValue && segment.IndexOf(nfi.NumberDecimalSeparator) >= 0)
                 isInteger = false;
-            
+
             return isInteger;
         }
 

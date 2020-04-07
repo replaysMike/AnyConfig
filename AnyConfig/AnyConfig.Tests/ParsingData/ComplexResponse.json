@@ -1,0 +1,32 @@
+﻿{
+  "intValue": 1,
+  "stringValue": "string",
+  "boolValue": true,
+  "numberValue": 3.1415,
+  "myIntArray": [ 1, 2, 3, 4, 5 ],
+  "myObject": {
+    "nameValue": "objectname",
+    "objectValue": 12345.00
+  },
+  "nestedObject": {
+    "nameValue": "name1",
+    "subObject": {
+      "subObjectNameValue": "subObjectName1",
+      "subObjectIdValue": 201
+    }
+  },
+  "myArrayOfObjects": [
+    {
+      "objname": "object1",
+      "id": 101
+    },
+    {
+      "objname": "object2",
+      "id": 102
+    },
+    {
+      "objname": "object3",
+      "id": 103
+    }
+  ]
+}
