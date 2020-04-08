@@ -32,6 +32,11 @@ Simplest usage is using the dedicated generics interface:
 var isEnabled = Config.Get<bool>("IsEnabled");
 ```
 
+You can specify a default value for settings that aren't required to exist:
+```csharp
+var intValue = Config.Get<int>("Port", 443);
+```
+
 You can also bind your own configuration class:
 ```csharp
 var testConfiguration = Config.Get<MyTestConfiguration>();
