@@ -10,7 +10,7 @@ A .net configuration library to make configuration of multi-target applications 
 
 ## Description
 
-AnyConfig makes configuration on solutions which mix .Net Core and .Net Framework projects easier. It abstracts away ConfigurationManager and IConfiguration loading with no dependencies on Microsoft implementation. You can instead use ConfigurationManager to load either json or xml configuration files, as well as the IConfiguration interface. This allows you to upgrade to json configuration files even for older projects without changing any code!
+AnyConfig makes configuration on solutions which mix .Net Core and .Net Framework projects easier. It abstracts away ConfigurationManager and IConfiguration loading with no dependencies on Microsoft implementation. You can instead use ConfigurationManager to load either json or xml configuration files, as well as the IConfiguration interface. This allows you to upgrade to json configuration files even for older projects, or have multi-target projects which use different configuration formats without extra code!
 
 ## Installation
 ```Powershell
@@ -19,10 +19,11 @@ PM> Install-Package Any-Config
 
 ## Features
 
-* Backwards compatible interface for ConfigurationManager for xml and json
+* Backwards compatible interface using ConfigurationManager for xml and json
 * Supports IConfiguration interface for xml and json
 * Supports generics for simple configuration value lookups
 * Automatic discovery of configuration files for .Net Core or .Net Framework projects
+* [todo] Yaml support coming soon
 
 ## Usage
 
