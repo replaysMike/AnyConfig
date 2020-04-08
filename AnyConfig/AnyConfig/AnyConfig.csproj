@@ -9,7 +9,7 @@
     <Description>A .net configuration library to make configuration of multi-target applications easier</Description>
     <RepositoryUrl>https://github.com/replaysMike/AnyConfig</RepositoryUrl>
     <PackageProjectUrl>https://github.com/replaysMike/AnyConfig</PackageProjectUrl>
-    <PackageTags>config configuration configurationmanager iconfiguration asp.net core dotnet-standard refactor software michael brown</PackageTags>
+    <PackageTags>anyconfig config configuration configurationmanager iconfiguration json xml appsettings asp.net core dotnet-standard refactor software michael brown</PackageTags>
     <PackageReleaseNotes>A .net configuration library to make configuration of multi-target applications easier</PackageReleaseNotes>
     <Version>1.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

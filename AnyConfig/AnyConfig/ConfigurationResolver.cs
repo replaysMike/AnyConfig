@@ -9,6 +9,8 @@ using System.Reflection;
 using TypeSupport;
 using TypeSupport.Extensions;
 using AnyConfig.Xml;
+using System.Linq;
+using AnyConfig.Collections;
 
 namespace AnyConfig
 {
@@ -47,11 +49,11 @@ namespace AnyConfig
         /// </summary>
         public ConfigurationResolver()
         {
-            var runtime = RuntimeEnvironment.DetectRuntime();
+            DetectedRuntime = RuntimeEnvironment.DetectRuntime();
             lock (_registeredEntryAssemblies)
             {
-                if (_registeredEntryAssemblies.ContainsKey(runtime.DetectedRuntimeFrameworkDescription))
-                    _entryAssembly = _registeredEntryAssemblies[runtime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                if (_registeredEntryAssemblies.ContainsKey(DetectedRuntime.DetectedRuntimeFrameworkDescription))
+                    _entryAssembly = _registeredEntryAssemblies[DetectedRuntime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
                 _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
             }
         }
@@ -63,7 +65,7 @@ namespace AnyConfig
         public ConfigurationResolver(Assembly entryAssembly)
         {
             _entryAssembly = entryAssembly;
-            var runtime = RuntimeEnvironment.DetectRuntime(_entryAssembly);
+            DetectedRuntime = RuntimeEnvironment.DetectRuntime(_entryAssembly);
             _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
         }
 
@@ -78,9 +80,31 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration<T>();
+                    return LoadDotNetCoreConfiguration<T>(default);
                 case RuntimeFramework.DotNetFramework:
-                    return LoadDotNetFrameworkConfiguration<T>();
+                    return LoadDotNetFrameworkConfiguration<T>(default);
+            }
+
+            throw new UnsupportedPlatformException();
+        }
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
+        /// <returns></returns>
+        public T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException = false)
+        {
+            // if on the .net core platform, resolve a configuration from appsettings.json
+            switch (DetectedRuntime.DetectedRuntimeFramework)
+            {
+                case RuntimeFramework.DotNetCore:
+                    return LoadDotNetCoreConfiguration<T>(defaultValue, settingName, null, null, throwsException);
+                case RuntimeFramework.DotNetFramework:
+                    return LoadDotNetFrameworkConfiguration<T>(defaultValue, settingName, null, null, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -90,17 +114,20 @@ namespace AnyConfig
         /// Resolve a configuration for the current runtime platform
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        public T ResolveConfiguration<T>(string sectionName)
+        public T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException = false)
         {
             var nameOfSection = sectionName ?? typeof(T).Name;
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration<T>(null, nameOfSection);
+                    return LoadDotNetCoreConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
-                    return LoadDotNetFrameworkConfiguration<T>(null, nameOfSection);
+                    return LoadDotNetFrameworkConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -151,7 +178,7 @@ namespace AnyConfig
         /// <returns></returns>
         public T GetFromXml<T>(string sectionName = null)
         {
-            return LoadDotNetFrameworkConfiguration<T>(null, sectionName);
+            return LoadDotNetFrameworkConfiguration<T>(default, null, null, sectionName, true);
         }
 
         /// <summary>
@@ -162,7 +189,7 @@ namespace AnyConfig
         /// <returns></returns>
         public T GetFromXmlFile<T>(string filename, string sectionName = null)
         {
-            return LoadDotNetFrameworkConfiguration<T>(filename, sectionName);
+            return LoadDotNetFrameworkConfiguration<T>(default, null, filename, sectionName, true);
         }
 
         /// <summary>
@@ -173,7 +200,7 @@ namespace AnyConfig
         /// <returns></returns>
         public T GetFromJson<T>(string sectionName = null)
         {
-            return LoadDotNetCoreConfiguration<T>(null, sectionName);
+            return LoadDotNetCoreConfiguration<T>(default, null, null, sectionName, true);
         }
 
         /// <summary>
@@ -184,7 +211,7 @@ namespace AnyConfig
         /// <returns></returns>
         public T GetFromJsonFile<T>(string filename, string sectionName = null)
         {
-            return LoadDotNetCoreConfiguration<T>(filename, sectionName);
+            return LoadDotNetCoreConfiguration<T>(default, null, filename, sectionName, true);
         }
 
         /// <summary>
@@ -211,33 +238,61 @@ namespace AnyConfig
             return ConfigProvider.GetConfiguration(Path.GetFileName(configFile), Path.GetDirectoryName(configFile));
         }
 
-        private T LoadDotNetCoreConfiguration<T>(string filename = null, string sectionName = null)
+        private T LoadDotNetCoreConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
-                throw new InvalidOperationException($"Could not load configuration.");
+                throw new ConfigurationMissingException($"Could not load configuration.");
 
-            var nameOfSection = sectionName ?? typeof(T).Name;
-            var configSection = configuration.GetSection(nameOfSection);
-            if (configSection == null)
-                throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+            if (!string.IsNullOrEmpty(settingName))
+            {
+                if(configuration.Providers.First().TryGet(settingName, out var value))
+                    return ((StringValue)value).As<T>();
+                return defaultValue;
+            }
+            else
+            {
+                var nameOfSection = sectionName ?? typeof(T).Name;
+                var configSection = configuration.GetSection(nameOfSection);
+                if (configSection == null)
+                {
+                    if (throwsException)
+                        throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+                    return defaultValue;
+                }
 
-            var value = JsonSerializer.Deserialize<T>(configSection.Value);
-
-            return value;
+                var value = JsonSerializer.Deserialize<T>(configSection.Value);
+                return value;
+            }
         }
 
-        private T LoadDotNetFrameworkConfiguration<T>(string filename = null, string sectionName = null)
+        private T LoadDotNetFrameworkConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             // for .net framework configs such as app.config and web.config we need to serialize individual values
-            // recursively map the configuration based on legacy property names
-            var nameOfSection = sectionName ?? typeof(T).Name;
-            var extendedType = typeof(T).GetExtendedType();
-            var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
-            if (propertyLegacyAttribute != null)
-                return (T)MapTypeProperties(extendedType, propertyLegacyAttribute.PrependChildrenName);
 
-            return (T)MapTypeProperties(extendedType);
+            if (!string.IsNullOrEmpty(settingName))
+            {
+                object value = null;
+                value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                if (value == ConfigProvider.Empty)
+                {
+                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                    if (value == ConfigProvider.Empty)
+                        return defaultValue;
+                }
+                return (T)value;
+            }
+            else
+            {
+                // recursively map the configuration based on legacy property names
+                var nameOfSection = sectionName ?? typeof(T).Name;
+                var extendedType = typeof(T).GetExtendedType();
+                var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
+                if (propertyLegacyAttribute != null)
+                    return (T)MapTypeProperties(extendedType, defaultValue, propertyLegacyAttribute.PrependChildrenName, throwsException);
+
+                return (T)MapTypeProperties(extendedType, defaultValue, null, throwsException);
+            }
         }
 
         /// <summary>
@@ -247,9 +302,10 @@ namespace AnyConfig
         /// <param name="configurationClassType"></param>
         /// <param name="prependPropertyName">Use this value to prepend a configuration setting name in the config</param>
         /// <returns></returns>
-        private object MapTypeProperties(ExtendedType configurationClassType, string prependPropertyName = null)
+        private object MapTypeProperties(ExtendedType configurationClassType, object defaultValue, string prependPropertyName = null, bool throwsException = false)
         {
-            var returnObject = new ObjectFactory().CreateEmptyObject(configurationClassType);
+            var objectFactory = new ObjectFactory();
+            var returnObject = objectFactory.CreateEmptyObject(configurationClassType);
 
             var legacyCustomSection = ConfigurationManager.GetSection(configurationClassType.Name);
             if (legacyCustomSection != null)
@@ -265,6 +321,7 @@ namespace AnyConfig
                 }
             }
 
+            var anyPropertiesMapped = false;
             foreach (var property in configurationClassType.Properties)
             {
                 var isRequired = false;
@@ -283,19 +340,32 @@ namespace AnyConfig
                     if (propertyType.IsReferenceType && propertyLegacyAttribute.ChildrenMapped)
                     {
                         // map all of this objects properties and attributes
-                        value = MapTypeProperties(propertyType, prependPropertyName + propertyLegacyAttribute.PrependChildrenName);
+                        value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
                     }
                 }
                 if (value == null)
                 {
                     value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
                     if (value == ConfigProvider.Empty)
+                    {
                         value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
-                    if (isRequired && value == ConfigProvider.Empty)
-                        throw new ConfigurationMissingException(propertyName, property.Type);
+                        if (isRequired && value == ConfigProvider.Empty)
+                            throw new ConfigurationMissingException(propertyName, property.Type);
+                    }
                 }
                 if (value != ConfigProvider.Empty)
+                {
                     property.PropertyInfo.SetValue(returnObject, value, null);
+                    anyPropertiesMapped = true;
+                }
+            }
+
+            if (!anyPropertiesMapped)
+            {
+                if (throwsException)
+                    throw new ConfigurationMissingException($"Unable to resolve configuration of type '{configurationClassType.Name}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+                else
+                    returnObject = defaultValue;
             }
             return returnObject;
         }

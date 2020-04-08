@@ -24,7 +24,7 @@ namespace AnyConfig
 
         public void Load()
         {
-            
+
         }
 
         internal void SetData(ICollection<KeyValuePair<string, string>> data)
@@ -34,7 +34,7 @@ namespace AnyConfig
 
         public void Set(string key, string value)
         {
-            
+
         }
 
         public bool TryGet(string key, out string value)
@@ -44,6 +44,14 @@ namespace AnyConfig
             {
                 value = Data
                     .Where(x => x.Key == key)
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+                return true;
+            }
+            if (Data.Any(x => x.Key.EndsWith($":{key}")))
+            {
+                value = Data
+                    .Where(x => x.Key.EndsWith($":{key}"))
                     .Select(x => x.Value)
                     .FirstOrDefault();
                 return true;

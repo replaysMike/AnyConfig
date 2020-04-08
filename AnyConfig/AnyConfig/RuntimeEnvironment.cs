@@ -19,6 +19,8 @@ namespace AnyConfig
             string framework = null;
             info.DetectedRuntimePlatform = RuntimeInformation.OSDescription;
             info.DetectedRuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription;
+            if (info.DetectedRuntimeFrameworkDescription.Contains(".NET Core"))
+                info.DetectedRuntimeFramework = RuntimeFramework.DotNetCore;
 
 #if NETFRAMEWORK
             if (entryAssembly == null)

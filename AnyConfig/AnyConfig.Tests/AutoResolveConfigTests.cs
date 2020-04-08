@@ -1,4 +1,5 @@
-﻿using AnyConfig.Scaffolding;
+﻿using AnyConfig.Exceptions;
+using AnyConfig.Scaffolding;
 using NUnit.Framework;
 using System.Linq;
 using System.Reflection;
@@ -40,8 +41,22 @@ namespace AnyConfig.Tests
         [Test]
         public void Should_Load_ConfigSection()
         {
-            var config = Config.Get<TestConfiguration>(nameof(TestConfiguration));
+            var config = Config.GetSection<TestConfiguration>(nameof(TestConfiguration));
             Assert.AreEqual(_testConfig, config);
+        }
+
+        [Test]
+        public void Should_Load_ConfigSection_DefaultValue()
+        {
+            var defaultValue = new UnknownConfiguration("default");
+            var config = Config.GetSection<UnknownConfiguration>(nameof(UnknownConfiguration), defaultValue);
+            Assert.AreEqual(defaultValue, config);
+        }
+
+        [Test]
+        public void Should_Load_ConfigSection_NoDefaultValueShouldThrow()
+        {
+            Assert.Throws<ConfigurationMissingException>(() => Config.GetSection<UnknownConfiguration>(nameof(UnknownConfiguration)));
         }
 
         [Test]
@@ -56,6 +71,27 @@ namespace AnyConfig.Tests
         {
             var config = Config.GetFromJsonFile<TestConfiguration>("appsettings.json", nameof(TestConfiguration));
             Assert.AreEqual(_testConfig, config);
+        }
+
+        [Test]
+        public void Should_Load_Config_Value()
+        {
+            var value = Config.Get<string>("RootStringValue");
+            Assert.AreEqual("TestRootValue", value);
+        }
+
+        [Test]
+        public void Should_Load_Config_NonRootValue()
+        {
+            var value = Config.Get<string>("StringSetting");
+            Assert.AreEqual("TestValue", value);
+        }
+
+        [Test]
+        public void Should_Load_Config_DefaultValue()
+        {
+            var value = Config.Get<int>("InvalidSetting", 999);
+            Assert.AreEqual(999, value);
         }
 
         [Test]

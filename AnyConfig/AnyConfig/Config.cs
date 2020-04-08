@@ -21,11 +21,46 @@ namespace AnyConfig
         /// Get a specific configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        public static T Get<T>(string settingName)
+        {
+            return Resolve<T>(settingName, default);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting</param>
+        /// <param name="defaultValue">Default value if setting is not found</param>
+        /// <returns></returns>
+        public static T Get<T>(string settingName, T defaultValue)
+        {
+            return Resolve<T>(settingName, defaultValue);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="sectionName">Section name to retrieve</param>
         /// <returns></returns>
-        public static T Get<T>(string sectionName)
+        public static T GetSection<T>(string sectionName)
         {
-            return Resolve<T>(sectionName);
+            return ResolveSection<T>(sectionName, default, true);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Section name to retrieve</param>
+        /// <param name="defaultValue">Default value if setting is not found</param>
+        /// <returns></returns>
+        public static T GetSection<T>(string sectionName, T defaultValue)
+        {
+            return ResolveSection<T>(sectionName, defaultValue, false);
         }
 
         /// <summary>
@@ -127,10 +162,16 @@ namespace AnyConfig
             return resolver.ResolveConfiguration<T>();
         }
 
-        private static T Resolve<T>(string sectionName)
+        private static T Resolve<T>(string settingName, T defaultValue)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfiguration<T>(sectionName);
+            return resolver.ResolveConfiguration<T>(settingName, defaultValue);
+        }
+
+        private static T ResolveSection<T>(string sectionName, T defaultValue, bool throwsException = false)
+        {
+            var resolver = CreateResolver();
+            return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
         }
 
         private static ConfigurationResolver CreateResolver() => new ConfigurationResolver();
