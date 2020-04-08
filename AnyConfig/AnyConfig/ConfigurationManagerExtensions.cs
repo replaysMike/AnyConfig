@@ -9,6 +9,33 @@ namespace AnyConfig
         /// <summary>
         /// Get value as a specified type
         /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">The type of object to return</param>
+        /// <returns></returns>
+        public static object As(this object value, Type type)
+        {
+            if (value == null)
+                return default;
+
+            var objectType = value.GetType();
+
+            // handle any custom serialization requirements
+            if (objectType == typeof(ConfigSectionPair))
+            {
+                var configSectionPair = value as ConfigSectionPair;
+                if (configSectionPair.TypeValue == typeof(RequiresJsonSerialization))
+                {
+                    // serialize data first
+                    return JsonSerializer.Deserialize(configSectionPair.Configuration.ToString(), type);
+                }
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        /// Get value as a specified type
+        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>

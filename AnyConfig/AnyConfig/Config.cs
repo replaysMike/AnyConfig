@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System;
 
 namespace AnyConfig
 {
@@ -23,9 +24,44 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="settingName"></param>
         /// <returns></returns>
+        public static string Get(string settingName)
+        {
+            return Resolve<string>(settingName, default);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName"></param>
+        /// <param name="type">The type to bind to</param>
+        /// <returns></returns>
+        public static object Get(string settingName, Type type)
+        {
+            return Resolve(settingName, type, default);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
         public static T Get<T>(string settingName)
         {
             return Resolve<T>(settingName, default);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting</param>
+        /// <param name="defaultValue">Default value if setting is not found</param>
+        /// <returns></returns>
+        public static string Get(string settingName, string defaultValue)
+        {
+            return Resolve<string>(settingName, defaultValue);
         }
 
         /// <summary>
@@ -44,6 +80,19 @@ namespace AnyConfig
         /// Get a specific configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting</param>
+        /// <param name="type">The type to bind to</param>
+        /// <param name="defaultValue">Default value if setting is not found</param>
+        /// <returns></returns>
+        public static object Get(string settingName, Type type, object defaultValue)
+        {
+            return Resolve(settingName, type, defaultValue);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="sectionName">Section name to retrieve</param>
         /// <returns></returns>
         public static T GetSection<T>(string sectionName)
@@ -56,11 +105,36 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName">Section name to retrieve</param>
+        /// <param name="type">The type to bind to</param>
+        /// <returns></returns>
+        public static object GetSection(string sectionName, Type type)
+        {
+            return ResolveSection(sectionName, type, default, true);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Section name to retrieve</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
         public static T GetSection<T>(string sectionName, T defaultValue)
         {
             return ResolveSection<T>(sectionName, defaultValue, false);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Section name to retrieve</param>
+        /// <param name="type">The type to bind to</param>
+        /// <param name="defaultValue">Default value if setting is not found</param>
+        /// <returns></returns>
+        public static object GetSection(string sectionName, Type type, object defaultValue)
+        {
+            return ResolveSection(sectionName, type, defaultValue, false);
         }
 
         /// <summary>
@@ -168,10 +242,22 @@ namespace AnyConfig
             return resolver.ResolveConfiguration<T>(settingName, defaultValue);
         }
 
+        private static object Resolve(string settingName, Type type, object defaultValue)
+        {
+            var resolver = CreateResolver();
+            return resolver.ResolveConfiguration(settingName, type, defaultValue);
+        }
+
         private static T ResolveSection<T>(string sectionName, T defaultValue, bool throwsException = false)
         {
             var resolver = CreateResolver();
             return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
+        }
+
+        private static object ResolveSection(string sectionName, Type type, object defaultValue, bool throwsException = false)
+        {
+            var resolver = CreateResolver();
+            return resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
         }
 
         private static ConfigurationResolver CreateResolver() => new ConfigurationResolver();

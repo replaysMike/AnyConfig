@@ -111,6 +111,29 @@ namespace AnyConfig
         }
 
         /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
+        /// <returns></returns>
+        public object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException = false)
+        {
+            // if on the .net core platform, resolve a configuration from appsettings.json
+            switch (DetectedRuntime.DetectedRuntimeFramework)
+            {
+                case RuntimeFramework.DotNetCore:
+                    return LoadDotNetCoreConfiguration(defaultValue, type, settingName, null, null, throwsException);
+                case RuntimeFramework.DotNetFramework:
+                    return LoadDotNetFrameworkConfiguration(defaultValue, type, settingName, null, null, throwsException);
+            }
+
+            throw new UnsupportedPlatformException();
+        }
+
+        /// <summary>
         /// Resolve a configuration for the current runtime platform
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -128,6 +151,30 @@ namespace AnyConfig
                     return LoadDotNetCoreConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
                     return LoadDotNetFrameworkConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
+            }
+
+            throw new UnsupportedPlatformException();
+        }
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
+        /// <returns></returns>
+        public object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException = false)
+        {
+            var nameOfSection = sectionName ?? type.Name;
+            // if on the .net core platform, resolve a configuration from appsettings.json
+            switch (DetectedRuntime.DetectedRuntimeFramework)
+            {
+                case RuntimeFramework.DotNetCore:
+                    return LoadDotNetCoreConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
+                case RuntimeFramework.DotNetFramework:
+                    return LoadDotNetFrameworkConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -238,6 +285,34 @@ namespace AnyConfig
             return ConfigProvider.GetConfiguration(Path.GetFileName(configFile), Path.GetDirectoryName(configFile));
         }
 
+        private object LoadDotNetCoreConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        {
+            var configuration = GetConfiguration(filename, sectionName);
+            if (configuration == null)
+                throw new ConfigurationMissingException($"Could not load configuration.");
+
+            if (!string.IsNullOrEmpty(settingName))
+            {
+                if (configuration.Providers.First().TryGet(settingName, out var value))
+                    return ((StringValue)value).As(type);
+                return defaultValue;
+            }
+            else
+            {
+                var nameOfSection = sectionName ?? type.Name;
+                var configSection = configuration.GetSection(nameOfSection);
+                if (configSection == null)
+                {
+                    if (throwsException)
+                        throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+                    return defaultValue;
+                }
+
+                var value = JsonSerializer.Deserialize(configSection.Value, type);
+                return value;
+            }
+        }
+
         private T LoadDotNetCoreConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             var configuration = GetConfiguration(filename, sectionName);
@@ -263,6 +338,35 @@ namespace AnyConfig
 
                 var value = JsonSerializer.Deserialize<T>(configSection.Value);
                 return value;
+            }
+        }
+
+        private object LoadDotNetFrameworkConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        {
+            // for .net framework configs such as app.config and web.config we need to serialize individual values
+
+            if (!string.IsNullOrEmpty(settingName))
+            {
+                object value = null;
+                value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                if (value == ConfigProvider.Empty)
+                {
+                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                    if (value == ConfigProvider.Empty)
+                        return defaultValue;
+                }
+                return value;
+            }
+            else
+            {
+                // recursively map the configuration based on legacy property names
+                var nameOfSection = sectionName ?? type.Name;
+                var extendedType = type.GetExtendedType();
+                var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
+                if (propertyLegacyAttribute != null)
+                    return MapTypeProperties(extendedType, defaultValue, propertyLegacyAttribute.PrependChildrenName, throwsException);
+
+                return MapTypeProperties(extendedType, defaultValue, null, throwsException);
             }
         }
 

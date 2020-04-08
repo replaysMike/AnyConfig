@@ -1,5 +1,6 @@
 ﻿using AnyConfig.Models;
 using Microsoft.Extensions.Configuration;
+using System;
 
 namespace AnyConfig
 {
@@ -31,6 +32,17 @@ namespace AnyConfig
         T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException = false);
 
         /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
+        /// <returns></returns>
+        object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException = false);
+
+        /// <summary>
         /// Resolve a configuration for the current runtime platform
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -39,6 +51,17 @@ namespace AnyConfig
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
         T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException = false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
+        /// <returns></returns>
+        object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException = false);
 
         /// <summary>
         /// Resolve a legacy configuration
