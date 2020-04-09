@@ -15,7 +15,7 @@ namespace AnyConfig
             }
             set
             {
-
+                // nothing to set
             }
         }
 

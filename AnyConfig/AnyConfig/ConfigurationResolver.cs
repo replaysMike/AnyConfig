@@ -1,16 +1,16 @@
-﻿using AnyConfig.Exceptions;
+﻿using AnyConfig.Collections;
+using AnyConfig.Exceptions;
 using AnyConfig.Json;
 using AnyConfig.Models;
+using AnyConfig.Xml;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using TypeSupport;
 using TypeSupport.Extensions;
-using AnyConfig.Xml;
-using System.Linq;
-using AnyConfig.Collections;
 
 namespace AnyConfig
 {
@@ -82,6 +82,7 @@ namespace AnyConfig
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration<T>(default);
                 case RuntimeFramework.DotNetFramework:
+                default:
                     return LoadDotNetFrameworkConfiguration<T>(default);
             }
 
@@ -121,6 +122,7 @@ namespace AnyConfig
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration<T>(defaultValue, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
+                default:
                     return LoadDotNetFrameworkConfiguration<T>(defaultValue, settingName, null, null, throwsException);
             }
 
@@ -163,6 +165,7 @@ namespace AnyConfig
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration(defaultValue, type, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
+                default:
                     return LoadDotNetFrameworkConfiguration(defaultValue, type, settingName, null, null, throwsException);
             }
 
@@ -195,6 +198,7 @@ namespace AnyConfig
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
+                default:
                     return LoadDotNetFrameworkConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
             }
 
@@ -229,6 +233,7 @@ namespace AnyConfig
                 case RuntimeFramework.DotNetCore:
                     return LoadDotNetCoreConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
+                default:
                     return LoadDotNetFrameworkConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
             }
 

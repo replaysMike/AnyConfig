@@ -123,6 +123,7 @@ namespace AnyConfig.Json
                         value.SetPropertyValue(childNode.Name, double.Parse(childNode.Value));
                         break;
                     case PrimitiveTypes.Null:
+                    default:
                         // nothing to do
                         break;
                 }

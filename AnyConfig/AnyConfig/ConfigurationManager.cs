@@ -208,6 +208,7 @@ namespace AnyConfig
                         break;
                     case ".xml":
                     case ".config":
+                    default:
                         configurationSource = ConfigurationManagerSource.Xml;
                         break;
                 }

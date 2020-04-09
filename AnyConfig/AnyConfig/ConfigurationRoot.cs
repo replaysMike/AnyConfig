@@ -30,7 +30,7 @@ namespace AnyConfig
 
         public void Reload()
         {
-            
+            // does nothing
         }
     }
 }

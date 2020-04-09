@@ -28,7 +28,7 @@ namespace AnyConfig
         public bool IsRequired { get; }
 
         /// <summary>
-        /// 
+        /// Specify the name of the legacy configuration setting name (App.config, Web.config)
         /// </summary>
         /// <param name="settingName">The name of the legacy configuration setting</param>
         /// <param name="prependChildrenName">A value to always prepend to its children</param>

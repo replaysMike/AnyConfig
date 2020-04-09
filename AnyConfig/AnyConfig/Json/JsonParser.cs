@@ -185,8 +185,6 @@ namespace AnyConfig.Json
                     i += 1; // read past the colon char
                     isColonFound = false; // reset this bit
 
-                    //if (fieldName.Equalsa ("MediaType"))
-                    //    Debugger.Break();
                     // what follows is either an array, object or value type.
                     // detect and determine what type of data needs to be parsed.
                     var blockType = DetectBlockType(json, i);
@@ -208,7 +206,8 @@ namespace AnyConfig.Json
                             currentBlock = ParseObjectBlock(json, i);
                             currentBlock.ValueType = PrimitiveTypes.Object;
                             currentBlock.OpenPosition = quotesStart - 1;
-                            //currentBlock.ClosePosition++;   // hack: I can't find the problem here that causes it to be one short
+                            break;
+                        default:
                             break;
                     }
                     currentBlock.Name = fieldName;

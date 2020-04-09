@@ -30,10 +30,29 @@ namespace AnyConfig
         /// <summary>
         /// Get a configuration object from a json serialized configuration file
         /// </summary>
+        /// <returns></returns>
+        public static IConfigurationRoot GetConfiguration()
+        {
+            return GetConfiguration(DotNetCoreSettingsFilename, null);
+        }
+
+        /// <summary>
+        /// Get a configuration object from a json serialized configuration file
+        /// </summary>
+        /// <param name="appSettingsJson">Name of json settings file</param>
+        /// <returns></returns>
+        public static IConfigurationRoot GetConfiguration(string appSettingsJson)
+        {
+            return GetConfiguration(appSettingsJson, null);
+        }
+
+        /// <summary>
+        /// Get a configuration object from a json serialized configuration file
+        /// </summary>
         /// <param name="appSettingsJson">Name of json settings file</param>
         /// <param name="path">Optional path to json settings file</param>
         /// <returns></returns>
-        public static IConfigurationRoot GetConfiguration(string appSettingsJson = DotNetCoreSettingsFilename, string path = null)
+        public static IConfigurationRoot GetConfiguration(string appSettingsJson, string path)
         {
             if (string.IsNullOrEmpty(path))
                 path = Directory.GetCurrentDirectory();
