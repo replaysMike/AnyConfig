@@ -3,54 +3,35 @@ using System.Text;
 
 namespace AnyConfig.Json
 {
-    public enum TabMode
-    {
-        Spaces,
-        Tabs
-    }
-    public enum LineEnding
-    {
-        CR,
-        LF,
-        CRLF,
-        Environment
-    }
-    public class JsonFormatConfig
-    {
-        public TabMode TabMode { get; set; }
-        public int TabSize { get; set; }
-        public LineEnding LineEnding { get; set; }
-        public JsonFormatConfig()
-            : this(TabMode.Spaces, LineEnding.Environment, 4)
-        {
-        }
-        public JsonFormatConfig(TabMode tabMode, LineEnding lineEnding, int tabSize = 4)
-        {
-            TabMode = tabMode;
-            TabSize = tabSize;
-            LineEnding = lineEnding;
-        }
-    }
-
     /// <summary>
     /// Json Formatter class
     /// </summary>
     public class JsonFormatter
     {
-        public JsonFormatConfig FormatConfig { get; set; }
+        /// <summary>
+        /// The Json formatting configuration
+        /// </summary>
+        public JsonFormatConfig FormatConfig { get; set; } = new JsonFormatConfig();
+
+        /// <summary>
+        /// Json Formatter
+        /// </summary>
         public JsonFormatter()
-            : this(new JsonFormatConfig())
         {
 
         }
 
+        /// <summary>
+        /// Json Formatter
+        /// </summary>
+        /// <param name="formatConfig"></param>
         public JsonFormatter(JsonFormatConfig formatConfig)
         {
             FormatConfig = formatConfig;
         }
 
         /// <summary>
-        /// Re-format a JSON string
+        /// Re-format a Json string
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
@@ -63,7 +44,7 @@ namespace AnyConfig.Json
         }
 
         /// <summary>
-        /// Re-format a JSON string
+        /// Re-format a Json string
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>

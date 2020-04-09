@@ -14,10 +14,7 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T Get<T>()
-        {
-            return Resolve<T>();
-        }
+        public static T Get<T>() => Resolve<T>();
 
         /// <summary>
         /// Get a specific configuration
@@ -25,20 +22,14 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static T Get<T>(Assembly assembly)
-        {
-            return Resolve<T>(assembly);
-        }
+        public static T Get<T>(Assembly assembly) => Resolve<T>(assembly);
 
         /// <summary>
         /// Get a specific configuration
         /// </summary>
         /// <param name="settingName">Name of setting</param>
         /// <returns></returns>
-        public static string Get(string settingName)
-        {
-            return Resolve<string>(settingName, default);
-        }
+        public static string Get(string settingName) => Resolve<string>(settingName, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -46,10 +37,7 @@ namespace AnyConfig
         /// <param name="settingName">Name of setting</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static string Get(string settingName, Assembly assembly)
-        {
-            return Resolve<string>(assembly, settingName, default);
-        }
+        public static string Get(string settingName, Assembly assembly) => Resolve<string>(assembly, settingName, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -57,10 +45,7 @@ namespace AnyConfig
         /// <param name="settingName">Name of setting</param>
         /// <param name="type">The type to bind to</param>
         /// <returns></returns>
-        public static object Get(string settingName, Type type)
-        {
-            return Resolve(settingName, type, default);
-        }
+        public static object Get(string settingName, Type type) => Resolve(settingName, type, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -69,10 +54,7 @@ namespace AnyConfig
         /// <param name="type">The type to bind to</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static object Get(string settingName, Type type, Assembly assembly)
-        {
-            return Resolve(assembly, settingName, type, default);
-        }
+        public static object Get(string settingName, Type type, Assembly assembly) => Resolve(assembly, settingName, type, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -80,10 +62,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="settingName">Name of setting</param>
         /// <returns></returns>
-        public static T Get<T>(string settingName)
-        {
-            return Resolve<T>(settingName, default);
-        }
+        public static T Get<T>(string settingName) => Resolve<T>(settingName, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -92,10 +71,7 @@ namespace AnyConfig
         /// <param name="settingName">Name of setting</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static T Get<T>(string settingName, Assembly assembly)
-        {
-            return Resolve<T>(assembly, settingName, default);
-        }
+        public static T Get<T>(string settingName, Assembly assembly) => Resolve<T>(assembly, settingName, default);
 
         /// <summary>
         /// Get a specific configuration
@@ -104,10 +80,7 @@ namespace AnyConfig
         /// <param name="settingName">Name of setting</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
-        public static string Get(string settingName, string defaultValue)
-        {
-            return Resolve<string>(settingName, defaultValue);
-        }
+        public static string Get(string settingName, string defaultValue) => Resolve<string>(settingName, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -117,10 +90,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static string Get(string settingName, string defaultValue, Assembly assembly)
-        {
-            return Resolve<string>(assembly, settingName, defaultValue);
-        }
+        public static string Get(string settingName, string defaultValue, Assembly assembly) => Resolve<string>(assembly, settingName, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -129,10 +99,7 @@ namespace AnyConfig
         /// <param name="settingName">Name of setting</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
-        public static T Get<T>(string settingName, T defaultValue)
-        {
-            return Resolve<T>(settingName, defaultValue);
-        }
+        public static T Get<T>(string settingName, T defaultValue) => Resolve<T>(settingName, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -142,10 +109,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static T Get<T>(string settingName, T defaultValue, Assembly assembly)
-        {
-            return Resolve<T>(assembly, settingName, defaultValue);
-        }
+        public static T Get<T>(string settingName, T defaultValue, Assembly assembly) => Resolve<T>(assembly, settingName, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -155,10 +119,7 @@ namespace AnyConfig
         /// <param name="type">The type to bind to</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
-        public static object Get(string settingName, Type type, object defaultValue)
-        {
-            return Resolve(settingName, type, defaultValue);
-        }
+        public static object Get(string settingName, Type type, object defaultValue) => Resolve(settingName, type, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -169,10 +130,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static object Get(string settingName, Type type, object defaultValue, Assembly assembly)
-        {
-            return Resolve(assembly, settingName, type, defaultValue);
-        }
+        public static object Get(string settingName, Type type, object defaultValue, Assembly assembly) => Resolve(assembly, settingName, type, defaultValue);
 
         /// <summary>
         /// Get a specific configuration
@@ -180,10 +138,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName">Section name to retrieve</param>
         /// <returns></returns>
-        public static T GetSection<T>(string sectionName)
-        {
-            return ResolveSection<T>(sectionName, default, true);
-        }
+        public static T GetSection<T>(string sectionName) => ResolveSection<T>(sectionName, default, true);
 
         /// <summary>
         /// Get a specific configuration
@@ -192,10 +147,7 @@ namespace AnyConfig
         /// <param name="sectionName">Section name to retrieve</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static T GetSection<T>(string sectionName, Assembly assembly)
-        {
-            return ResolveSection<T>(assembly, sectionName, default, true);
-        }
+        public static T GetSection<T>(string sectionName, Assembly assembly) => ResolveSection<T>(assembly, sectionName, default, true);
 
         /// <summary>
         /// Get a specific configuration
@@ -204,10 +156,7 @@ namespace AnyConfig
         /// <param name="sectionName">Section name to retrieve</param>
         /// <param name="type">The type to bind to</param>
         /// <returns></returns>
-        public static object GetSection(string sectionName, Type type)
-        {
-            return ResolveSection(sectionName, type, default, true);
-        }
+        public static object GetSection(string sectionName, Type type) => ResolveSection(sectionName, type, default, true);
 
         /// <summary>
         /// Get a specific configuration
@@ -217,10 +166,7 @@ namespace AnyConfig
         /// <param name="type">The type to bind to</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static object GetSection(string sectionName, Type type, Assembly assembly)
-        {
-            return ResolveSection(assembly, sectionName, type, default, true);
-        }
+        public static object GetSection(string sectionName, Type type, Assembly assembly) => ResolveSection(assembly, sectionName, type, default, true);
 
         /// <summary>
         /// Get a specific configuration
@@ -229,10 +175,7 @@ namespace AnyConfig
         /// <param name="sectionName">Section name to retrieve</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
-        public static T GetSection<T>(string sectionName, T defaultValue)
-        {
-            return ResolveSection<T>(sectionName, defaultValue, false);
-        }
+        public static T GetSection<T>(string sectionName, T defaultValue) => ResolveSection<T>(sectionName, defaultValue, false);
 
         /// <summary>
         /// Get a specific configuration
@@ -242,10 +185,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static T GetSection<T>(string sectionName, T defaultValue, Assembly assembly)
-        {
-            return ResolveSection<T>(assembly, sectionName, defaultValue, false);
-        }
+        public static T GetSection<T>(string sectionName, T defaultValue, Assembly assembly) => ResolveSection<T>(assembly, sectionName, defaultValue, false);
 
         /// <summary>
         /// Get a specific configuration
@@ -255,10 +195,7 @@ namespace AnyConfig
         /// <param name="type">The type to bind to</param>
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <returns></returns>
-        public static object GetSection(string sectionName, Type type, object defaultValue)
-        {
-            return ResolveSection(sectionName, type, defaultValue, false);
-        }
+        public static object GetSection(string sectionName, Type type, object defaultValue) => ResolveSection(sectionName, type, defaultValue, false);
 
 
         /// <summary>
@@ -270,10 +207,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Default value if setting is not found</param>
         /// <param name="assembly">Specify the assembly associated with the configuration</param>
         /// <returns></returns>
-        public static object GetSection(string sectionName, Type type, object defaultValue, Assembly assembly)
-        {
-            return ResolveSection(assembly, sectionName, type, defaultValue, false);
-        }
+        public static object GetSection(string sectionName, Type type, object defaultValue, Assembly assembly) => ResolveSection(assembly, sectionName, type, defaultValue, false);
 
         /// <summary>
         /// Get an IConfiguration
@@ -436,25 +370,25 @@ namespace AnyConfig
             return resolver.ResolveConfiguration(settingName, type, defaultValue);
         }
 
-        private static T ResolveSection<T>(string sectionName, T defaultValue, bool throwsException = false)
+        private static T ResolveSection<T>(string sectionName, T defaultValue, bool throwsException)
         {
             var resolver = CreateResolver();
             return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
         }
 
-        private static T ResolveSection<T>(Assembly assembly, string sectionName, T defaultValue, bool throwsException = false)
+        private static T ResolveSection<T>(Assembly assembly, string sectionName, T defaultValue, bool throwsException)
         {
             var resolver = CreateResolver(assembly);
             return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
         }
 
-        private static object ResolveSection(string sectionName, Type type, object defaultValue, bool throwsException = false)
+        private static object ResolveSection(string sectionName, Type type, object defaultValue, bool throwsException)
         {
             var resolver = CreateResolver();
             return resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
         }
         
-        private static object ResolveSection(Assembly assembly, string sectionName, Type type, object defaultValue, bool throwsException = false)
+        private static object ResolveSection(Assembly assembly, string sectionName, Type type, object defaultValue, bool throwsException)
         {
             var resolver = CreateResolver(assembly);
             return resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);

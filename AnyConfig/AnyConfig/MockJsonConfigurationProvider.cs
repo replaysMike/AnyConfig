@@ -24,7 +24,7 @@ namespace AnyConfig
 
         public void Load()
         {
-
+            // does nothing
         }
 
         internal void SetData(ICollection<KeyValuePair<string, string>> data)
@@ -34,7 +34,7 @@ namespace AnyConfig
 
         public void Set(string key, string value)
         {
-
+            throw new NotImplementedException();
         }
 
         public bool TryGet(string key, out string value)

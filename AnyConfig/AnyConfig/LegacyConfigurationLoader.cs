@@ -12,21 +12,35 @@ using TypeSupport.Extensions;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// Loads a legacy configuration
+    /// </summary>
     public class LegacyConfigurationLoader
     {
-        private Assembly _entryAssembly;
+        private readonly Assembly _entryAssembly;
+
         public LegacyConfigurationLoader(Assembly entryAssembly)
         {
             _entryAssembly = entryAssembly;
         }
 
-        public LegacyConfiguration LoadDotNetCoreLegacyConfiguration(string filename = null)
+        public LegacyConfiguration LoadDotNetCoreLegacyConfiguration()
+        {
+            return LoadDotNetCoreLegacyConfiguration(string.Empty);
+        }
+
+        public LegacyConfiguration LoadDotNetCoreLegacyConfiguration(string filename)
         {
             var configFile = ResolveConfigFile(filename);
             return SerializeLegacyJsonConfiguration(configFile);
         }
 
-        public LegacyConfiguration LoadDotNetFrameworkLegacyConfiguration(string filename = null)
+        public LegacyConfiguration LoadDotNetFrameworkLegacyConfiguration()
+        {
+            return LoadDotNetFrameworkLegacyConfiguration(string.Empty);
+        }
+
+        public LegacyConfiguration LoadDotNetFrameworkLegacyConfiguration(string filename)
         {
             var configFile = ResolveConfigFile(filename);
             return SerializeLegacyXmlConfiguration(configFile);

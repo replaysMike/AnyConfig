@@ -7,7 +7,10 @@ namespace AnyConfig
     {
         private readonly List<IConfigurationProvider> _configurationProviders = new List<IConfigurationProvider>();
 
-        public ConfigurationRoot() : base() { }
+        public ConfigurationRoot()
+        {
+
+        }
 
         public ConfigurationRoot(List<IConfigurationSection> configurationSections) : base(configurationSections)
         {

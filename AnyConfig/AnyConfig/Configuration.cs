@@ -22,7 +22,11 @@ namespace AnyConfig
             }
             set
             {
-                // do nothing
+                var item = _configurationSections
+                    .Where(x => x.Key == key)
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+                item = value;
             }
         }
 

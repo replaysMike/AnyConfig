@@ -23,13 +23,6 @@ namespace AnyConfig.Xml
         }
 
         /// <summary>
-        /// Create a Xml parser
-        /// </summary>
-        public XmlParser()
-        {
-        }
-
-        /// <summary>
         /// True if a valid xml is parsed
         /// </summary>
         /// <param name="xml"></param>

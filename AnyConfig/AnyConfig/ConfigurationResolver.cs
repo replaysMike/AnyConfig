@@ -93,10 +93,27 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="settingName">Name of setting to load</param>
+        /// <returns></returns>
+        public T ResolveConfiguration<T>(string settingName) => ResolveConfiguration<T>(settingName, default, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        public T ResolveConfiguration<T>(string settingName, T defaultValue) => ResolveConfiguration<T>(settingName, defaultValue, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        public T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException = false)
+        public T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException)
         {
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
@@ -116,10 +133,29 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="settingName">Name of setting to load</param>
         /// <param name="type">The type to return</param>
+        /// <returns></returns>
+        public object ResolveConfiguration(string settingName, Type type) => ResolveConfiguration(settingName, type, default, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        public object ResolveConfiguration(string settingName, Type type, object defaultValue) => ResolveConfiguration(settingName, type, default, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        public object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException = false)
+        public object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException)
         {
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
@@ -139,9 +175,18 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName">Name of section to load</param>
         /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        public T ResolveConfigurationSection<T>(string sectionName, T defaultValue) => ResolveConfigurationSection<T>(sectionName, default, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        public T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException = false)
+        public T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException)
         {
             var nameOfSection = sectionName ?? typeof(T).Name;
             // if on the .net core platform, resolve a configuration from appsettings.json
@@ -163,9 +208,19 @@ namespace AnyConfig
         /// <param name="sectionName">Name of section to load</param>
         /// <param name="type">The type to return</param>
         /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        public object ResolveConfigurationSection(string sectionName, Type type, object defaultValue) => ResolveConfigurationSection(sectionName, type, default, false);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        public object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException = false)
+        public object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException)
         {
             var nameOfSection = sectionName ?? type.Name;
             // if on the .net core platform, resolve a configuration from appsettings.json
@@ -184,38 +239,33 @@ namespace AnyConfig
         /// Resolve a legacy configuration
         /// </summary>
         /// <returns></returns>
-        public LegacyConfiguration ResolveLegacyConfigurationFromXml()
-        {
-            return _legacyConfigurationLoader.LoadDotNetFrameworkLegacyConfiguration();
-        }
+        public LegacyConfiguration ResolveLegacyConfigurationFromXml() => _legacyConfigurationLoader.LoadDotNetFrameworkLegacyConfiguration();
 
         /// <summary>
         /// Resolve a legacy configuration
         /// </summary>
         /// <param name="filename">Filename of xml configuration to load</param>
         /// <returns></returns>
-        public LegacyConfiguration ResolveLegacyConfigurationFromXml(string filename)
-        {
-            return _legacyConfigurationLoader.LoadDotNetFrameworkLegacyConfiguration(filename);
-        }
+        public LegacyConfiguration ResolveLegacyConfigurationFromXml(string filename) => _legacyConfigurationLoader.LoadDotNetFrameworkLegacyConfiguration(filename);
 
         /// <summary>
         /// Resolve a legacy configuration
         /// </summary>
         /// <returns></returns>
-        public LegacyConfiguration ResolveLegacyConfigurationFromJson()
-        {
-            return _legacyConfigurationLoader.LoadDotNetCoreLegacyConfiguration();
-        }
+        public LegacyConfiguration ResolveLegacyConfigurationFromJson() => _legacyConfigurationLoader.LoadDotNetCoreLegacyConfiguration();
 
         /// <summary>
         /// Resolve a configuration for the current runtime platform
         /// </summary>
         /// <returns></returns>
-        public LegacyConfiguration ResolveLegacyConfigurationFromJson(string filename)
-        {
-            return _legacyConfigurationLoader.LoadDotNetCoreLegacyConfiguration(filename);
-        }
+        public LegacyConfiguration ResolveLegacyConfigurationFromJson(string filename) => _legacyConfigurationLoader.LoadDotNetCoreLegacyConfiguration(filename);
+
+        /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetFromXml<T>() => GetFromXml<T>(null);
 
         /// <summary>
         /// Get configuration as an object from Xml configuration
@@ -223,10 +273,14 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromXml<T>(string sectionName = null)
-        {
-            return LoadDotNetFrameworkConfiguration<T>(default, null, null, sectionName, true);
-        }
+        public T GetFromXml<T>(string sectionName) => LoadDotNetFrameworkConfiguration<T>(default, null, null, sectionName, true);
+
+        /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetFromXmlFile<T>(string filename) => GetFromXmlFile<T>(filename, null);
 
         /// <summary>
         /// Get configuration as an object from Xml configuration
@@ -234,10 +288,14 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromXmlFile<T>(string filename, string sectionName = null)
-        {
-            return LoadDotNetFrameworkConfiguration<T>(default, null, filename, sectionName, true);
-        }
+        public T GetFromXmlFile<T>(string filename, string sectionName) => LoadDotNetFrameworkConfiguration<T>(default, null, filename, sectionName, true);
+
+        /// <summary>
+        /// Get configuration as an object from Json configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetFromJson<T>() => GetFromJson<T>(null);
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -245,10 +303,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromJson<T>(string sectionName = null)
-        {
-            return LoadDotNetCoreConfiguration<T>(default, null, null, sectionName, true);
-        }
+        public T GetFromJson<T>(string sectionName) => LoadDotNetCoreConfiguration<T>(default, null, null, sectionName, true);
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -256,10 +311,28 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromJsonFile<T>(string filename, string sectionName = null)
-        {
-            return LoadDotNetCoreConfiguration<T>(default, null, filename, sectionName, true);
-        }
+        public T GetFromJsonFile<T>(string filename) => GetFromJsonFile<T>(filename, null);
+
+        /// <summary>
+        /// Get configuration as an object from Json configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName"></param>
+        /// <returns></returns>
+        public T GetFromJsonFile<T>(string filename, string sectionName) => LoadDotNetCoreConfiguration<T>(default, null, filename, sectionName, true);
+
+        /// <summary>
+        /// Get an IConfiguration
+        /// </summary>
+        /// <returns></returns>
+        public IConfigurationRoot GetConfiguration() => GetConfiguration(null, null);
+
+        /// <summary>
+        /// Get an IConfiguration
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public IConfigurationRoot GetConfiguration(string filename) => GetConfiguration(filename, null);
 
         /// <summary>
         /// Get an IConfiguration
@@ -267,7 +340,7 @@ namespace AnyConfig
         /// <param name="filename"></param>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public IConfigurationRoot GetConfiguration(string filename = null, string sectionName = null)
+        public IConfigurationRoot GetConfiguration(string filename, string sectionName)
         {
             var configFile = filename ?? DotNetCoreSettingsFilename;
             if (!string.IsNullOrEmpty(configFile))
@@ -321,7 +394,7 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(settingName))
             {
-                if(configuration.Providers.First().TryGet(settingName, out var value))
+                if (configuration.Providers.First().TryGet(settingName, out var value))
                     return ((StringValue)value).As<T>();
                 return defaultValue;
             }

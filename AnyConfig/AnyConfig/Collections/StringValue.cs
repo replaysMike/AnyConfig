@@ -25,15 +25,15 @@ namespace AnyConfig.Collections
             return Value.Equals(obj);
         }
 
-        public bool Equals(string str)
+        public bool Equals(string other)
         {
             if (ReferenceEquals(Value, null))
             {
-                if (ReferenceEquals(str, null))
+                if (ReferenceEquals(other, null))
                     return true;
                 return false;
             }
-            return Value.Equals(str);
+            return Value.Equals(other);
         }
 
         public override int GetHashCode() => Value.GetHashCode();

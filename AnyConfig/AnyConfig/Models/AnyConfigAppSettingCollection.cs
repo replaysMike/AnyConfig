@@ -53,32 +53,32 @@ namespace AnyConfig.Models
             return firstValue.Equals(obj);
         }
 
-        public bool Equals(StringValue str)
+        public bool Equals(StringValue other)
         {
             if (_values.Count == 0)
                 return false;
             var firstValue = _values.FirstOrDefault().Value;
             if (ReferenceEquals(firstValue, null))
             {
-                if (ReferenceEquals(str, null))
+                if (ReferenceEquals(other, null))
                     return true;
                 return false;
             }
-            return firstValue.Equals(str);
+            return firstValue.Equals(other);
         }
 
-        public bool Equals(string str)
+        public bool Equals(string other)
         {
             if (_values.Count == 0)
                 return false;
             var firstValue = _values.FirstOrDefault().Value;
             if (ReferenceEquals(firstValue, null))
             {
-                if (ReferenceEquals(str, null))
+                if (ReferenceEquals(other, null))
                     return true;
                 return false;
             }
-            var isEqual = firstValue.Equals(str);
+            var isEqual = firstValue.Equals(other);
             return isEqual;
         }
 

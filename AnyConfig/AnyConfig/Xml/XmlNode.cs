@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AnyConfig.Xml
 {
     public class XmlNode
     {
-        private XmlFormatter _xmlFormatter;
+        private readonly XmlFormatter _xmlFormatter;
 
         /// <summary>
         /// The name of the node
@@ -201,10 +200,6 @@ namespace AnyConfig.Xml
                             path = "[" + node.ArrayPosition.Value + "]" + path;
                         else
                             path = "[]" + path;
-                    }
-                    else
-                    {
-
                     }
                 }
                 else

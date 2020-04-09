@@ -49,7 +49,7 @@ namespace AnyConfig.Collections
             }
         }
         
-        public GenericNameValueCollection() : base()
+        public GenericNameValueCollection()
         {
         }
 

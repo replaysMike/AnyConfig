@@ -10,9 +10,18 @@ namespace AnyConfig
         /// <summary>
         /// Detect the current runtime
         /// </summary>
+        /// <returns></returns>
+        public static RuntimeInfo DetectRuntime()
+        {
+            return DetectRuntime(null);
+        }
+
+        /// <summary>
+        /// Detect the current runtime
+        /// </summary>
         /// <param name="entryAssembly"></param>
         /// <returns></returns>
-        public static RuntimeInfo DetectRuntime(Assembly entryAssembly = null)
+        public static RuntimeInfo DetectRuntime(Assembly entryAssembly)
         {
             var info = new RuntimeInfo();
 

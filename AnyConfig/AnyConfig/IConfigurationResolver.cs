@@ -26,10 +26,46 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="settingName">Name of setting to load</param>
+        /// <returns></returns>
+        T ResolveConfiguration<T>(string settingName);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        T ResolveConfiguration<T>(string settingName, T defaultValue);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException = false);
+        T ResolveConfiguration<T>(string settingName, T defaultValue, bool throwsException);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
+        /// <returns></returns>
+        object ResolveConfiguration(string settingName, Type type);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform with a specific setting name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="settingName">Name of setting to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        object ResolveConfiguration(string settingName, Type type, object defaultValue);
 
         /// <summary>
         /// Resolve a configuration for the current runtime platform with a specific setting name
@@ -40,7 +76,16 @@ namespace AnyConfig
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException = false);
+        object ResolveConfiguration(string settingName, Type type, object defaultValue, bool throwsException);
+        
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        T ResolveConfigurationSection<T>(string sectionName, T defaultValue);
 
         /// <summary>
         /// Resolve a configuration for the current runtime platform
@@ -50,7 +95,17 @@ namespace AnyConfig
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException = false);
+        T ResolveConfigurationSection<T>(string sectionName, T defaultValue, bool throwsException);
+
+        /// <summary>
+        /// Resolve a configuration for the current runtime platform
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName">Name of section to load</param>
+        /// <param name="type">The type to return</param>
+        /// <param name="defaultValue">Value to return if setting is not found</param>
+        /// <returns></returns>
+        object ResolveConfigurationSection(string sectionName, Type type, object defaultValue);
 
         /// <summary>
         /// Resolve a configuration for the current runtime platform
@@ -61,7 +116,7 @@ namespace AnyConfig
         /// <param name="defaultValue">Value to return if setting is not found</param>
         /// <param name="throwsException">True if exceptions should be thrown if data cannot be loaded</param>
         /// <returns></returns>
-        object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException = false);
+        object ResolveConfigurationSection(string sectionName, Type type, object defaultValue, bool throwsException);
 
         /// <summary>
         /// Resolve a legacy configuration
@@ -92,9 +147,8 @@ namespace AnyConfig
         /// Get configuration as an object from Xml configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sectionName"></param>
         /// <returns></returns>
-        T GetFromXml<T>(string sectionName = null);
+        T GetFromXml<T>();
 
         /// <summary>
         /// Get configuration as an object from Xml configuration
@@ -102,7 +156,29 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        T GetFromXmlFile<T>(string filename, string sectionName = null);
+        T GetFromXml<T>(string sectionName);
+
+        /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        T GetFromXmlFile<T>(string filename);
+
+        /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sectionName"></param>
+        /// <returns></returns>
+        T GetFromXmlFile<T>(string filename, string sectionName);
+
+        /// <summary>
+        /// Get configuration as an object from Json configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        T GetFromJson<T>();
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -110,7 +186,14 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        T GetFromJson<T>(string sectionName = null);
+        T GetFromJson<T>(string sectionName);
+
+        /// <summary>
+        /// Get configuration as an object from Json configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        T GetFromJsonFile<T>(string filename);
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -118,7 +201,20 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        T GetFromJsonFile<T>(string filename, string sectionName = null);
+        T GetFromJsonFile<T>(string filename, string sectionName);
+
+        /// <summary>
+        /// Get an IConfiguration
+        /// </summary>
+        /// <returns></returns>
+        IConfigurationRoot GetConfiguration();
+
+        /// <summary>
+        /// Get an IConfiguration
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        IConfigurationRoot GetConfiguration(string filename);
 
         /// <summary>
         /// Get an IConfiguration
@@ -126,6 +222,6 @@ namespace AnyConfig
         /// <param name="filename"></param>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        IConfigurationRoot GetConfiguration(string filename = null, string sectionName = null);
+        IConfigurationRoot GetConfiguration(string filename, string sectionName);
     }
 }

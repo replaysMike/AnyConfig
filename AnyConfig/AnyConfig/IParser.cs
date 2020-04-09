@@ -1,6 +1,6 @@
 ﻿namespace AnyConfig
 {
-    public interface IParser<TNode>
+    public interface IParser<out TNode>
     {
         /// <summary>
         /// The original text to be parsed

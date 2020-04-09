@@ -5,7 +5,7 @@ namespace AnyConfig.Models
 {
     public class ConnectionStringSettingsCollection
     {
-        private Dictionary<string, ConnectionStringSetting> _values = new Dictionary<string, ConnectionStringSetting>();
+        private readonly Dictionary<string, ConnectionStringSetting> _values = new Dictionary<string, ConnectionStringSetting>();
 
         public ConnectionStringSetting this[string key]
         {

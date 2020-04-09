@@ -1,51 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace AnyConfig.Xml
 {
-    public enum TabMode
-    {
-        Spaces,
-        Tabs
-    }
-    public enum LineEnding
-    {
-        CR,
-        LF,
-        CRLF,
-        Environment
-    }
-    public class XmlFormatConfig
-    {
-        public TabMode TabMode { get; set; }
-        public int TabSize { get; set; }
-        public LineEnding LineEnding { get; set; }
-        public XmlFormatConfig()
-            : this(TabMode.Spaces, LineEnding.Environment, 4)
-        {
-        }
-        public XmlFormatConfig(TabMode tabMode, LineEnding lineEnding, int tabSize = 4)
-        {
-            TabMode = tabMode;
-            TabSize = tabSize;
-            LineEnding = lineEnding;
-        }
-    }
-
     /// <summary>
     /// Xml Formatter class
     /// </summary>
     public class XmlFormatter
     {
-        public XmlFormatConfig FormatConfig { get; set; }
+        /// <summary>
+        /// Xml format configuration
+        /// </summary>
+        public XmlFormatConfig FormatConfig { get; set; } = new XmlFormatConfig();
+
+        /// <summary>
+        /// Xml Formatter
+        /// </summary>
         public XmlFormatter()
-            : this(new XmlFormatConfig())
         {
 
         }
 
+        /// <summary>
+        /// Xml Formatter
+        /// </summary>
+        /// <param name="formatConfig"></param>
         public XmlFormatter(XmlFormatConfig formatConfig)
         {
             FormatConfig = formatConfig;
