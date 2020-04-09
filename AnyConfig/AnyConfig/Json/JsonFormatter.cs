@@ -73,7 +73,7 @@ namespace AnyConfig.Json
             if (node.ParentNode == null && depth == 0)
                 sb.Append("{" + GetLineEnding());
             var childCount = 0;
-            foreach (var childNode in node.ChildNodes)
+            foreach (JsonNode childNode in node.ChildNodes)
             {
                 childCount++;
                 depth++;

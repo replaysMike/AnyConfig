@@ -80,10 +80,10 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration<T>(default);
+                    return LoadJsonConfiguration<T>(default);
                 case RuntimeFramework.DotNetFramework:
                 default:
-                    return LoadDotNetFrameworkConfiguration<T>(default);
+                    return LoadXmlConfiguration<T>(default);
             }
 
             throw new UnsupportedPlatformException();
@@ -120,10 +120,10 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration<T>(defaultValue, settingName, null, null, throwsException);
+                    return LoadJsonConfiguration<T>(defaultValue, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
                 default:
-                    return LoadDotNetFrameworkConfiguration<T>(defaultValue, settingName, null, null, throwsException);
+                    return LoadXmlConfiguration<T>(defaultValue, settingName, null, null, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -163,10 +163,10 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration(defaultValue, type, settingName, null, null, throwsException);
+                    return LoadJsonConfiguration(defaultValue, type, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
                 default:
-                    return LoadDotNetFrameworkConfiguration(defaultValue, type, settingName, null, null, throwsException);
+                    return LoadXmlConfiguration(defaultValue, type, settingName, null, null, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -196,10 +196,10 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
+                    return LoadJsonConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
                 default:
-                    return LoadDotNetFrameworkConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
+                    return LoadXmlConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -231,10 +231,10 @@ namespace AnyConfig
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
                 case RuntimeFramework.DotNetCore:
-                    return LoadDotNetCoreConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
+                    return LoadJsonConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
                 default:
-                    return LoadDotNetFrameworkConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
+                    return LoadXmlConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
             }
 
             throw new UnsupportedPlatformException();
@@ -278,7 +278,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromXml<T>(string sectionName) => LoadDotNetFrameworkConfiguration<T>(default, null, null, sectionName, true);
+        public T GetFromXml<T>(string sectionName) => LoadXmlConfiguration<T>(default, null, null, sectionName, true);
 
         /// <summary>
         /// Get configuration as an object from Xml configuration
@@ -293,7 +293,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromXmlFile<T>(string filename, string sectionName) => LoadDotNetFrameworkConfiguration<T>(default, null, filename, sectionName, true);
+        public T GetFromXmlFile<T>(string filename, string sectionName) => LoadXmlConfiguration<T>(default, null, filename, sectionName, true);
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -308,7 +308,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromJson<T>(string sectionName) => LoadDotNetCoreConfiguration<T>(default, null, null, sectionName, true);
+        public T GetFromJson<T>(string sectionName) => LoadJsonConfiguration<T>(default, null, null, sectionName, true);
 
         /// <summary>
         /// Get configuration as an object from Json configuration
@@ -324,7 +324,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="sectionName"></param>
         /// <returns></returns>
-        public T GetFromJsonFile<T>(string filename, string sectionName) => LoadDotNetCoreConfiguration<T>(default, null, filename, sectionName, true);
+        public T GetFromJsonFile<T>(string filename, string sectionName) => LoadJsonConfiguration<T>(default, null, filename, sectionName, true);
 
         /// <summary>
         /// Get an IConfiguration
@@ -347,23 +347,31 @@ namespace AnyConfig
         /// <returns></returns>
         public IConfigurationRoot GetConfiguration(string filename, string sectionName)
         {
-            var configFile = filename ?? DotNetCoreSettingsFilename;
-            if (!string.IsNullOrEmpty(configFile))
-            {
-                configFile = Path.GetFullPath(configFile);
-                if (!File.Exists(configFile))
-                {
-                    if (_entryAssembly != null)
-                        configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename ?? DotNetCoreSettingsFilename);
-                    if (!File.Exists(configFile))
-                        throw new FileNotFoundException($"Could not find configuration file '{configFile}'");
-                }
-            }
+            var configFile = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
+            
             // for .net core configs such as appsettings.json we can serialize from json directly
             return ConfigProvider.GetConfiguration(Path.GetFileName(configFile), Path.GetDirectoryName(configFile));
         }
 
-        private object LoadDotNetCoreConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        private string ResolveFilenamePath(string filename)
+        {
+            if (!string.IsNullOrEmpty(filename))
+            {
+                var configFile = filename.ToString();
+                configFile = Path.GetFullPath(configFile);
+                if (!File.Exists(configFile))
+                {
+                    if (_entryAssembly != null)
+                        configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename);
+                    if (!File.Exists(configFile))
+                        throw new FileNotFoundException($"Could not find configuration file '{configFile}'");
+                }
+                return configFile;
+            }
+            return filename;
+        }
+
+        private object LoadJsonConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
@@ -391,7 +399,7 @@ namespace AnyConfig
             }
         }
 
-        private T LoadDotNetCoreConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        private T LoadJsonConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
@@ -419,19 +427,24 @@ namespace AnyConfig
             }
         }
 
-        private object LoadDotNetFrameworkConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        private object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             // for .net framework configs such as app.config and web.config we need to serialize individual values
-
+            filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
                 object value = null;
-                value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                if (!string.IsNullOrEmpty(filename))
+                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                 if (value == ConfigProvider.Empty)
                 {
-                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
                     if (value == ConfigProvider.Empty)
-                        return defaultValue;
+                    {
+                        value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                        if (value == ConfigProvider.Empty)
+                            return defaultValue;
+                    }
                 }
                 return value;
             }
@@ -442,25 +455,30 @@ namespace AnyConfig
                 var extendedType = type.GetExtendedType();
                 var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
                 if (propertyLegacyAttribute != null)
-                    return MapTypeProperties(extendedType, defaultValue, propertyLegacyAttribute.PrependChildrenName, throwsException);
+                    return MapTypeProperties(extendedType, defaultValue, filename, propertyLegacyAttribute.PrependChildrenName, throwsException);
 
-                return MapTypeProperties(extendedType, defaultValue, null, throwsException);
+                return MapTypeProperties(extendedType, defaultValue, filename, null, throwsException);
             }
         }
 
-        private T LoadDotNetFrameworkConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        private T LoadXmlConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             // for .net framework configs such as app.config and web.config we need to serialize individual values
-
+            filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
                 object value = null;
-                value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
-                if (value == ConfigProvider.Empty)
+                if (!string.IsNullOrEmpty(filename))
+                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                if (value.IsNullOrEmpty())
                 {
-                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
-                    if (value == ConfigProvider.Empty)
-                        return defaultValue;
+                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                    if (value.IsNullOrEmpty())
+                    {
+                        value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                        if (value.IsNullOrEmpty())
+                            return defaultValue;
+                    }
                 }
                 return (T)value;
             }
@@ -471,9 +489,9 @@ namespace AnyConfig
                 var extendedType = typeof(T).GetExtendedType();
                 var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
                 if (propertyLegacyAttribute != null)
-                    return (T)MapTypeProperties(extendedType, defaultValue, propertyLegacyAttribute.PrependChildrenName, throwsException);
+                    return (T)MapTypeProperties(extendedType, defaultValue, filename, propertyLegacyAttribute.PrependChildrenName, throwsException);
 
-                return (T)MapTypeProperties(extendedType, defaultValue, null, throwsException);
+                return (T)MapTypeProperties(extendedType, defaultValue, filename, null, throwsException);
             }
         }
 
@@ -484,7 +502,7 @@ namespace AnyConfig
         /// <param name="configurationClassType"></param>
         /// <param name="prependPropertyName">Use this value to prepend a configuration setting name in the config</param>
         /// <returns></returns>
-        private object MapTypeProperties(ExtendedType configurationClassType, object defaultValue, string prependPropertyName = null, bool throwsException = false)
+        private object MapTypeProperties(ExtendedType configurationClassType, object defaultValue, string filename = null, string prependPropertyName = null, bool throwsException = false)
         {
             var objectFactory = new ObjectFactory();
             var returnObject = objectFactory.CreateEmptyObject(configurationClassType);
@@ -522,20 +540,25 @@ namespace AnyConfig
                     if (propertyType.IsReferenceType && propertyLegacyAttribute.ChildrenMapped)
                     {
                         // map all of this objects properties and attributes
-                        value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
+                        value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), filename, prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
                     }
                 }
-                if (value == null)
+                if (value.IsNullOrEmpty())
                 {
-                    value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
-                    if (value == ConfigProvider.Empty)
+                    if (!string.IsNullOrEmpty(filename))
+                        value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                    if (value.IsNullOrEmpty())
                     {
-                        value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
-                        if (isRequired && value == ConfigProvider.Empty)
-                            throw new ConfigurationMissingException(propertyName, property.Type);
+                        value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                        if (value.IsNullOrEmpty())
+                        {
+                            value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                            if (isRequired && value.IsNullOrEmpty())
+                                throw new ConfigurationMissingException(propertyName, property.Type);
+                        }
                     }
                 }
-                if (value != ConfigProvider.Empty)
+                if (!value.IsNullOrEmpty())
                 {
                     property.PropertyInfo.SetValue(returnObject, value, null);
                     anyPropertiesMapped = true;

@@ -28,6 +28,10 @@
         /// <summary>
         /// Json configuration file
         /// </summary>
-        Json
+        JsonFile,
+        /// <summary>
+        /// Xml configuration file
+        /// </summary>
+        XmlFile
     }
 }

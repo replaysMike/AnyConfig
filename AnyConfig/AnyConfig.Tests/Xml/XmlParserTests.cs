@@ -27,7 +27,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(2, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(2, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(2, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(2, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(1, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(1, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(1, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(1, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -109,7 +109,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(0, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(0, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual(0, node.Attributes.Count);
             Assert.AreEqual("/TestObject/ChildObject", node.ChildNodes.First().FullPath);
             Assert.AreEqual("ChildObject", node.ChildNodes.First().Name);
-            Assert.AreEqual(0, node.ChildNodes.First().Attributes.Count);
+            Assert.AreEqual(0, node.ChildNodes.First().As<XmlNode>().Attributes.Count);
         }
 
         [Test]
@@ -169,13 +169,13 @@ namespace AnyConfig.Tests.Xml
             Assert.AreEqual("MultipleConfiguration", node.Name);
             Assert.AreEqual("TestConfigurations", node.ChildNodes.First().Name);
             Assert.AreEqual(2, node.ChildNodes.First().ChildNodes.Count);
-            Assert.AreEqual(2, node.ChildNodes.First().ArrayValues.Count);
-            Assert.AreEqual(0, node.ChildNodes.First().ArrayValues.First().ArrayPosition);
-            Assert.AreEqual("TestConfiguration", node.ChildNodes.First().ArrayValues.First().Name);
-            Assert.AreEqual("true", node.ChildNodes.First().ArrayValues.First().ChildNodes.First().InnerContent);
-            Assert.AreEqual(1, node.ChildNodes.First().ArrayValues.Skip(1).First().ArrayPosition);
-            Assert.AreEqual("TestConfiguration", node.ChildNodes.First().ArrayValues.Skip(1).First().Name);
-            Assert.AreEqual("false", node.ChildNodes.First().ArrayValues.Skip(1).First().ChildNodes.First().InnerContent);
+            Assert.AreEqual(2, node.ChildNodes.First().ArrayNodes.Count);
+            Assert.AreEqual(0, node.ChildNodes.First().ArrayNodes.First().ArrayPosition);
+            Assert.AreEqual("TestConfiguration", node.ChildNodes.First().ArrayNodes.First().Name);
+            Assert.AreEqual("true", node.ChildNodes.First().ArrayNodes.First().ChildNodes.First().As<XmlNode>().InnerContent);
+            Assert.AreEqual(1, node.ChildNodes.First().ArrayNodes.Skip(1).First().ArrayPosition);
+            Assert.AreEqual("TestConfiguration", node.ChildNodes.First().ArrayNodes.Skip(1).First().Name);
+            Assert.AreEqual("false", node.ChildNodes.First().ArrayNodes.Skip(1).First().ChildNodes.First().As<XmlNode>().InnerContent);
         }
     }
 }

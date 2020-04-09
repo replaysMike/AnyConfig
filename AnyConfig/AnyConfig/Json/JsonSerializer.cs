@@ -48,7 +48,7 @@ namespace AnyConfig.Json
             var factory = new ObjectFactory();
             var value = factory.CreateEmptyObject<T>();
 
-            foreach (var node in rootNode.ChildNodes)
+            foreach (JsonNode node in rootNode.ChildNodes)
             {
                 if (string.IsNullOrEmpty(jsonNodeName) || node.Name.Equals(jsonNodeName))
                 {
@@ -74,7 +74,7 @@ namespace AnyConfig.Json
             var factory = new ObjectFactory();
             var value = factory.CreateEmptyObject(type);
 
-            foreach (var node in rootNode.ChildNodes)
+            foreach (JsonNode node in rootNode.ChildNodes)
             {
                 if (string.IsNullOrEmpty(jsonNodeName) || node.Name.Equals(jsonNodeName))
                 {
@@ -91,36 +91,45 @@ namespace AnyConfig.Json
             var extendedType = type.GetExtendedType();
             var properties = extendedType.Properties;
 
-            foreach (var childNode in node.ChildNodes)
+            foreach (JsonNode childNode in node.ChildNodes)
             {
                 var property = properties.FirstOrDefault(x => x.Name == childNode.Name);
                 if (property == null)
-                    continue;
+                {
+                    // support attribute based remapping
+                    property = properties
+                        .Select(x => new { Property = x, Attribute = x.GetAttribute<LegacyConfigurationNameAttribute>() })
+                        .Where(x => x.Attribute.SettingName == childNode.Name)
+                        .Select(x => x.Property)
+                        .FirstOrDefault();
+                    if(property == null)
+                        continue;
+                }
                 switch (childNode.ValueType)
                 {
                     case PrimitiveTypes.Object:
                         var factory = new ObjectFactory();
-                        var obj = factory.CreateEmptyObject(value.GetProperty(childNode.Name).PropertyType);
-                        obj = DeserializeNode(value.GetProperty(childNode.Name).PropertyType, obj, childNode);
-                        value.SetPropertyValue(childNode.Name, obj);
+                        var obj = factory.CreateEmptyObject(value.GetProperty(property.Name).PropertyType);
+                        obj = DeserializeNode(value.GetProperty(property.Name).PropertyType, obj, childNode);
+                        value.SetPropertyValue(property.Name, obj);
                         break;
                     case PrimitiveTypes.String:
                         if (property.Type.IsEnum == true)
-                            value.SetPropertyValue(childNode.Name, Enum.Parse(property.Type, childNode.Value));
+                            value.SetPropertyValue(property.Name, Enum.Parse(property.Type, childNode.Value));
                         else
-                            value.SetPropertyValue(childNode.Name, childNode.Value);
+                            value.SetPropertyValue(property.Name, childNode.Value);
                         break;
                     case PrimitiveTypes.Integer:
-                        value.SetPropertyValue(childNode.Name, int.Parse(childNode.Value));
+                        value.SetPropertyValue(property.Name, int.Parse(childNode.Value));
                         break;
                     case PrimitiveTypes.Boolean:
-                        value.SetPropertyValue(childNode.Name, bool.Parse(childNode.Value));
+                        value.SetPropertyValue(property.Name, bool.Parse(childNode.Value));
                         break;
                     case PrimitiveTypes.Array:
-                        value.SetPropertyValue(childNode.Name, childNode);
+                        value.SetPropertyValue(property.Name, childNode);
                         break;
                     case PrimitiveTypes.Number:
-                        value.SetPropertyValue(childNode.Name, double.Parse(childNode.Value));
+                        value.SetPropertyValue(property.Name, double.Parse(childNode.Value));
                         break;
                     case PrimitiveTypes.Null:
                     default:

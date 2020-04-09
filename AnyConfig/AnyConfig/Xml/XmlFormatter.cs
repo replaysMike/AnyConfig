@@ -82,7 +82,7 @@ namespace AnyConfig.Xml
                 // display inner text of element without any children
                 sb.Append($"{node.InnerContent}{GetLineEnding()}");
             }
-            foreach (var childNode in node.ChildNodes)
+            foreach (XmlNode childNode in node.ChildNodes)
             {
                 childCount++;
                 depth++;

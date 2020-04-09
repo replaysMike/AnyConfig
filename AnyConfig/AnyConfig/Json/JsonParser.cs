@@ -163,7 +163,7 @@ namespace AnyConfig.Json
                         parentBlock.ValueType = PrimitiveTypes.Array;
                         // set the json contents
                         if (parentBlock.OpenPosition >= 0 && parentBlock.Length > 0)
-                            parentBlock.OriginalText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
+                            parentBlock.OuterText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
                         i = parentBlock.ClosePosition - 1;
                         break;
                     }
@@ -213,7 +213,7 @@ namespace AnyConfig.Json
                     currentBlock.Name = fieldName;
 
                     if (currentBlock.OpenPosition >= 0 && currentBlock.Length > 0)
-                        currentBlock.OriginalText = json.Substring(currentBlock.OpenPosition, currentBlock.Length).Trim();
+                        currentBlock.OuterText = json.Substring(currentBlock.OpenPosition, currentBlock.Length).Trim();
 
                     if (parentBlock != null)
                     {
@@ -226,10 +226,10 @@ namespace AnyConfig.Json
                 }
             }
 
-            if (string.IsNullOrEmpty(parentBlock.OriginalText))
+            if (string.IsNullOrEmpty(parentBlock.OuterText))
             {
                 if (parentBlock != null && parentBlock.Length > 0)
-                    parentBlock.OriginalText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
+                    parentBlock.OuterText = json.Substring(parentBlock.OpenPosition, parentBlock.Length).Trim();
                 else
                 {
                     throw new ParseException("Error: End of Block not found. Double check your json for formatting errors.");

@@ -7,7 +7,7 @@ namespace AnyConfig.Json
     /// <summary>
     /// A JSON node element
     /// </summary>
-    public class JsonNode
+    public class JsonNode : INode
     {
         private JsonFormatter _jsonFormatter;
         
@@ -39,12 +39,12 @@ namespace AnyConfig.Json
         /// <summary>
         /// All child nodes inherited by this node
         /// </summary>
-        public List<JsonNode> ChildNodes { get; set; }
+        public List<INode> ChildNodes { get; set; }
         
         /// <summary>
         /// The parent mode
         /// </summary>
-        public JsonNode ParentNode { get; set; }
+        public INode ParentNode { get; set; }
         
         /// <summary>
         /// The value of the node
@@ -59,7 +59,7 @@ namespace AnyConfig.Json
         /// <summary>
         /// The raw string that makes up the node
         /// </summary>
-        public string OriginalText { get; set; }
+        public string OuterText { get; set; }
         
         /// <summary>
         /// True if this node has been validated
@@ -82,6 +82,22 @@ namespace AnyConfig.Json
         public string ExternalPathLocation { get; set; }
 
         /// <summary>
+        /// For array types, get all nodes for the array
+        /// </summary>
+        public List<INode> ArrayNodes
+        {
+            get
+            {
+                if (NodeType == JsonNodeType.Array)
+                {
+                    return ChildNodes.ToList();
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// For array types, get all values for the array
         /// </summary>
         public List<string> ArrayValues
@@ -90,7 +106,7 @@ namespace AnyConfig.Json
             {
                 if (NodeType == JsonNodeType.Array)
                 {
-                    return ChildNodes.Select(x => x.Value).ToList();
+                    return ChildNodes.Select(x => ((JsonNode)x).Value).ToList();
                 }
 
                 return null;
@@ -135,7 +151,7 @@ namespace AnyConfig.Json
             _jsonFormatter = new JsonFormatter();
             Name = name;
             NodeType = nodeType;
-            ChildNodes = new List<JsonNode>();
+            ChildNodes = new List<INode>();
         }
 
         /// <summary>
@@ -143,9 +159,20 @@ namespace AnyConfig.Json
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public JsonNode SelectNodeByName(string name)
+        public JsonNode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a node by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public JsonNode SelectNodeByName(string name, StringComparison comparisonType)
         {
-            return ChildNodes.Where(x => x.Name == name).FirstOrDefault();
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.Name.Equals(name, comparisonType));
+            return matches
+                .FirstOrDefault().As<JsonNode>();
         }
 
         /// <summary>
@@ -153,9 +180,43 @@ namespace AnyConfig.Json
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string SelectValueByName(string name)
+        public string SelectValueByName(string name) => SelectValueByName(name, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string SelectValueByName(string name, StringComparison comparisonType)
         {
-            return ChildNodes.Where(x => x.Name == name).Select(y => y.Value).FirstOrDefault();
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.Name.Equals(name, comparisonType));
+            return matches
+                .Select(y => y.As<JsonNode>().Value)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Select a child node's value by its path
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string SelectValueByPath(string path) => SelectValueByName(path, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a child node's value by its path
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string SelectValueByPath(string path, StringComparison comparisonType)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.FullPath.Equals(path, comparisonType));
+            return matches
+                .Select(y => y.As<JsonNode>().Value)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -192,7 +253,7 @@ namespace AnyConfig.Json
         /// <param name="node"></param>
         /// <param name="withArrayHints">True to show the array position</param>
         /// <returns></returns>
-        private string GetParentPath(string path, JsonNode node, bool withArrayHints = false)
+        private string GetParentPath(string path, INode node, bool withArrayHints = false)
         {
             if (node != null)
             {
@@ -201,7 +262,7 @@ namespace AnyConfig.Json
                     // show the array element position if requested
                     if (withArrayHints)
                     {
-                        if (node.ParentNode != null && node.ParentNode.ValueType == PrimitiveTypes.Array)
+                        if (node.ParentNode != null && node.ParentNode.As<JsonNode>().ValueType == PrimitiveTypes.Array)
                         {
                             if (node.ArrayPosition != null) // just in case
                                 path = "[" + node.ArrayPosition.Value + "]" + path;
@@ -222,6 +283,17 @@ namespace AnyConfig.Json
                     path = GetParentPath(path, node.ParentNode, withArrayHints);
             }
             return path;
+        }
+
+        /// <summary>
+        /// Get INode as concrete type
+        /// </summary>
+        /// <typeparam name="TNode"></typeparam>
+        /// <returns></returns>
+        public TNode As<TNode>()
+            where TNode : INode
+        {
+            return (TNode)(INode)this;
         }
 
         public override string ToString() => string.Format("{3}{4}{0} {1}, {2} children.", string.IsNullOrEmpty(Name) ? "()" : Name, NodeType.ToString(), ChildNodes.Count, IsDefined ? "" : "!", IsValidated ? "" : "*");

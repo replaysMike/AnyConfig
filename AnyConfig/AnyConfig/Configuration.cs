@@ -39,7 +39,7 @@ namespace AnyConfig
 
         public void AddSection(JsonNode node)
         {
-            var section = new ConfigurationSection(node.FullPath, node.Name, node.OriginalText);
+            var section = new ConfigurationSection(node.FullPath, node.Name, node.OuterText);
             _configurationSections.Add(section);
         }
 

@@ -98,11 +98,11 @@ namespace AnyConfig
                 var configSections = new List<Models.ConfigSectionPair>();
                 var jsonParser = new JsonParser();
                 var nodes = jsonParser.Parse(json);
-                foreach (var node in nodes.ChildNodes)
+                foreach (JsonNode node in nodes.ChildNodes)
                 {
                     if (node.Name.Equals("AppSettings", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        foreach (var appSetting in node.ChildNodes)
+                        foreach (JsonNode appSetting in node.ChildNodes)
                         {
                             appSettings.Add(new AppSettingPair { Key = appSetting.Name, Value = appSetting.Value });
                         }
@@ -112,7 +112,7 @@ namespace AnyConfig
                         foreach (var connectionStringEntry in node.ChildNodes)
                         {
                             var propertyList = new Dictionary<string, string>();
-                            foreach (var connectionString in connectionStringEntry.ChildNodes)
+                            foreach (JsonNode connectionString in connectionStringEntry.ChildNodes)
                             {
                                 propertyList.Add(connectionString.Name, connectionString.Value);
                             }
@@ -138,7 +138,7 @@ namespace AnyConfig
                     {
                         configSections.Add(new ConfigSectionPair { 
                             Name = node.Name, 
-                            Configuration = node.OriginalText,
+                            Configuration = node.OuterText,
                             Type = nameof(RequiresJsonSerialization),
                             TypeValue = typeof(RequiresJsonSerialization)
                         });

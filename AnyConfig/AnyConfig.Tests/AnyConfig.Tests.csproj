@@ -8,6 +8,8 @@
     <None Remove="appsettings.json" />
     <None Remove="legacyappsettings.json" />
     <None Remove="legacyrootappsettings.json" />
+    <None Remove="legacysettingname.config" />
+    <None Remove="legacysettingname.json" />
     <None Remove="ParsingData\AllTypesResponse.json" />
     <None Remove="ParsingData\ArrayResponse.json" />
     <None Remove="ParsingData\ComplexResponse.json" />
@@ -17,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="legacysettingname.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="legacysettingname.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="legacyrootappsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

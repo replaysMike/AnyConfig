@@ -8,7 +8,7 @@
         public CustomEnum CustomEnumSetting { get; set; }
         public CustomEnum CustomEnumNumericSetting { get; set; }
 
-        [LegacyConfigurationName(prependChildrenName: "TestConfigurationObject", childrenMapped: true)]
+        [LegacyConfigurationNameAttribute(prependChildrenName: "TestConfigurationObject", childrenMapped: true)]
         public TestConfigurationObject TestConfigurationObject { get; set; }
 
         public override int GetHashCode()

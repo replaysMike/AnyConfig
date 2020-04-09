@@ -46,7 +46,7 @@ namespace AnyConfig.Tests.Json
             Assert.That(node.NodeType, Is.EqualTo(JsonNodeType.Object));
             Assert.That(node.ParentNode, Is.Null); // ensure we are at the root
             Assert.That(node.ChildNodes.Count, Is.EqualTo(1));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("myArray")).First().ValueType, Is.EqualTo(PrimitiveTypes.Array));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("myArray")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Array));
             Assert.That(node.ChildNodes.Where(x => x.Name.Equals("myArray")).First().ChildNodes.Count, Is.EqualTo(5));
         }
 
@@ -62,10 +62,10 @@ namespace AnyConfig.Tests.Json
             Assert.That(node.NodeType, Is.EqualTo(JsonNodeType.Object));
             Assert.That(node.ParentNode, Is.Null); // ensure we are at the root
             Assert.That(node.ChildNodes.Count, Is.EqualTo(4));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().Value, Is.EqualTo("1"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().Value, Is.EqualTo("string"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().Value, Is.EqualTo("true"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().Value, Is.EqualTo("3.1415"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().As<JsonNode>().Value, Is.EqualTo("1"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().As<JsonNode>().Value, Is.EqualTo("string"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().As<JsonNode>().Value, Is.EqualTo("true"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().As<JsonNode>().Value, Is.EqualTo("3.1415"));
         }
 
         /// <summary>
@@ -83,46 +83,46 @@ namespace AnyConfig.Tests.Json
 
             // validate root children
             Assert.That(node.ChildNodes.Count, Is.EqualTo(8));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().Value, Is.EqualTo("1"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().Value, Is.EqualTo("string"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().Value, Is.EqualTo("true"));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().Value, Is.EqualTo("3.1415"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().As<JsonNode>().Value, Is.EqualTo("1"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().As<JsonNode>().Value, Is.EqualTo("string"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().As<JsonNode>().Value, Is.EqualTo("true"));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().As<JsonNode>().Value, Is.EqualTo("3.1415"));
 
             // validate simple object
-            var sutNode = node.ChildNodes.Where(x => x.Name.Equals("myObject")).First();
+            var sutNode = node.ChildNodes.Where(x => x.Name.Equals("myObject")).First().As<JsonNode>();
             Assert.That(sutNode.ValueType, Is.EqualTo(PrimitiveTypes.Object));
             Assert.That(sutNode.ChildNodes.Count, Is.EqualTo(2));
-            Assert.That(sutNode.ChildNodes.Where(y => y.Name.Equals("nameValue")).First().Value, Is.EqualTo("objectname"));
+            Assert.That(sutNode.ChildNodes.Where(y => y.Name.Equals("nameValue")).First().As<JsonNode>().Value, Is.EqualTo("objectname"));
 
             // validate nested object
-            sutNode = node.ChildNodes.Where(x => x.Name.Equals("nestedObject")).First();
+            sutNode = node.ChildNodes.Where(x => x.Name.Equals("nestedObject")).First().As<JsonNode>();
             Assert.That(sutNode.ValueType, Is.EqualTo(PrimitiveTypes.Object));
 
             Assert.That(node.ChildNodes
                 .Where(x => x.Name.Equals("nestedObject")).First().ChildNodes
-                .Where(x => x.Name.Equals("nameValue")).First().Value, Is.EqualTo("name1"));
+                .Where(x => x.Name.Equals("nameValue")).First().As<JsonNode>().Value, Is.EqualTo("name1"));
             Assert.That(node.ChildNodes
                 .Where(x => x.Name.Equals("nestedObject")).First().ChildNodes
-                .Where(x => x.Name.Equals("subObject")).First().ValueType, Is.EqualTo(PrimitiveTypes.Object));
+                .Where(x => x.Name.Equals("subObject")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Object));
 
             var subObjectNode = sutNode.ChildNodes
                 .Where(x => x.Name.Equals("subObject")).First().ChildNodes
-                .Where(x => x.Name.Equals("subObjectNameValue")).First();
+                .Where(x => x.Name.Equals("subObjectNameValue")).First().As<JsonNode>();
             Assert.That(subObjectNode.Value, Is.EqualTo("subObjectName1"));
             Assert.That(subObjectNode.ValueType, Is.EqualTo(PrimitiveTypes.String));
 
             subObjectNode = sutNode.ChildNodes
                 .Where(x => x.Name.Equals("subObject")).First().ChildNodes
-                .Where(x => x.Name.Equals("subObjectIdValue")).First();
+                .Where(x => x.Name.Equals("subObjectIdValue")).First().As<JsonNode>();
             Assert.That(subObjectNode.ValueType, Is.EqualTo(PrimitiveTypes.Integer));
             Assert.That(subObjectNode.Value, Is.EqualTo("201"));
 
             // validate array of simple objects
-            sutNode = node.ChildNodes.Where(x => x.Name.Equals("myArrayOfObjects")).First();
+            sutNode = node.ChildNodes.Where(x => x.Name.Equals("myArrayOfObjects")).First().As<JsonNode>();
             Assert.That(sutNode.ValueType, Is.EqualTo(PrimitiveTypes.Array));
             Assert.That(sutNode.ChildNodes.Count, Is.EqualTo(3));
             Assert.That(sutNode.ChildNodes.First().ChildNodes
-                .Where(y => y.Name.Equals("objname")).First().Value, Is.EqualTo("object1"));
+                .Where(y => y.Name.Equals("objname")).First().As<JsonNode>().Value, Is.EqualTo("object1"));
         }
 
         [Test]
@@ -133,13 +133,13 @@ namespace AnyConfig.Tests.Json
 
             Assert.That(node.NodeType, Is.EqualTo(JsonNodeType.Object));
             Assert.That(node.ParentNode, Is.Null); // ensure we are at the root
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Integer));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.String));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Boolean));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Number));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("objectValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Object));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("arrayValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Array));
-            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("nullValue")).First().ValueType, Is.EqualTo(PrimitiveTypes.Null));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("intValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Integer));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("stringValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.String));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("boolValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Boolean));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("numberValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Number));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("objectValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Object));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("arrayValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Array));
+            Assert.That(node.ChildNodes.Where(x => x.Name.Equals("nullValue")).First().As<JsonNode>().ValueType, Is.EqualTo(PrimitiveTypes.Null));
         }
 
         private string LoadTestData(string name)

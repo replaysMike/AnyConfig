@@ -87,7 +87,7 @@ namespace AnyConfig.Xml
             var factory = new ObjectFactory();
             var properties = extendedType.Properties;
             var addMethod = extendedType.Methods.FirstOrDefault(x => x.Name == "Add" && x.Parameters.Any(y => y.ParameterType == genericArgumentType));
-            foreach (var childNode in node.ChildNodes)
+            foreach (XmlNode childNode in node.ChildNodes)
             {
                 // add to array
                 var arrayItem = factory.CreateEmptyObject(genericArgumentType);
@@ -102,58 +102,68 @@ namespace AnyConfig.Xml
             var extendedType = type.GetExtendedType();
             var properties = extendedType.Properties;
 
-            foreach (var childNode in node.ChildNodes)
+            foreach (XmlNode childNode in node.ChildNodes)
             {
                 var property = properties.FirstOrDefault(x => x.Name == childNode.Name);
                 if (property == null)
-                    continue;
+                {
+                    // support attribute based remapping
+                    property = properties
+                        .Select(x => new { Property = x, Attribute = x.GetAttribute<LegacyConfigurationNameAttribute>() })
+                        .Where(x => x.Attribute.SettingName == childNode.Name)
+                        .Select(x => x.Property)
+                        .FirstOrDefault();
+                    if (property == null)
+                        continue;
+                }
+                    
                 switch (property.Type.Name)
                 {
                     case "Boolean":
-                        value.SetPropertyValue(childNode.Name, bool.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, bool.Parse(childNode.InnerContent));
                         break;
                     case "Byte":
-                        value.SetPropertyValue(childNode.Name, byte.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, byte.Parse(childNode.InnerContent));
                         break;
                     case "SByte":
-                        value.SetPropertyValue(childNode.Name, sbyte.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, sbyte.Parse(childNode.InnerContent));
                         break;
                     case "UInt16":
-                        value.SetPropertyValue(childNode.Name, ushort.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, ushort.Parse(childNode.InnerContent));
                         break;
                     case "Int16":
-                        value.SetPropertyValue(childNode.Name, short.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, short.Parse(childNode.InnerContent));
                         break;
                     case "UInt32":
-                        value.SetPropertyValue(childNode.Name, uint.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, uint.Parse(childNode.InnerContent));
                         break;
                     case "Int32":
-                        value.SetPropertyValue(childNode.Name, int.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, int.Parse(childNode.InnerContent));
                         break;
                     case "UInt64":
-                        value.SetPropertyValue(childNode.Name, ulong.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, ulong.Parse(childNode.InnerContent));
                         break;
                     case "Int64":
-                        value.SetPropertyValue(childNode.Name, long.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, long.Parse(childNode.InnerContent));
                         break;
                     case "Single":
-                        value.SetPropertyValue(childNode.Name, float.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, float.Parse(childNode.InnerContent));
                         break;
                     case "Double":
-                        value.SetPropertyValue(childNode.Name, double.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, double.Parse(childNode.InnerContent));
                         break;
                     case "Decimal":
-                        value.SetPropertyValue(childNode.Name, decimal.Parse(childNode.InnerContent));
+                        value.SetPropertyValue(property.Name, decimal.Parse(childNode.InnerContent));
                         break;
                     case "String":
-                        value.SetPropertyValue(childNode.Name, childNode.InnerContent);
+                        value.SetPropertyValue(property.Name, childNode.InnerContent);
                         break;
                     default:
                         // custom type
                         if (property.Type.IsEnum)
                         {
                             var enumValue = Enum.Parse(property.Type, childNode.InnerContent);
-                            value.SetPropertyValue(childNode.Name, enumValue);
+                            value.SetPropertyValue(property.Name, enumValue);
                             break;
                         }
                         var factory = new ObjectFactory();
@@ -167,7 +177,7 @@ namespace AnyConfig.Xml
                         {
                             obj = DeserializeNode(property.Type, obj, childNode);
                         }
-                        value.SetPropertyValue(childNode.Name, obj);
+                        value.SetPropertyValue(property.Name, obj);
                         break;
                 }
             }

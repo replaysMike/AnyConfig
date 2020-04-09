@@ -1,4 +1,6 @@
-﻿using AnyConfig.Json;
+﻿using AnyConfig.Exceptions;
+using AnyConfig.Json;
+using AnyConfig.Xml;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Resources;
 using TypeSupport;
+using TypeSupport.Extensions;
 
 namespace AnyConfig
 {
@@ -66,7 +69,7 @@ namespace AnyConfig
             var configuration = new ConfigurationRoot();
             var provider = new MockJsonConfigurationProvider();
             configuration.AddProvider(provider);
-            foreach (var node in rootNode.ChildNodes)
+            foreach (JsonNode node in rootNode.ChildNodes)
             {
                 if (node.ValueType == PrimitiveTypes.Object)
                 {
@@ -85,12 +88,12 @@ namespace AnyConfig
         {
             if (node.NodeType == JsonNodeType.Object)
             {
-                foreach(var childNode in node.ChildNodes)
+                foreach (JsonNode childNode in node.ChildNodes)
                     values = MapAllNodes(childNode, values);
             }
             else if (node.NodeType == JsonNodeType.Value)
             {
-                values.Add(new KeyValuePair<string, string>($"{node.FullPath.Replace("/",":").Substring(1)}", GetNodeValue(node.Value, node.ValueType)));
+                values.Add(new KeyValuePair<string, string>($"{node.FullPath.Replace("/", ":").Substring(1)}", GetNodeValue(node.Value, node.ValueType)));
             }
             else
             {
@@ -178,7 +181,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            return InternalGet(valueType, optionName, configSource, defaultValue, throwsException);
+            return InternalGet(valueType, optionName, configSource, defaultValue, throwsException, configParameters);
         }
 
         /// <summary>
@@ -356,9 +359,13 @@ namespace AnyConfig
                 case ConfigSource.Custom:
                     // implement custom requirements
                     break;
-                case ConfigSource.Json:
+                case ConfigSource.JsonFile:
                     // parse a Json file and load a config value
                     result = GetJsonConfigSetting<T>(optionName, defaultValue, throwsException, configParameters);
+                    break;
+                case ConfigSource.XmlFile:
+                    // parse a Xml file and load a config value
+                    result = GetXmlConfigSetting<T>(optionName, defaultValue, throwsException, configParameters);
                     break;
                 default:
                     break;
@@ -395,9 +402,13 @@ namespace AnyConfig
                 case ConfigSource.Custom:
                     // implement custom requirements
                     break;
-                case ConfigSource.Json:
+                case ConfigSource.JsonFile:
                     // parse a Json file and load a config value
                     result = GetJsonConfigSetting(valueType, optionName, defaultValue, throwsException, configParameters);
+                    break;
+                case ConfigSource.XmlFile:
+                    // parse a Xml file and load a config value
+                    result = GetXmlConfigSetting(valueType, optionName, defaultValue, throwsException, configParameters);
                     break;
                 default:
                     break;
@@ -616,14 +627,18 @@ namespace AnyConfig
         private static T GetJsonConfigSetting<T>(string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var result = defaultValue;
-            var filename = configParameters.GetExpressionValue("Filename");
+            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
             if (File.Exists(filename))
             {
-                var json = System.IO.File.ReadAllText(filename);
+                var json = File.ReadAllText(filename);
                 var parser = new JsonParser();
                 var objects = parser.Parse(json);
                 var val = objects.SelectValueByName(optionName);
                 result = ConvertStringToNativeType<T>(val, defaultValue);
+            }
+            else if (throwsException)
+            {
+                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
             }
             return result;
         }
@@ -631,14 +646,56 @@ namespace AnyConfig
         private static object GetJsonConfigSetting(Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var result = defaultValue;
-            var filename = configParameters.GetExpressionValue("Filename");
+            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
             if (File.Exists(filename))
             {
-                var json = System.IO.File.ReadAllText(filename);
+                var json = File.ReadAllText(filename);
                 var parser = new JsonParser();
                 var objects = parser.Parse(json);
                 var val = objects.SelectValueByName(optionName);
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
+            }
+            else if (throwsException)
+            {
+                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+            }
+            return result;
+        }
+
+        private static T GetXmlConfigSetting<T>(string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        {
+            var result = defaultValue;
+            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
+            if (File.Exists(filename))
+            {
+                var xml = File.ReadAllText(filename);
+                var parser = new XmlParser();
+                var objects = parser.Parse(xml);
+                var val = objects.SelectValueByName(optionName);
+                result = ConvertStringToNativeType<T>(val, defaultValue);
+            }
+            else if (throwsException)
+            {
+                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+            }
+            return result;
+        }
+
+        private static object GetXmlConfigSetting(Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        {
+            var result = defaultValue;
+            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
+            if (File.Exists(filename))
+            {
+                var xml = File.ReadAllText(filename);
+                var parser = new XmlParser();
+                var objects = parser.Parse(xml);
+                var val = objects.SelectValueByName(optionName);
+                result = ConvertStringToNativeType(valueType, val, defaultValue);
+            }
+            else if (throwsException)
+            {
+                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
             }
             return result;
         }
@@ -835,7 +892,28 @@ namespace AnyConfig
             {
                 if (expression.Parameters[0].Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    val = expression.Body.ToString().Replace("\"", "");
+                    switch (expression.Body)
+                    {
+                        case BlockExpression e:
+                            break;
+                        case DefaultExpression e:
+                            break;
+                        case DynamicExpression e:
+                            break;
+                        case MemberExpression e:
+                            var m = e.Expression as ConstantExpression;
+                            val = m.Value.GetFieldValue(e.Member.Name).ToString();
+                            break;
+                        case MethodCallExpression e:
+                            break;
+                        case LambdaExpression e:
+                            break;
+                        case ConstantExpression e:
+                            val = e.Value.ToString().Replace("\"", "");
+                            break;
+                        case UnaryExpression e:
+                            break;
+                    }
                     break;
                 }
             }

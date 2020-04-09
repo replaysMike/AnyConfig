@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AnyConfig.Xml
 {
-    public class XmlNode
+    public class XmlNode : INode
     {
         private readonly XmlFormatter _xmlFormatter;
 
@@ -36,7 +36,7 @@ namespace AnyConfig.Xml
         /// <summary>
         /// All child nodes inherited by this node
         /// </summary>
-        public List<XmlNode> ChildNodes { get; set; } = new List<XmlNode>();
+        public List<INode> ChildNodes { get; set; } = new List<INode>();
 
         /// <summary>
         /// All child nodes inherited by this node
@@ -46,7 +46,7 @@ namespace AnyConfig.Xml
         /// <summary>
         /// The parent mode
         /// </summary>
-        public XmlNode ParentNode { get; set; }
+        public INode ParentNode { get; set; }
 
         /// <summary>
         /// The XML declaration header
@@ -56,7 +56,7 @@ namespace AnyConfig.Xml
         /// <summary>
         /// The value of the node
         /// </summary>
-        public string Value { get; set; }
+        public string Value => InnerText;
 
         /// <summary>
         /// The inner string that makes up the node without XML children
@@ -96,7 +96,7 @@ namespace AnyConfig.Xml
         /// <summary>
         /// Get all values for an array
         /// </summary>
-        public List<XmlNode> ArrayValues
+        public List<INode> ArrayNodes
         {
             get
             {
@@ -146,10 +146,63 @@ namespace AnyConfig.Xml
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public XmlNode SelectNodeByName(string name)
+        public XmlNode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a node by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public XmlNode SelectNodeByName(string name, StringComparison comparisonType)
         {
-            return ChildNodes
-                .Where(x => x.Name == name)
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.Name.Equals(name, comparisonType));
+            return matches
+                .FirstOrDefault().As<XmlNode>();
+        }
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string SelectValueByName(string name) => SelectValueByName(name, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string SelectValueByName(string name, StringComparison comparisonType)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.Name.Equals(name, comparisonType));
+            return matches
+                .Select(y => y.As<XmlNode>().Value)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string SelectValueByPath(string path) => SelectValueByPath(path, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string SelectValueByPath(string path, StringComparison comparisonType)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.FullPath.Equals(path, comparisonType));
+            return matches
+                .Select(y => y.As<XmlNode>().Value)
                 .FirstOrDefault();
         }
 
@@ -187,7 +240,7 @@ namespace AnyConfig.Xml
         /// <param name="node"></param>
         /// <param name="withArrayHints">True to show the array position</param>
         /// <returns></returns>
-        private string GetParentPath(string path, XmlNode node, bool withArrayHints = false)
+        private string GetParentPath(string path, INode node, bool withArrayHints = false)
         {
             if (node != null)
             {
@@ -210,6 +263,17 @@ namespace AnyConfig.Xml
                     path = GetParentPath(path, node.ParentNode, withArrayHints);
             }
             return path;
+        }
+
+        /// <summary>
+        /// Get INode as concrete type
+        /// </summary>
+        /// <typeparam name="TNode"></typeparam>
+        /// <returns></returns>
+        public TNode As<TNode>()
+            where TNode : INode
+        {
+            return (TNode)(INode)this;
         }
 
         public override string ToString() => string.Format("{2}{3}{0} {1}, {2} children.", string.IsNullOrEmpty(Name) ? "()" : Name, ChildNodes.Count, IsDefined ? "" : "!", IsValidated ? "" : "*");
