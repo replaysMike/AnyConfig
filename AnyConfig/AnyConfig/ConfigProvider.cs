@@ -22,6 +22,7 @@ namespace AnyConfig
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private const string DotNetFrameworkSettingsFilename = "App.config";
+        private static readonly Dictionary<string, string> _cachedConfigurationFiles = new Dictionary<string, string>();
 
         public static ConfigValueNotSet Empty => ConfigValueNotSet.Instance;
 
@@ -59,7 +60,7 @@ namespace AnyConfig
         {
             if (string.IsNullOrEmpty(path))
                 path = Directory.GetCurrentDirectory();
-            var filePath = Path.Combine(path, appSettingsJson);
+            var filePath = Path.Combine(path, appSettingsJson ?? DotNetCoreSettingsFilename);
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The configuration file named '{filePath}' was not found.");
 
@@ -213,6 +214,7 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="optionName"></param>
+        /// <param name="defaultValue">Default value to return if setting is not found</param>
         /// <param name="configSource"></param>
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
@@ -220,6 +222,33 @@ namespace AnyConfig
         public static T Get<T>(string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             return InternalGet<T>(optionName, configSource, defaultValue, throwsException, configParameters);
+        }
+
+        /// <summary>
+        /// Get a configuration setting
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configSource"></param>
+        /// <param name="throwsException">True to throw exception if key is not found</param>
+        /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
+        /// <returns></returns>
+        public static T Get<T>(ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        {
+            return InternalGet<T>(string.Empty, configSource, default, throwsException, configParameters);
+        }
+
+        /// <summary>
+        /// Get a configuration setting
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="defaultValue">Default value to return if setting is not found</param>
+        /// <param name="configSource"></param>
+        /// <param name="throwsException">True to throw exception if key is not found</param>
+        /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
+        /// <returns></returns>
+        public static T Get<T>(T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        {
+            return InternalGet<T>(string.Empty, configSource, defaultValue, throwsException, configParameters);
         }
 
         /// <summary>
@@ -342,11 +371,8 @@ namespace AnyConfig
             switch (configSource)
             {
                 case ConfigSource.WebConfig:
-                    // Standard web.config file
-                    result = GetWebConfigSetting<T>(optionName, defaultValue, throwsException, configParameters);
-                    break;
                 case ConfigSource.ApplicationConfig:
-                    // Standard app.config file
+                    // Standard .net config file
                     result = GetWebConfigSetting<T>(optionName, defaultValue, throwsException, configParameters);
                     break;
                 case ConfigSource.EmbeddedResource:
@@ -626,77 +652,94 @@ namespace AnyConfig
 
         private static T GetJsonConfigSetting<T>(string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
-            var result = defaultValue;
-            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            if (File.Exists(filename))
-            {
-                var json = File.ReadAllText(filename);
-                var parser = new JsonParser();
-                var objects = parser.Parse(json);
-                var val = objects.SelectValueByName(optionName);
-                result = ConvertStringToNativeType<T>(val, defaultValue);
-            }
-            else if (throwsException)
-            {
-                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-            }
-            return result;
+            return (T)GetJsonConfigSetting(typeof(T), optionName, defaultValue, throwsException, configParameters);
         }
 
         private static object GetJsonConfigSetting(Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
+            var json = string.Empty;
             var result = defaultValue;
             var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            if (File.Exists(filename))
+            if (_cachedConfigurationFiles.ContainsKey(filename))
             {
-                var json = File.ReadAllText(filename);
+                json = _cachedConfigurationFiles[filename];
+            }
+            else
+            {
+                if (File.Exists(filename))
+                {
+                    json = File.ReadAllText(filename);
+                    _cachedConfigurationFiles.Add(filename, json);
+                }
+                else if (throwsException)
+                {
+                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                }
+            }
+            if (!string.IsNullOrEmpty(optionName))
+            {
                 var parser = new JsonParser();
                 var objects = parser.Parse(json);
                 var val = objects.SelectValueByName(optionName);
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
-            else if (throwsException)
+            else
             {
-                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                // mapping an entire object
+                return JsonSerializer.Deserialize(json, valueType);
             }
             return result;
         }
 
         private static T GetXmlConfigSetting<T>(string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
-            var result = defaultValue;
-            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            if (File.Exists(filename))
-            {
-                var xml = File.ReadAllText(filename);
-                var parser = new XmlParser();
-                var objects = parser.Parse(xml);
-                var val = objects.SelectValueByName(optionName);
-                result = ConvertStringToNativeType<T>(val, defaultValue);
-            }
-            else if (throwsException)
-            {
-                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-            }
-            return result;
+            return (T)GetXmlConfigSetting(typeof(T), optionName, defaultValue, throwsException, configParameters);
         }
 
         private static object GetXmlConfigSetting(Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
+            var xml = string.Empty;
             var result = defaultValue;
             var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            if (File.Exists(filename))
+            if (_cachedConfigurationFiles.ContainsKey(filename))
             {
-                var xml = File.ReadAllText(filename);
+                xml = _cachedConfigurationFiles[filename];
+            }
+            else
+            {
+                if (File.Exists(filename))
+                {
+                    xml = File.ReadAllText(filename);
+                    _cachedConfigurationFiles.Add(filename, xml);
+                }
+                else if (throwsException)
+                {
+                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(optionName))
+            {
                 var parser = new XmlParser();
                 var objects = parser.Parse(xml);
                 var val = objects.SelectValueByName(optionName);
+                if (val == null)
+                {
+                    // if no value is found, try selecting it from appSettings nodes
+                    val = objects
+                        .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
+                        .QueryNodes(x => x.Name == "add" && x.Attributes.Any(y => y.Name == "key" && y.Value == optionName))
+                        .FirstOrDefault()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
+                        .Select(x => x.Value).FirstOrDefault();
+                }
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
-            else if (throwsException)
+            else
             {
-                throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                // mapping an entire object
+                return XmlSerializer.Deserialize(xml, valueType);
             }
+
             return result;
         }
 

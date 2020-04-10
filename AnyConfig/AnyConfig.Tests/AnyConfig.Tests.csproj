@@ -7,6 +7,8 @@
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="legacyappsettings.json" />
+    <None Remove="legacyflatmap.config" />
+    <None Remove="legacyflatmap.json" />
     <None Remove="legacyrootappsettings.json" />
     <None Remove="legacysettingname.config" />
     <None Remove="legacysettingname.json" />
@@ -19,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="legacyflatmap.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="legacyflatmap.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="legacysettingname.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

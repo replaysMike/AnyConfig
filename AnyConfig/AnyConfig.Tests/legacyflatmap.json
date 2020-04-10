@@ -1,0 +1,12 @@
+{
+  "BoolSetting": true,
+  "StringSetting": "TestValue",
+  "IntSetting": 1,
+  "CustomEnumSetting": "Second",
+  "CustomEnumNumericSetting": 2,
+  "TestConfigurationObjectName": "TestName",
+  "TestConfigurationObjectValue": "TestValue",
+  "RootStringValue": "TestRootValue",
+  "RootBoolSetting": "true",
+  "RootIntSetting": 1
+}

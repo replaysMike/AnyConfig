@@ -157,9 +157,10 @@ namespace AnyConfig.Xml
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
             var matches = nodes
-                .Where(x => x.Name.Equals(name, comparisonType));
+                .Where(x => x.Name.Equals(name, comparisonType))
+                .Select(x => x.As<XmlNode>());
             return matches
-                .FirstOrDefault().As<XmlNode>();
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -204,6 +205,18 @@ namespace AnyConfig.Xml
             return matches
                 .Select(y => y.As<XmlNode>().Value)
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Query child nodes
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public IEnumerable<XmlNode> QueryNodes(Func<XmlNode, bool> condition)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes).Select(x => x.As<XmlNode>());
+            var matches = nodes.Where(condition);
+            return matches.Select(y => y.As<XmlNode>());
         }
 
         /// <summary>

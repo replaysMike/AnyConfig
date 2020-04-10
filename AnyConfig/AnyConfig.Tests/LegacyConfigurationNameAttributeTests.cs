@@ -16,19 +16,43 @@ namespace AnyConfig.Tests
         [Test]
         public void Legacy_SettingName_Json_ShouldMap()
         {
-            var legacySettingNameConfig = Config.GetFromJsonFile<LegacySettingNameConfiguration>("legacysettingname.json");
+            var config = Config.GetFromJsonFile<LegacySettingNameConfiguration>("legacysettingname.json");
 
-            Assert.NotNull(legacySettingNameConfig);
-            Assert.AreEqual("Some value", legacySettingNameConfig.AlternateName);
+            Assert.NotNull(config);
+            Assert.AreEqual("Some value", config.AlternateName);
         }
 
         [Test]
         public void Legacy_SettingName_Xml_ShouldMap()
         {
-            var legacySettingNameConfig = Config.GetFromXmlFile<LegacySettingNameConfiguration>("legacysettingname.config");
+            var config = Config.GetFromXmlFile<LegacySettingNameConfiguration>("legacysettingname.config");
 
-            Assert.NotNull(legacySettingNameConfig);
-            Assert.AreEqual("Some value", legacySettingNameConfig.AlternateName);
+            Assert.NotNull(config);
+            Assert.AreEqual("Some value", config.AlternateName);
+        }
+
+        [Test]
+        public void Legacy_TestConfiguration_Json_ShouldFlatMap()
+        {
+            var config = Config.GetFromJsonFile<TestConfiguration>("legacyflatmap.json");
+
+            Assert.NotNull(config);
+            Assert.AreEqual(true, config.BoolSetting);
+            Assert.AreEqual("TestValue", config.StringSetting);
+            Assert.AreEqual(1, config.IntSetting);
+            Assert.AreEqual("TestName", config.TestConfigurationObject.Name);
+        }
+
+        [Test]
+        public void Legacy_TestConfiguration_Xml_ShouldFlatMap()
+        {
+            var config = Config.GetFromXmlFile<TestConfiguration>("legacyflatmap.config");
+
+            Assert.NotNull(config);
+            Assert.AreEqual(true, config.BoolSetting);
+            Assert.AreEqual("TestValue", config.StringSetting);
+            Assert.AreEqual(1, config.IntSetting);
+            Assert.AreEqual("TestName", config.TestConfigurationObject.Name);
         }
     }
 }

@@ -10,57 +10,57 @@ namespace AnyConfig.Json
     public class JsonNode : INode
     {
         private JsonFormatter _jsonFormatter;
-        
+
         /// <summary>
         /// The name of the node
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
         /// The type of node
         /// </summary>
         public JsonNodeType NodeType { get; set; }
-        
+
         /// <summary>
         /// The position in the raw string this node begins
         /// </summary>
         public int OpenPosition { get; set; }
-        
+
         /// <summary>
         /// The position in the raw string this node ends
         /// </summary>
         public int ClosePosition { get; set; }
-        
+
         /// <summary>
         /// The raw length of the string this node occupies
         /// </summary>
         public int Length => ClosePosition - OpenPosition;
-        
+
         /// <summary>
         /// All child nodes inherited by this node
         /// </summary>
         public List<INode> ChildNodes { get; set; }
-        
+
         /// <summary>
         /// The parent mode
         /// </summary>
         public INode ParentNode { get; set; }
-        
+
         /// <summary>
         /// The value of the node
         /// </summary>
         public string Value { get; set; }
-        
+
         /// <summary>
         /// The data type of the value
         /// </summary>
         public PrimitiveTypes ValueType { get; set; }
-        
+
         /// <summary>
         /// The raw string that makes up the node
         /// </summary>
         public string OuterText { get; set; }
-        
+
         /// <summary>
         /// True if this node has been validated
         /// </summary>
@@ -170,9 +170,10 @@ namespace AnyConfig.Json
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
             var matches = nodes
-                .Where(x => x.Name.Equals(name, comparisonType));
+                .Where(x => x.Name.Equals(name, comparisonType))
+                .Select(x => x.As<JsonNode>());
             return matches
-                .FirstOrDefault().As<JsonNode>();
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -220,6 +221,18 @@ namespace AnyConfig.Json
         }
 
         /// <summary>
+        /// Query child nodes
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public IEnumerable<JsonNode> QueryNodes(Func<JsonNode, bool> condition)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes).Select(x => x.As<JsonNode>());
+            var matches = nodes.Where(condition);
+            return matches.Select(y => y.As<JsonNode>());
+        }
+
+        /// <summary>
         /// Map a child node to another object
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
@@ -239,7 +252,7 @@ namespace AnyConfig.Json
         public IEnumerable<TResult> SelectChildren<TResult>(Func<JsonNode, IEnumerable<TResult>> lambda)
         {
             return lambda(this);
-        } 
+        }
 
         public string ToJsonString()
         {

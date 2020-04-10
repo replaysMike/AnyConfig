@@ -347,32 +347,33 @@ namespace AnyConfig
         /// <returns></returns>
         public IConfigurationRoot GetConfiguration(string filename, string sectionName)
         {
-            var configFile = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
-            
             // for .net core configs such as appsettings.json we can serialize from json directly
-            return ConfigProvider.GetConfiguration(Path.GetFileName(configFile), Path.GetDirectoryName(configFile));
+            filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
+            return ConfigProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
         }
 
         private string ResolveFilenamePath(string filename)
         {
-            if (!string.IsNullOrEmpty(filename))
+            var configFile = filename;
+            if (!string.IsNullOrEmpty(configFile))
             {
-                var configFile = filename.ToString();
                 configFile = Path.GetFullPath(configFile);
                 if (!File.Exists(configFile))
                 {
                     if (_entryAssembly != null)
                         configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename);
+                    else
+                        configFile = Path.GetFullPath(filename);
                     if (!File.Exists(configFile))
                         throw new FileNotFoundException($"Could not find configuration file '{configFile}'");
                 }
-                return configFile;
             }
-            return filename;
+            return configFile;
         }
 
         private object LoadJsonConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
                 throw new ConfigurationMissingException($"Could not load configuration.");
@@ -401,6 +402,7 @@ namespace AnyConfig
 
         private T LoadJsonConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
                 throw new ConfigurationMissingException($"Could not load configuration.");
@@ -417,6 +419,13 @@ namespace AnyConfig
                 var configSection = configuration.GetSection(nameOfSection);
                 if (configSection == null)
                 {
+                    if (sectionName == null)
+                    {
+                        // try flat mapping
+                        var flatMapValue = ConfigProvider.Get<T>(ConfigSource.JsonFile, throwsException, Filename => filename);
+                        if (flatMapValue != null)
+                            return flatMapValue;
+                    }
                     if (throwsException)
                         throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
                     return defaultValue;
