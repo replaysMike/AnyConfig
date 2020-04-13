@@ -371,7 +371,7 @@ namespace AnyConfig
             return configFile;
         }
 
-        private object LoadJsonConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        public object LoadJsonConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
@@ -400,7 +400,7 @@ namespace AnyConfig
             }
         }
 
-        private T LoadJsonConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        public T LoadJsonConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
@@ -436,7 +436,7 @@ namespace AnyConfig
             }
         }
 
-        private object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        public object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             // for .net framework configs such as app.config and web.config we need to serialize individual values
             filename = ResolveFilenamePath(filename);
@@ -464,13 +464,13 @@ namespace AnyConfig
                 var extendedType = type.GetExtendedType();
                 var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
                 if (propertyLegacyAttribute != null)
-                    return MapTypeProperties(extendedType, defaultValue, filename, propertyLegacyAttribute.PrependChildrenName, throwsException);
+                    return MapTypeProperties(extendedType, defaultValue, filename, sectionName, propertyLegacyAttribute.PrependChildrenName, throwsException);
 
-                return MapTypeProperties(extendedType, defaultValue, filename, null, throwsException);
+                return MapTypeProperties(extendedType, defaultValue, filename, sectionName, null, throwsException);
             }
         }
 
-        private T LoadXmlConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
+        public T LoadXmlConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
             // for .net framework configs such as app.config and web.config we need to serialize individual values
             filename = ResolveFilenamePath(filename);
@@ -498,9 +498,9 @@ namespace AnyConfig
                 var extendedType = typeof(T).GetExtendedType();
                 var propertyLegacyAttribute = extendedType.GetAttribute<LegacyConfigurationNameAttribute>();
                 if (propertyLegacyAttribute != null)
-                    return (T)MapTypeProperties(extendedType, defaultValue, filename, propertyLegacyAttribute.PrependChildrenName, throwsException);
+                    return (T)MapTypeProperties(extendedType, defaultValue, filename, sectionName, propertyLegacyAttribute.PrependChildrenName, throwsException);
 
-                return (T)MapTypeProperties(extendedType, defaultValue, filename, null, throwsException);
+                return (T)MapTypeProperties(extendedType, defaultValue, filename, sectionName, null, throwsException);
             }
         }
 
@@ -511,12 +511,16 @@ namespace AnyConfig
         /// <param name="configurationClassType"></param>
         /// <param name="prependPropertyName">Use this value to prepend a configuration setting name in the config</param>
         /// <returns></returns>
-        private object MapTypeProperties(ExtendedType configurationClassType, object defaultValue, string filename = null, string prependPropertyName = null, bool throwsException = false)
+        private object MapTypeProperties(ExtendedType configurationClassType, object defaultValue, string filename = null, string sectionName = null, string prependPropertyName = null, bool throwsException = false)
         {
             var objectFactory = new ObjectFactory();
             var returnObject = objectFactory.CreateEmptyObject(configurationClassType);
 
-            var legacyCustomSection = ConfigurationManager.GetSection(configurationClassType.Name);
+            object legacyCustomSection = null;
+            if (!string.IsNullOrEmpty(sectionName))
+                legacyCustomSection = ConfigurationManager.GetSection(sectionName);
+            if (legacyCustomSection == null)
+                legacyCustomSection = ConfigurationManager.GetSection(configurationClassType.Name);
             if (legacyCustomSection != null)
             {
                 if (legacyCustomSection.GetType() == typeof(ConfigSectionPair))
@@ -527,6 +531,10 @@ namespace AnyConfig
                         returnObject = XmlSerializer.Deserialize(configSectionPair.Configuration.ToString(), configurationClassType.Type);
                         return returnObject;
                     }
+                }
+                else
+                {
+                    return legacyCustomSection;
                 }
             }
 
@@ -549,7 +557,7 @@ namespace AnyConfig
                     if (propertyType.IsReferenceType && propertyLegacyAttribute.ChildrenMapped)
                     {
                         // map all of this objects properties and attributes
-                        value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), filename, prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
+                        value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), filename, sectionName, prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
                     }
                 }
                 if (value.IsNullOrEmpty())

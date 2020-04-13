@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Reflection;
 
 namespace AnyConfig.Tests
@@ -37,6 +38,19 @@ namespace AnyConfig.Tests
 
             var config = Config.GetFromXml<TestConfiguration>();
             Assert.AreEqual(_testConfig, config);
+        }
+
+        [Test]
+        public void Should_Load_EntityFramework_Xml_Config()
+        {
+            // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.Reload();
+
+            var type = Type.GetType("System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
+            var config = Config.GetFromXml("entityFramework", type);
+            Assert.NotNull(config);
+            Assert.AreEqual(type, config.GetType());
         }
 
         [Test]

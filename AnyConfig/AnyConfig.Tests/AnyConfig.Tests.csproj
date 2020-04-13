@@ -59,6 +59,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="EntityFramework" Version="6.4.0" />
+    <PackageReference Include="EntityFramework6.Npgsql" Version="6.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="NLog" Version="4.7.0" />
     <PackageReference Include="NLog.Config" Version="4.7.0" />

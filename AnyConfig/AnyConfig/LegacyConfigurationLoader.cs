@@ -264,21 +264,10 @@ namespace AnyConfig
                         {
                             if (configSectionDeclaration.TypeValue != null)
                             {
-                                var configSectionHandler = new ObjectFactory().CreateEmptyObject(configSectionDeclaration.TypeValue);
-                                var methods = configSectionHandler.GetMethods(MethodOptions.All);
-                                var createMethod = methods.FirstOrDefault(x => x.Name == "System.Configuration.IConfigurationSectionHandler.Create");
-                                if (createMethod == null)
-                                    throw new ConfigurationException($"The configSection named '{configSectionDeclaration.Name}' does not implement IConfigurationSectionHandler.");
-                                try
-                                {
-                                    // invoke the section handler
-                                    var configSection = createMethod.MethodInfo.Invoke(configSectionHandler, new object[] { null, null, node });
-                                    configSectionDeclaration.Configuration = configSection;
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw new ConfigurationException($"Unable to obtain configuration for configSection named '{configSectionDeclaration.Name}'.", ex);
-                                }
+                                if (IsConfigurationSectionHandler(configSectionDeclaration))
+                                    ExecuteConfigurationSectionHandler(configSectionDeclaration, node);
+                                else if(IsConfigurationSection(configSectionDeclaration))
+                                    ConfigureConfigurationSection(configSectionDeclaration, node);
                             }
                         }
                         catch (Exception ex)
@@ -301,6 +290,68 @@ namespace AnyConfig
                     break;
             }
             return config;
+        }
+
+        private bool IsConfigurationSection(ConfigSectionPair configSection)
+        {
+            var extendedType = configSection.TypeValue.GetExtendedType();
+            return extendedType.BaseTypes.Any(x => x.FullName.Equals("System.Configuration.ConfigurationSection"));
+        }
+
+        private void ConfigureConfigurationSection(ConfigSectionPair configSection, XmlNode node)
+        {
+            var configurationSection = new ObjectFactory().CreateEmptyObject(configSection.TypeValue);
+            var methods = configurationSection.GetMethods(MethodOptions.All);
+            var deserializeMethod = methods.FirstOrDefault(x => x.Name == "DeserializeSection");
+            if (deserializeMethod == null)
+                throw new ConfigurationException($"The configSection named '{configSection.Name}' does not implement ConfigurationSection.DeserializeSection.");
+            try
+            {
+                // invoke the section xml deserialization handler
+                using (var stream = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(stream))
+                    {
+                        writer.Write(node.OuterXml);
+                        writer.Flush();
+                        stream.Position = 0;
+                        var xmlReader = XmlReader.Create(stream);
+                        var handler = deserializeMethod.MethodInfo.Invoke(configurationSection, new object[] { xmlReader });
+                        configSection.Configuration = configurationSection;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException($"Unable to obtain configuration for configSection named '{configSection.Name}'.", ex);
+            }
+        }
+
+        private bool IsConfigurationSectionHandler(ConfigSectionPair configSection)
+        {
+            var configSectionHandler = new ObjectFactory().CreateEmptyObject(configSection.TypeValue);
+            var methods = configSectionHandler.GetMethods(MethodOptions.All);
+            var createMethod = methods.FirstOrDefault(x => x.Name.Equals("System.Configuration.IConfigurationSectionHandler.Create"));
+            return createMethod != null;
+        }
+
+        private void ExecuteConfigurationSectionHandler(ConfigSectionPair configSection, XmlNode node)
+        {
+            var configSectionHandler = new ObjectFactory().CreateEmptyObject(configSection.TypeValue);
+            var methods = configSectionHandler.GetMethods(MethodOptions.All);
+            var createMethod = methods.FirstOrDefault(x => x.Name.Equals("System.Configuration.IConfigurationSectionHandler.Create"));
+            if (createMethod == null)
+                throw new ConfigurationException($"The configSection named '{configSection.Name}' does not implement IConfigurationSectionHandler.");
+            try
+            {
+                // invoke the section handler
+                var handler = createMethod.MethodInfo.Invoke(configSectionHandler, new object[] { null, null, node });
+                configSection.Configuration = handler;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException($"Unable to obtain configuration for configSection named '{configSection.Name}'.", ex);
+            }
         }
 
         private Type ResolveType(string typeName)

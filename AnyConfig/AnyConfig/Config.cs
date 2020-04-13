@@ -256,6 +256,17 @@ namespace AnyConfig
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        public static object GetFromXml(string sectionName, Type type)
+        {
+            var resolver = CreateResolver();
+            return resolver.LoadXmlConfiguration(null, type, sectionName: sectionName);
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T GetFromXml<T>(Assembly assembly)
         {
             var resolver = CreateResolver(assembly);
