@@ -28,7 +28,7 @@ namespace AnyConfig
         public static ConfigurationManagerSource ConfigurationSource { get; set; } = ConfigurationManagerSource.Auto;
 
         /// <summary>
-        /// The configuration filename
+        /// Get/set the configuration filename
         /// </summary>
         public static string ConfigurationFilename { get; set; }
 
@@ -188,6 +188,8 @@ namespace AnyConfig
                         config = resolver.ResolveLegacyConfigurationFromXml(ConfigurationFilename) ?? resolver.ResolveLegacyConfigurationFromJson(ConfigurationFilename);
                         break;
                 }
+                // update the configuration filename to what was actually loaded
+                ConfigurationFilename = config.Filename;
                 return config;
             }
             finally

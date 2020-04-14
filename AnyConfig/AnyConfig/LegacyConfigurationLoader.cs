@@ -91,6 +91,7 @@ namespace AnyConfig
             if (!File.Exists(filename))
                 throw new ConfigurationException($"Could not load Json configuration at '{filename}'");
             var legacyConfiguration = new LegacyConfiguration();
+            legacyConfiguration.Filename = filename;
 
             try
             {
@@ -163,6 +164,7 @@ namespace AnyConfig
             if (!File.Exists(filename))
                 throw new ConfigurationException($"Could not load Xml configuration at '{filename}'");
             var config = new LegacyConfiguration();
+            config.Filename = filename;
             var doc = new XmlDocument();
             doc.Load(filename);
 

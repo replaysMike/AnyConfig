@@ -10,6 +10,7 @@ namespace AnyConfig.Models
     public class LegacyConfiguration
     {
         public Configuration Configuration { get; set; } = new Configuration();
+        public string Filename { get; set; }
     }
 
     public class Configuration
