@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// AnyConfig configuration
+    /// </summary>
     public class Configuration : IConfiguration
     {
         protected readonly List<IConfigurationSection> _configurationSections = new List<IConfigurationSection>();

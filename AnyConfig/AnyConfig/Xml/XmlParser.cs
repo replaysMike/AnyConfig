@@ -44,12 +44,14 @@ namespace AnyConfig.Xml
             return false;
         }
 
-        public XmlNode Parse(string text)
+        public XmlNode Parse(string xml)
         {
-            OriginalText = text;
+            if (string.IsNullOrEmpty(xml))
+                throw new ArgumentNullException(nameof(xml));
+            OriginalText = xml;
 
             // determine the type of root node: Object or Array
-            var rootNode = GetNextNode(text, 0, null);
+            var rootNode = GetNextNode(xml, 0, null);
 
             //Optionally, we could validate some things here
 

@@ -56,6 +56,8 @@ namespace AnyConfig.Json
 
         public JsonNode Parse(string json)
         {
+            if (string.IsNullOrEmpty(json))
+                throw new ArgumentNullException(nameof(json));
             // Convert into a JSNode document
             OriginalText = EnsureRooted(json);
 

@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using AnyConfig.Tests.Models;
+using Microsoft.Extensions.Configuration;
+using NUnit.Framework;
 using System;
 using System.Reflection;
 
@@ -81,6 +83,23 @@ namespace AnyConfig.Tests
         {
             var config = Config.GetFromJson<TestConfiguration>();
             Assert.AreEqual(_testConfig, config);
+        }
+
+        [Test]
+        public void Should_Load_IConfiguration_AndBind()
+        {
+            var config = Config.GetConfiguration("appsettings_full.json");
+            Assert.NotNull(config);
+            var section = config.GetSection("WebHostServiceConfiguration");
+            Assert.NotNull(section);
+            var webHostServiceConfiguration = section.Get<WebHostServiceConfiguration>();
+            Assert.NotNull(webHostServiceConfiguration);
+            Assert.AreEqual("Test service", webHostServiceConfiguration.Name);
+            Assert.AreEqual(LoadCertificateType.Embedded, webHostServiceConfiguration.CertificateType);
+            Assert.AreEqual(5433, webHostServiceConfiguration.Port);
+            Assert.AreEqual(1024, webHostServiceConfiguration.MaxCacheItems);
+            Assert.AreEqual("*", webHostServiceConfiguration.IP);
+            Assert.AreEqual(3, webHostServiceConfiguration.AuthorizedIPs.Count);
         }
     }
 }
