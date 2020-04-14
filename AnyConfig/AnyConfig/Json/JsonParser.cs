@@ -13,6 +13,11 @@ namespace AnyConfig.Json
     public class JsonParser : IJsonParser
     {
         /// <summary>
+        /// Get/set the parser configuration
+        /// </summary>
+        public JsonParserConfig JsonParserConfig { get; set; } = new JsonParserConfig();
+
+        /// <summary>
         /// The original string passed to the parser
         /// </summary>
         public string OriginalText { get; private set; }
@@ -30,6 +35,15 @@ namespace AnyConfig.Json
         /// </summary>
         public JsonParser()
         {
+        }
+
+        /// <summary>
+        /// Create a Json V4 parser
+        /// </summary>
+        /// <param name="config">Specify a json parser configuration</param>
+        public JsonParser(JsonParserConfig config)
+        {
+            JsonParserConfig = config;
         }
 
         /// <summary>
@@ -426,7 +440,7 @@ namespace AnyConfig.Json
                 cursorPosition = i;
             }
 
-            return segment.ToString().Trim();  // remove surrounding whitespace
+            return segment.ToString().Trim(); // remove surrounding whitespace
         }
 
         /// <summary>
@@ -533,11 +547,26 @@ namespace AnyConfig.Json
                 if (segment.Equals("null", StringComparison.InvariantCultureIgnoreCase))
                     node.Value = null;
                 else
+                {
+                    // process backslash handling
+                    if (JsonParserConfig.DecodeBackslash)
+                        segment = DecodeBackslash(segment);
                     node.Value = StripQuotedString(segment);
+                }
             }
             else
                 node = null;    // no segment found
             return node;
+        }
+
+        /// <summary>
+        /// Take raw json value and decode double backslashes to single backslashes
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private string DecodeBackslash(string value)
+        {
+            return value.Replace(@"\\", @"\");
         }
 
         /// <summary>

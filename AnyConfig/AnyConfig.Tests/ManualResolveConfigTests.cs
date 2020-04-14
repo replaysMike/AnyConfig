@@ -117,7 +117,7 @@ namespace AnyConfig.Tests
         }
 
         [Test]
-        public void Should_Load_IConfiguration_EncodingIsCorrect()
+        public void Should_Load_IConfiguration_BackslashEncodingIsCorrect()
         {
             var config = Config.GetConfiguration("appsettings_full.json");
             Assert.NotNull(config);
@@ -125,7 +125,7 @@ namespace AnyConfig.Tests
             Assert.NotNull(securityConfigurationSection);
             var securityConfiguration = securityConfigurationSection.Get<SecurityConfiguration>();
             Assert.NotNull(securityConfiguration);
-            Assert.AreEqual(@"FAKEPASSWORDSALT*{3-\\?{", securityConfiguration.MasterUserPasswordSalt);
+            Assert.AreEqual(@"FAKEPASSWORDSALT*{3-\?{", securityConfiguration.MasterUserPasswordSalt);
         }
     }
 }
