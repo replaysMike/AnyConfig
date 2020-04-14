@@ -196,13 +196,13 @@ namespace AnyConfig
                             config.Configuration.ConfigSections.Add(configSectionPair);
                         }
                     }
+                }
 
-                    if (configurationNode.ChildNodes != null)
+                if (configurationNode.ChildNodes != null)
+                {
+                    foreach (XmlNode xmlNode in configurationNode.ChildNodes)
                     {
-                        foreach (XmlNode xmlNode in configurationNode.ChildNodes)
-                        {
-                            config = ProcessNode(xmlNode, config);
-                        }
+                        config = ProcessNode(xmlNode, config);
                     }
                 }
             }
