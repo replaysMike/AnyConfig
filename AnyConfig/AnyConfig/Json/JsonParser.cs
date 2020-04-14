@@ -195,8 +195,6 @@ namespace AnyConfig.Json
                     switch (blockType)
                     {
                         case JsonNodeType.Value:
-                            if (fieldName == "MasterUserPasswordSalt")
-                                System.Diagnostics.Debugger.Break();
                             currentBlock = ParseValueBlock(json, i);
                             currentBlock.ValueType = DetectDataType(json, i);
                             currentBlock.OpenPosition = quotesStart - 1;
