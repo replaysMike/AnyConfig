@@ -115,5 +115,17 @@ namespace AnyConfig.Tests
             var invalidConfiguration = invalidSection.Get<InvalidConfiguration>();
             Assert.Null(invalidConfiguration);
         }
+
+        [Test]
+        public void Should_Load_IConfiguration_EncodingIsCorrect()
+        {
+            var config = Config.GetConfiguration("appsettings_full.json");
+            Assert.NotNull(config);
+            var securityConfigurationSection = config.GetSection("SecurityConfiguration");
+            Assert.NotNull(securityConfigurationSection);
+            var securityConfiguration = securityConfigurationSection.Get<SecurityConfiguration>();
+            Assert.NotNull(securityConfiguration);
+            Assert.AreEqual(@"FAKEPASSWORDSALT*{3-\\?{", securityConfiguration.MasterUserPasswordSalt);
+        }
     }
 }

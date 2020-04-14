@@ -195,6 +195,8 @@ namespace AnyConfig.Json
                     switch (blockType)
                     {
                         case JsonNodeType.Value:
+                            if (fieldName == "MasterUserPasswordSalt")
+                                System.Diagnostics.Debugger.Break();
                             currentBlock = ParseValueBlock(json, i);
                             currentBlock.ValueType = DetectDataType(json, i);
                             currentBlock.OpenPosition = quotesStart - 1;
@@ -396,7 +398,7 @@ namespace AnyConfig.Json
         private string ParseSegment(string json, int pos, out int cursorPosition, out int openPosition)
         {
             var EOBC = ",{}[]";
-            var segment = "";
+            var segment = new StringBuilder();
             var quotesCount = 0;
             cursorPosition = pos;
             openPosition = pos;
@@ -416,17 +418,17 @@ namespace AnyConfig.Json
                 else if (json[i] == '"' && quotesCount > 0)
                 {
                     quotesCount--;
-                    segment += '"';
+                    segment.Append('"');
                     cursorPosition = i + 1;
                     break;
                 }
                 if (segment.Length == 0)
                     openPosition = i;
-                segment += json[i];
+                segment.Append(json[i]);
                 cursorPosition = i;
             }
 
-            return segment.Trim();  // remove surrounding whitespace
+            return segment.ToString().Trim();  // remove surrounding whitespace
         }
 
         /// <summary>
