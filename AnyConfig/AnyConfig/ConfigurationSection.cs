@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// AnyConfig configuration section
+    /// </summary>
     public class ConfigurationSection : IConfigurationSection
     {
         private JsonNode _jsonNode;
@@ -34,17 +37,23 @@ namespace AnyConfig
         public string Path { get; private set; }
 
         /// <summary>
-        /// The original value (json) of the ConfigurationSection
+        /// The value of the entry
         /// </summary>
         public string Value { get; set; }
 
-        public ConfigurationSection(string path, string key, string value)
+        /// <summary>
+        /// The original text of the ConfigurationSection
+        /// </summary>
+        public string RawText { get; set; }
+
+        public ConfigurationSection(string path, string key, string value, string rawText)
         {
             Path = path;
             Key = key;
             Value = value;
-            if (!string.IsNullOrEmpty(value))
-                ParseConfigurationSection(value);
+            RawText = rawText;
+            if (!string.IsNullOrEmpty(rawText))
+                ParseConfigurationSection(rawText);
         }
 
         private void ParseConfigurationSection(string json)
@@ -61,13 +70,13 @@ namespace AnyConfig
                 switch (parentNode.NodeType)
                 {
                     case JsonNodeType.Array:
-                        return parentNode.ArrayValues.Select(x => new ConfigurationSection(parentNode.FullPath, parentNode.Name, x));
+                        return parentNode.ArrayValues.Select(x => new ConfigurationSection(parentNode.FullPath, parentNode.Name, x, parentNode.OuterText));
                     case JsonNodeType.Object:
                     default:
-                        return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText));
+                        return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText, x.OuterText));
                 }
             }
-            return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText));
+            return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText, x.OuterText));
         }
 
         public IChangeToken GetReloadToken()
@@ -83,15 +92,20 @@ namespace AnyConfig
                 switch (node.NodeType)
                 {
                     case JsonNodeType.Value:
-                        return new ConfigurationSection(node.FullPath, node.Name, node.Value);
+                        return new ConfigurationSection(node.FullPath, node.Name, node.Value, node.OuterText);
                     case JsonNodeType.Array:
-                        return new ConfigurationSection(node.FullPath, node.Name, node.OuterText);
+                        return new ConfigurationSection(node.FullPath, node.Name, node.OuterText, node.OuterText);
                     case JsonNodeType.Object:
                     default:
-                        return new ConfigurationSection(node.FullPath, node.Name, node.OuterText);
+                        return new ConfigurationSection(node.FullPath, node.Name, node.OuterText, node.OuterText);
                 }
             }
             return null;
+        }
+
+        public override string ToString()
+        {
+            return Key;
         }
     }
 }

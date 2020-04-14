@@ -90,9 +90,9 @@ namespace AnyConfig.Tests
         {
             var config = Config.GetConfiguration("appsettings_full.json");
             Assert.NotNull(config);
-            var section = config.GetSection("WebHostServiceConfiguration");
-            Assert.NotNull(section);
-            var webHostServiceConfiguration = section.Get<WebHostServiceConfiguration>();
+            var webHostServiceConfigurationSection = config.GetSection("WebHostServiceConfiguration");
+            Assert.NotNull(webHostServiceConfigurationSection);
+            var webHostServiceConfiguration = webHostServiceConfigurationSection.Get<WebHostServiceConfiguration>();
             Assert.NotNull(webHostServiceConfiguration);
             Assert.AreEqual("Test service", webHostServiceConfiguration.Name);
             Assert.AreEqual(LoadCertificateType.Embedded, webHostServiceConfiguration.CertificateType);
@@ -100,6 +100,9 @@ namespace AnyConfig.Tests
             Assert.AreEqual(1024, webHostServiceConfiguration.MaxCacheItems);
             Assert.AreEqual("*", webHostServiceConfiguration.IP);
             Assert.AreEqual(3, webHostServiceConfiguration.AuthorizedIPs.Count);
+            var securityConfigurationSection = config.GetSection("SecurityConfiguration");
+            var securityConfiguration = securityConfigurationSection.Get<SecurityConfiguration>();
+            Assert.NotNull(securityConfiguration);
         }
     }
 }
