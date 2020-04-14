@@ -167,32 +167,43 @@ namespace AnyConfig
             doc.Load(filename);
 
             var configurationNode = doc.SelectSingleNode("configuration");
-            // load custom config section declarations
-            var configSectionNodes = configurationNode.SelectSingleNode("configSections");
-            foreach (XmlNode configSectionNode in configSectionNodes.SelectNodes("section"))
+            if (configurationNode != null)
             {
-                var configSectionPair = new ConfigSectionPair
+                // load custom config section declarations
+                var configSectionNodes = configurationNode.SelectSingleNode("configSections");
+                if (configSectionNodes != null)
                 {
-                    Name = configSectionNode.Attributes.GetNamedItem("name")?.InnerText,
-                    Type = configSectionNode.Attributes.GetNamedItem("type")?.InnerText,
-                };
-                try
-                {
-                    configSectionPair.TypeValue = ResolveType(configSectionNode.Attributes.GetNamedItem("type")?.InnerText);
+                    var sections = configSectionNodes.SelectNodes("section");
+                    if (sections != null)
+                    {
+                        foreach (XmlNode configSectionNode in sections)
+                        {
+                            var configSectionPair = new ConfigSectionPair
+                            {
+                                Name = configSectionNode.Attributes.GetNamedItem("name")?.InnerText,
+                                Type = configSectionNode.Attributes.GetNamedItem("type")?.InnerText,
+                            };
+                            try
+                            {
+                                configSectionPair.TypeValue = ResolveType(configSectionNode.Attributes.GetNamedItem("type")?.InnerText);
+                            }
+                            catch (TypeLoadException)
+                            {
+                                // could not load this type
+                            }
+                            config.Configuration.ConfigSections.Add(configSectionPair);
+                        }
+                    }
+
+                    if (configurationNode.ChildNodes != null)
+                    {
+                        foreach (XmlNode xmlNode in configurationNode.ChildNodes)
+                        {
+                            config = ProcessNode(xmlNode, config);
+                        }
+                    }
                 }
-                catch (TypeLoadException)
-                {
-                    // could not load this type
-                }
-                config.Configuration.ConfigSections.Add(configSectionPair);
             }
-
-
-            foreach (XmlNode xmlNode in configurationNode.ChildNodes)
-            {
-                config = ProcessNode(xmlNode, config);
-            }
-
             return config;
         }
 
@@ -201,61 +212,76 @@ namespace AnyConfig
             switch (node.Name.ToLower())
             {
                 case "connectionstrings":
-                    foreach (XmlNode connectionStringNode in node.SelectNodes("add"))
+                    var connectionstringsAddNodes = node.SelectNodes("add");
+                    if (connectionstringsAddNodes != null)
                     {
-                        config.Configuration.ConnectionStrings.Add(new ConnectionStringPair
+                        foreach (XmlNode connectionStringNode in connectionstringsAddNodes)
                         {
-                            Name = connectionStringNode.Attributes.GetNamedItem("name")?.InnerText,
-                            ConnectionStringSetting = new ConnectionStringSetting
+                            config.Configuration.ConnectionStrings.Add(new ConnectionStringPair
                             {
                                 Name = connectionStringNode.Attributes.GetNamedItem("name")?.InnerText,
-                                ConnectionString = connectionStringNode.Attributes.GetNamedItem("connectionString")?.InnerText,
-                                ProviderName = connectionStringNode.Attributes.GetNamedItem("providerName")?.InnerText
-                            }
-                        });
+                                ConnectionStringSetting = new ConnectionStringSetting
+                                {
+                                    Name = connectionStringNode.Attributes.GetNamedItem("name")?.InnerText,
+                                    ConnectionString = connectionStringNode.Attributes.GetNamedItem("connectionString")?.InnerText,
+                                    ProviderName = connectionStringNode.Attributes.GetNamedItem("providerName")?.InnerText
+                                }
+                            });
+                        }
                     }
                     break;
                 case "appsettings":
-                    foreach (XmlNode appSettingsNode in node.SelectNodes("add"))
+                    var appsettingsAddNodes = node.SelectNodes("add");
+                    if (appsettingsAddNodes != null)
                     {
-                        config.Configuration.AppSettings.Add(new AppSettingPair
+                        foreach (XmlNode appSettingsNode in appsettingsAddNodes)
                         {
-                            Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
-                            Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText,
-                        });
-                    }
-                    break;
-                case "anyconfig":
-                    // custom anyconfig root appsettings. They are stored as groups with a single element
-                    foreach (XmlNode appSettingsNode in node.SelectNodes("add"))
-                    {
-                        var groupSettings = new List<AnyConfigAppSettingPair>();
-                        config.Configuration.AnyConfigGroups.Add(new AnyConfigGroup
-                        {
-                            GroupName = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
-                            Settings = new List<AnyConfigAppSettingPair> { new AnyConfigAppSettingPair() { Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText, Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText } },
-                        });
-                    }
-
-                    // custom anyconfig grouped appsettings
-                    foreach (XmlNode anyConfigNode in node.ChildNodes)
-                    {
-                        var groupSettings = new List<AnyConfigAppSettingPair>();
-                        foreach (XmlNode appSettingsNode in anyConfigNode.SelectNodes("add"))
-                        {
-                            groupSettings.Add(new AnyConfigAppSettingPair
+                            config.Configuration.AppSettings.Add(new AppSettingPair
                             {
                                 Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
                                 Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText,
                             });
                         }
-                        if (groupSettings.Any())
+                    }
+                    break;
+                case "anyconfig":
+                    // custom anyconfig root appsettings. They are stored as groups with a single element
+                    var anyconfigAddNodes = node.SelectNodes("add");
+                    if (anyconfigAddNodes != null)
+                    {
+                        foreach (XmlNode appSettingsNode in anyconfigAddNodes)
                         {
+                            var groupSettings = new List<AnyConfigAppSettingPair>();
                             config.Configuration.AnyConfigGroups.Add(new AnyConfigGroup
                             {
-                                GroupName = anyConfigNode.Name,
-                                Settings = groupSettings,
+                                GroupName = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
+                                Settings = new List<AnyConfigAppSettingPair> { new AnyConfigAppSettingPair() { Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText, Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText } },
                             });
+                        }
+                    }
+
+                    // custom anyconfig grouped appsettings
+                    if (node.ChildNodes != null)
+                    {
+                        foreach (XmlNode anyConfigNode in node.ChildNodes)
+                        {
+                            var groupSettings = new List<AnyConfigAppSettingPair>();
+                            foreach (XmlNode appSettingsNode in anyConfigNode.SelectNodes("add"))
+                            {
+                                groupSettings.Add(new AnyConfigAppSettingPair
+                                {
+                                    Key = appSettingsNode.Attributes.GetNamedItem("key")?.InnerText,
+                                    Value = appSettingsNode.Attributes.GetNamedItem("value")?.InnerText,
+                                });
+                            }
+                            if (groupSettings.Any())
+                            {
+                                config.Configuration.AnyConfigGroups.Add(new AnyConfigGroup
+                                {
+                                    GroupName = anyConfigNode.Name,
+                                    Settings = groupSettings,
+                                });
+                            }
                         }
                     }
                     break;
