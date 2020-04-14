@@ -104,5 +104,16 @@ namespace AnyConfig.Tests
             var securityConfiguration = securityConfigurationSection.Get<SecurityConfiguration>();
             Assert.NotNull(securityConfiguration);
         }
+
+        [Test]
+        public void Should_Load_IConfiguration_InvalidSectionReturnsNull()
+        {
+            var config = Config.GetConfiguration("appsettings_full.json");
+            Assert.NotNull(config);
+            var invalidSection = config.GetSection("InvalidConfiguration");
+            Assert.NotNull(invalidSection);
+            var invalidConfiguration = invalidSection.Get<InvalidConfiguration>();
+            Assert.Null(invalidConfiguration);
+        }
     }
 }

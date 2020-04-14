@@ -64,6 +64,8 @@ namespace AnyConfig
 
         public IEnumerable<IConfigurationSection> GetChildren()
         {
+            if (_jsonNode == null)
+                return new List<IConfigurationSection>();
             if (_jsonNode.NodeType == JsonNodeType.Object)
             {
                 var parentNode = _jsonNode.SelectNodeByName(Key);
@@ -100,7 +102,9 @@ namespace AnyConfig
                         return new ConfigurationSection(node.FullPath, node.Name, node.OuterText, node.OuterText);
                 }
             }
-            return null;
+
+            // always return a configuration section
+            return new ConfigurationSection(key, key, null, null);
         }
 
         public override string ToString()

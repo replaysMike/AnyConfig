@@ -58,7 +58,11 @@ namespace AnyConfig
 
         public IConfigurationSection GetSection(string key)
         {
-            return _configurationSections.FirstOrDefault(x => x.Key == key);
+            var configSection = _configurationSections.FirstOrDefault(x => x.Key == key);
+            if (configSection != null)
+                return configSection;
+            // always return a configuration section
+            return new ConfigurationSection(key, key, null, null);
         }
     }
 }

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// AnyConfig configuration root
+    /// </summary>
     public class ConfigurationRoot : Configuration, IConfigurationRoot
     {
         private readonly List<IConfigurationProvider> _configurationProviders = new List<IConfigurationProvider>();
