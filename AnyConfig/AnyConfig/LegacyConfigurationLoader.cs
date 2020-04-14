@@ -88,6 +88,8 @@ namespace AnyConfig
 
         private LegacyConfiguration SerializeLegacyJsonConfiguration(string filename)
         {
+            if (!File.Exists(filename))
+                throw new ConfigurationException($"Could not load Json configuration at '{filename}'");
             var legacyConfiguration = new LegacyConfiguration();
 
             try
@@ -158,6 +160,8 @@ namespace AnyConfig
 
         private LegacyConfiguration SerializeLegacyXmlConfiguration(string filename)
         {
+            if (!File.Exists(filename))
+                throw new ConfigurationException($"Could not load Xml configuration at '{filename}'");
             var config = new LegacyConfiguration();
             var doc = new XmlDocument();
             doc.Load(filename);
