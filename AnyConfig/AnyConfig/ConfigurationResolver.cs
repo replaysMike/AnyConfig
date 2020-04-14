@@ -417,7 +417,7 @@ namespace AnyConfig
             {
                 var nameOfSection = sectionName ?? typeof(T).Name;
                 var configSection = configuration.GetSection(nameOfSection);
-                if (configSection == null)
+                if (string.IsNullOrEmpty(configSection.Value))
                 {
                     if (sectionName == null)
                     {
