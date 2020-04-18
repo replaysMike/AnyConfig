@@ -19,10 +19,11 @@ PM> Install-Package Any-Config
 
 ## Features
 
-* Backwards compatible interface using ConfigurationManager for xml and json
-* Supports IConfiguration interface for xml and json
+* Backwards compatible interface using ConfigurationManager for Xml and Json
+* Supports IConfiguration interface for Xml and Json
 * Supports generics for simple configuration value lookups
 * Automatic discovery of configuration files for .Net Core or .Net Framework projects
+* Legacy Xml encrypted sections (DAPI and Rsa) are supported
 * [todo] Yaml support coming soon
 
 ## Usage
