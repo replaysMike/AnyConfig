@@ -131,6 +131,11 @@ namespace AnyConfig
             _legacyConfiguration = new Lazy<LegacyConfiguration>(() => LoadConfiguration());
         }
 
+        public static Models.Configuration OpenExeConfiguration(ConfigurationUserLevel userLevel)
+        {
+            return _legacyConfiguration.Value.Configuration;
+        }
+
         private static ConnectionStringSettingsCollection GetConnectionStrings()
         {
             return new ConnectionStringSettingsCollection(GetConnectionStringsAsDictionary());

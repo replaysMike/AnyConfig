@@ -12,6 +12,13 @@ namespace AnyConfig.Scaffolding
         public IConfiguration Config { get; set; }
         public TestScaffold(string path)
         {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            System.Configuration.ConfigurationSection connectionStrings = config.GetSection("connectionStrings");
+            if (connectionStrings.SectionInformation.IsProtected)
+            {
+                
+            }
+
             var connectionTest = ConfigurationManager.ConnectionStrings["test"];
             var appTest = ConfigurationManager.AppSettings["test"];
             var nlogTest = ConfigurationManager.GetSection("nlog");

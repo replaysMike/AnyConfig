@@ -39,6 +39,11 @@ namespace AnyConfig.Collections
         }
 
         /// <summary>
+        /// Section information
+        /// </summary>
+        public SectionInformation SectionInformation { get; set; }
+
+        /// <summary>
         /// Gets all the keys in the GenericNameValueCollection.
         /// </summary>
         public new StringValue[] AllKeys

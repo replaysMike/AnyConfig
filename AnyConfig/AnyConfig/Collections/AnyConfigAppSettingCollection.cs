@@ -1,10 +1,11 @@
 ﻿using AnyConfig.Collections;
+using AnyConfig.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace AnyConfig.Models
+namespace AnyConfig.Collections
 {
     /// <summary>
     /// Stores AnyConfig grouped appsettings
@@ -23,6 +24,11 @@ namespace AnyConfig.Models
                     .FirstOrDefault();
             }
         }
+
+        /// <summary>
+        /// Section information
+        /// </summary>
+        public string ConfigProtectionProvider { get; set; }
 
         public AnyConfigAppSettingCollection(List<AnyConfigAppSettingPair> values)
         {

@@ -1,4 +1,6 @@
-﻿using AnyConfig.Tests.Models;
+﻿using AnyConfig.Collections;
+using AnyConfig.Models;
+using AnyConfig.Tests.Models;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using System;
@@ -126,6 +128,30 @@ namespace AnyConfig.Tests
             var securityConfiguration = securityConfigurationSection.Get<SecurityConfiguration>();
             Assert.NotNull(securityConfiguration);
             Assert.AreEqual(@"FAKEPASSWORDSALT*{3-\?{", securityConfiguration.MasterUserPasswordSalt);
+        }
+
+        [Test]
+        public void Should_Load_Protected_Dapi_Xml()
+        {
+            // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.Reload();
+
+            var config = Config.GetFromXmlFile<SectionCollection<ConnectionStringPair>>("DapiProtectedApp.config", "connectionStrings");
+            var connection = config["TestConnection"].ConnectionStringSetting.ConnectionString;
+            Assert.AreEqual("host=localhost;", connection);
+        }
+
+        [Test]
+        public void Should_Load_Protected_Rsa_ConfigurationManager()
+        {
+            // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.Reload();
+
+            var config = Config.GetFromXmlFile<SectionCollection<ConnectionStringPair>>("RsaProtectedApp.config", "connectionStrings");
+            var connection = config["TestConnection"].ConnectionStringSetting.ConnectionString;
+            Assert.AreEqual("host=localhost;", connection);
         }
     }
 }

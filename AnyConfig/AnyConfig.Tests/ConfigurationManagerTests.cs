@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using AnyConfig.Scaffolding;
+using NUnit.Framework;
 using System.Linq;
 using System.Reflection;
 
@@ -190,6 +191,34 @@ namespace AnyConfig.Tests
             Assert.NotNull(testConfiguration.TestConfigurationObject);
             Assert.AreEqual("TestName", testConfiguration.TestConfigurationObject.Name);
             Assert.AreEqual("TestValue", testConfiguration.TestConfigurationObject.Value);
+        }
+
+        [Test]
+        public void Should_Load_Protected_Dapi_ConfigurationManager()
+        {
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.ConfigurationFilename = "DapiProtectedApp.config";
+            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Xml;
+            ConfigurationManager.Reload();
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var connectionStrings = config.GetSection("connectionStrings");
+            Assert.IsTrue(connectionStrings.SectionInformation.IsProtected);
+            Assert.IsTrue(connectionStrings.SectionInformation.ProtectionProvider.Name.Equals("DataProtectionConfigurationProvider", System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.AreEqual("host=localhost;", ConfigurationManager.ConnectionStrings["TestConnection"].ConnectionString);
+        }
+
+        [Test]
+        public void Should_Load_Protected_Rsa_ConfigurationManager()
+        {
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.ConfigurationFilename = "RsaProtectedApp.config";
+            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Xml;
+            ConfigurationManager.Reload();
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var connectionStrings = config.GetSection("connectionStrings");
+            Assert.IsTrue(connectionStrings.SectionInformation.IsProtected);
+            Assert.IsTrue(connectionStrings.SectionInformation.ProtectionProvider.Name.Equals("RsaProtectedConfigurationProvider", System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.AreEqual("host=localhost;", ConfigurationManager.ConnectionStrings["TestConnection"].ConnectionString);
         }
     }
 }

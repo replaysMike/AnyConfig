@@ -543,7 +543,7 @@ namespace AnyConfig
             {
                 var isRequired = false;
                 var propertyName = property.Name;
-                var propertyType = property.Type.GetExtendedType();
+                var propertyType = property.Type;
                 if (!string.IsNullOrEmpty(prependPropertyName))
                     propertyName = prependPropertyName + propertyName;
                 object value = null;
@@ -557,21 +557,22 @@ namespace AnyConfig
                     if (propertyType.IsReferenceType && propertyLegacyAttribute.ChildrenMapped)
                     {
                         // map all of this objects properties and attributes
+                        propertyType = propertyType.Refresh(TypeSupportOptions.All);
                         value = MapTypeProperties(propertyType, objectFactory.CreateEmptyObject(propertyType), filename, sectionName, prependPropertyName + propertyLegacyAttribute.PrependChildrenName, throwsException);
                     }
                 }
                 if (value.IsNullOrEmpty())
                 {
                     if (!string.IsNullOrEmpty(filename))
-                        value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                        value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                     if (value.IsNullOrEmpty())
                     {
-                        value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                        value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
                         if (value.IsNullOrEmpty())
                         {
-                            value = ConfigProvider.Get(propertyType.Type, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                            value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                             if (isRequired && value.IsNullOrEmpty())
-                                throw new ConfigurationMissingException(propertyName, property.Type);
+                                throw new ConfigurationMissingException(propertyName, propertyType);
                         }
                     }
                 }

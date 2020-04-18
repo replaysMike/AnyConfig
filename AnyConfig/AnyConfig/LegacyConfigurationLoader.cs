@@ -1,4 +1,5 @@
-﻿using AnyConfig.Exceptions;
+﻿using AnyConfig.Collections;
+using AnyConfig.Exceptions;
 using AnyConfig.Json;
 using AnyConfig.Models;
 using System;
@@ -137,19 +138,20 @@ namespace AnyConfig
                         if (!appSettings.Any(x => x.Key == node.Name))
                             appSettings.Add(new AppSettingPair { Key = node.Name, Value = node.Value });
                     }
-                    else if(node.ValueType == PrimitiveTypes.Object)
+                    else if (node.ValueType == PrimitiveTypes.Object)
                     {
-                        configSections.Add(new ConfigSectionPair { 
-                            Name = node.Name, 
+                        configSections.Add(new ConfigSectionPair
+                        {
+                            Name = node.Name,
                             Configuration = node.OuterText,
                             Type = nameof(RequiresJsonSerialization),
                             TypeValue = typeof(RequiresJsonSerialization)
                         });
                     }
                 }
-                legacyConfiguration.Configuration.AppSettings = appSettings;
-                legacyConfiguration.Configuration.ConnectionStrings = connectionStrings;
-                legacyConfiguration.Configuration.ConfigSections = configSections;
+                legacyConfiguration.Configuration.AppSettings = new SectionCollection<AppSettingPair>(appSettings);
+                legacyConfiguration.Configuration.ConnectionStrings = new SectionCollection<ConnectionStringPair>(connectionStrings);
+                legacyConfiguration.Configuration.ConfigSections = new SectionCollection<ConfigSectionPair>(configSections);
             }
             catch (Exception)
             {
@@ -211,9 +213,16 @@ namespace AnyConfig
 
         private LegacyConfiguration ProcessNode(XmlNode node, LegacyConfiguration config)
         {
+            var configProtectionProvider = node.Attributes.GetNamedItem("configProtectionProvider");
+            var sectionInformation = new SectionInformation(node.Name, configProtectionProvider?.Value);
+            if (sectionInformation.IsProtected && node.ChildNodes.Count > 0)
+                node = sectionInformation.ProtectionProvider.Decrypt(node.ChildNodes[0]);
             switch (node.Name.ToLower())
             {
                 case "connectionstrings":
+
+                    sectionInformation.Type = typeof(SectionCollection<ConnectionStringPair>).Name;
+                    config.Configuration.ConnectionStrings.SectionInformation = sectionInformation;
                     var connectionstringsAddNodes = node.SelectNodes("add");
                     if (connectionstringsAddNodes != null)
                     {
@@ -231,8 +240,17 @@ namespace AnyConfig
                             });
                         }
                     }
+                    config.Configuration.ConfigSections.Add(new ConfigSectionPair
+                    {
+                        Name = "connectionStrings",
+                        Configuration = config.Configuration.ConnectionStrings,
+                        Type = config.Configuration.ConnectionStrings.GetType().Name,
+                        TypeValue = config.Configuration.ConnectionStrings.GetType(),
+                    });
                     break;
                 case "appsettings":
+                    sectionInformation.Type = typeof(SectionCollection<AppSettingPair>).Name;
+                    config.Configuration.AppSettings.SectionInformation = sectionInformation;
                     var appsettingsAddNodes = node.SelectNodes("add");
                     if (appsettingsAddNodes != null)
                     {
@@ -245,9 +263,18 @@ namespace AnyConfig
                             });
                         }
                     }
+                    config.Configuration.ConfigSections.Add(new ConfigSectionPair
+                    {
+                        Name = "appSettings",
+                        Configuration = config.Configuration.AppSettings,
+                        Type = config.Configuration.AppSettings.GetType().Name,
+                        TypeValue = config.Configuration.AppSettings.GetType(),
+                    });
                     break;
                 case "anyconfig":
                     // custom anyconfig root appsettings. They are stored as groups with a single element
+                    sectionInformation.Type = typeof(SectionCollection<AnyConfigGroup>).Name;
+                    config.Configuration.AnyConfigGroups.SectionInformation = sectionInformation;
                     var anyconfigAddNodes = node.SelectNodes("add");
                     if (anyconfigAddNodes != null)
                     {
@@ -292,13 +319,15 @@ namespace AnyConfig
                     var configSectionDeclaration = config.Configuration.ConfigSections.FirstOrDefault(x => x.Name == node.Name);
                     if (configSectionDeclaration != null)
                     {
+                        config.Configuration.ConfigSections.SectionInformation = sectionInformation;
                         try
                         {
                             if (configSectionDeclaration.TypeValue != null)
                             {
+                                sectionInformation.Type = configSectionDeclaration.TypeValue.Name;
                                 if (IsConfigurationSectionHandler(configSectionDeclaration))
                                     ExecuteConfigurationSectionHandler(configSectionDeclaration, node);
-                                else if(IsConfigurationSection(configSectionDeclaration))
+                                else if (IsConfigurationSection(configSectionDeclaration))
                                     ConfigureConfigurationSection(configSectionDeclaration, node);
                             }
                         }
@@ -310,6 +339,7 @@ namespace AnyConfig
                     else
                     {
                         // unknown config type, it needs to be deserialized
+                        sectionInformation.Type = typeof(RequiresXmlSerialization).Name;
                         var configSection = new ConfigSectionPair
                         {
                             Configuration = node.OuterXml,

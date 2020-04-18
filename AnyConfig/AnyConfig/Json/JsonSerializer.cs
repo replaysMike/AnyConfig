@@ -79,7 +79,7 @@ namespace AnyConfig.Json
 
             foreach(var property in properties)
             {
-                var propertyType = property.Type.GetExtendedType();
+                var propertyType = property.Type;
                 if (propertyType.IsReferenceType && propertyType != typeof(string))
                 {
                     var matchedNode = node.SelectNodeByName(property.Name);
@@ -87,7 +87,7 @@ namespace AnyConfig.Json
                         skipFlatMap = true;
                     var objectFactory = new ObjectFactory();
                     var childValue = objectFactory.CreateEmptyObject(propertyType);
-                    childValue = DeserializeNode(property.Type, childValue, matchedNode ?? node, skipFlatMap, property.GetAttribute<LegacyConfigurationNameAttribute>());
+                    childValue = DeserializeNode(propertyType, childValue, matchedNode ?? node, skipFlatMap, property.GetAttribute<LegacyConfigurationNameAttribute>());
                     value.SetPropertyValue(property.Name, childValue);
                 }
                 else

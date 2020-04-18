@@ -1,11 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using AnyConfig.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace AnyConfig.Models
+namespace AnyConfig.Collections
 {
+    /// <summary>
+    /// Collection of connection strings
+    /// </summary>
     public class ConnectionStringSettingsCollection
     {
         private readonly Dictionary<string, ConnectionStringSetting> _values = new Dictionary<string, ConnectionStringSetting>();
+
+        /// <summary>
+        /// Section information
+        /// </summary>
+        public SectionInformation SectionInformation { get; set; }
 
         public ConnectionStringSetting this[string key]
         {
