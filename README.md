@@ -23,7 +23,7 @@ PM> Install-Package Any-Config
 * Supports IConfiguration interface for Xml and Json
 * Supports generics for simple configuration value lookups
 * Automatic discovery of configuration files for .Net Core or .Net Framework projects
-* Legacy Xml encrypted sections (DAPI and Rsa) are supported
+* Legacy Xml encrypted sections (DPAPI and RSA) are supported
 * [todo] Yaml support coming soon
 
 ## Usage
