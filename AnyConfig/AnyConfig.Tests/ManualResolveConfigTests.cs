@@ -131,6 +131,7 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        [Category("RequiresEncryption")]
         public void Should_Load_Protected_Dapi_Xml()
         {
             // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
@@ -143,6 +144,7 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        [Category("RequiresEncryption")]
         public void Should_Load_Protected_Rsa_ConfigurationManager()
         {
             // the underlying xml loading uses ConfigurationManager, so reset it as other tests can affect this
