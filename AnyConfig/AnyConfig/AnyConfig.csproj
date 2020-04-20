@@ -31,7 +31,6 @@
     </PropertyGroup>
     <ItemGroup>
       <InputAssemblies Include="TypeSupport.dll" />
-      <InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions.dll" />
       <InputAssemblies Include="Microsoft.Extensions.Primitives.dll" />
       <InputAssemblies Include="System.Buffers.dll" />
       <InputAssemblies Include="System.Collections.Immutable.dll" />
