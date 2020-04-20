@@ -14,14 +14,87 @@
     <Version>1.0.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>Any-Config</PackageId>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.3" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.7.0" />
-    <PackageReference Include="TypeSupport" Version="1.0.108" />
+    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.3" PrivateAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" PrivateAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.7.0" PrivateAssets="all" />
+    <PackageReference Include="TypeSupport" Version="1.0.108" PrivateAssets="all" />
   </ItemGroup>
+
+  <Target Name="ILRepackNetFramework48" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' == 'net48'">
+    <PropertyGroup>
+      <WorkingDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)</WorkingDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <InputAssemblies Include="TypeSupport.dll" />
+      <InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions.dll" />
+      <InputAssemblies Include="Microsoft.Extensions.Primitives.dll" />
+      <InputAssemblies Include="System.Buffers.dll" />
+      <InputAssemblies Include="System.Collections.Immutable.dll" />
+      <InputAssemblies Include="System.Memory.dll" />
+      <InputAssemblies Include="System.Numerics.Vectors.dll" />
+      <InputAssemblies Include="System.Runtime.CompilerServices.Unsafe.dll" />
+      <InputAssemblies Include="System.Security.AccessControl.dll" />
+      <InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
+      <InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
+      <InputAssemblies Include="System.Security.Permissions.dll" />
+      <InputAssemblies Include="System.Security.Principal.Windows.dll" />
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Dot not internalize any types inside this assembly -->
+      <!--<InternalizeExcludeAssemblies Include="AnyConfig.dll" />-->
+    </ItemGroup>
+    <Message Text="MERGING: $(TargetFramework) @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
+    <ILRepack
+      Parallel="true"
+      AllowDuplicateResources="false"
+      DebugInfo="true"
+      OutputType="$(OutputType)"
+      MainAssembly="$(AssemblyName).dll"
+      OutputAssembly="$(AssemblyName).dll"
+      InputAssemblies="@(InputAssemblies)"
+      InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)"
+      WorkingDirectory="$(WorkingDirectory)" />
+  </Target>
+
+  <Target Name="ILRepackNetStandard20" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' == 'netstandard2.0'">
+    <PropertyGroup>
+      <WorkingDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)</WorkingDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <InputAssemblies Include="TypeSupport.dll" />
+      <InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions.dll" />
+      <InputAssemblies Include="Microsoft.Extensions.Primitives.dll" />
+      <InputAssemblies Include="System.Buffers.dll" />
+      <InputAssemblies Include="System.Collections.Immutable.dll" />
+      <InputAssemblies Include="System.Memory.dll" />
+      <InputAssemblies Include="System.Numerics.Vectors.dll" />
+      <InputAssemblies Include="System.Runtime.CompilerServices.Unsafe.dll" />
+      <InputAssemblies Include="System.Security.AccessControl.dll" />
+      <InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
+      <InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
+      <InputAssemblies Include="System.Security.Permissions.dll" />
+      <InputAssemblies Include="System.Security.Principal.Windows.dll" />
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Dot not internalize any types inside this assembly -->
+      <!--<InternalizeExcludeAssemblies Include="AnyConfig.dll" />-->
+    </ItemGroup>
+    <Message Text="MERGING: $(TargetFramework) @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
+    <ILRepack
+      Parallel="true"
+      AllowDuplicateResources="false"
+      DebugInfo="true"
+      OutputType="$(OutputType)"
+      MainAssembly="$(AssemblyName).dll"
+      OutputAssembly="$(AssemblyName).dll"
+      InputAssemblies="@(InputAssemblies)"
+      InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)"
+      WorkingDirectory="$(WorkingDirectory)" />
+  </Target>
 
 </Project>
