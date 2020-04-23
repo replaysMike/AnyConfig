@@ -53,7 +53,7 @@ namespace AnyConfig
 
         public IChangeToken GetReloadToken()
         {
-            throw new NotImplementedException();
+            return new ConfigurationReloadToken();
         }
 
         public IConfigurationSection GetSection(string key)
