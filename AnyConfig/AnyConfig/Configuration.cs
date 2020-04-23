@@ -46,15 +46,9 @@ namespace AnyConfig
             _configurationSections.Add(section);
         }
 
-        public IEnumerable<IConfigurationSection> GetChildren()
-        {
-            return _configurationSections;
-        }
+        public IEnumerable<IConfigurationSection> GetChildren() => _configurationSections;
 
-        public IChangeToken GetReloadToken()
-        {
-            return new ConfigurationReloadToken();
-        }
+        public IChangeToken GetReloadToken() => new ConfigurationReloadToken();
 
         public IConfigurationSection GetSection(string key)
         {

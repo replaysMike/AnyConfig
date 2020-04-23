@@ -119,6 +119,15 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_Load_IConfiguration_ReturnsReloadToken()
+        {
+            var config = Config.GetConfiguration("appsettings_full.json");
+            Assert.NotNull(config);
+            var token = config.GetReloadToken();
+            Assert.NotNull(token);
+        }
+
+        [Test]
         public void Should_Load_IConfiguration_BackslashEncodingIsCorrect()
         {
             var config = Config.GetConfiguration("appsettings_full.json");
