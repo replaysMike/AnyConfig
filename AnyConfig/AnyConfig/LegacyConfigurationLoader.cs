@@ -213,9 +213,9 @@ namespace AnyConfig
 
         private LegacyConfiguration ProcessNode(XmlNode node, LegacyConfiguration config)
         {
-            var configProtectionProvider = node.Attributes.GetNamedItem("configProtectionProvider");
+            var configProtectionProvider = node.Attributes?.GetNamedItem("configProtectionProvider");
             var sectionInformation = new SectionInformation(node.Name, configProtectionProvider?.Value);
-            if (sectionInformation.IsProtected && node.ChildNodes.Count > 0)
+            if (sectionInformation.IsProtected && node.ChildNodes.Count > 0 && sectionInformation.ProtectionProvider != null)
                 node = sectionInformation.ProtectionProvider.Decrypt(node.ChildNodes[0]);
             switch (node.Name.ToLower())
             {
