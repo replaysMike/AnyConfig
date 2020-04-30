@@ -94,6 +94,7 @@ namespace AnyConfig.Tests
             Assert.NotNull(config);
             var webHostServiceConfigurationSection = config.GetSection("WebHostServiceConfiguration");
             Assert.NotNull(webHostServiceConfigurationSection);
+            
             var webHostServiceConfiguration = webHostServiceConfigurationSection.Get<WebHostServiceConfiguration>();
             Assert.NotNull(webHostServiceConfiguration);
             Assert.AreEqual("Test service", webHostServiceConfiguration.Name);

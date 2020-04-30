@@ -102,12 +102,18 @@ namespace AnyConfig.Tests
             Assert.NotNull(config);
             Assert.AreEqual(1, config.Providers.Count());
 
-            var provider = config.Providers.First();
+            var provider = config.Providers.First() as JsonConfigurationProvider;
             var success = provider.TryGet("TestConfiguration:BoolSetting", out var val);
 
             Assert.AreEqual(true, success);
             Assert.AreEqual("True", val);
-            
+
+            // provider should contain the right number of keys
+            Assert.AreEqual(31, provider.Data.Count);
+
+            var rateLimitingKeys = provider.GetChildKeys("IpRateLimiting");
+            Assert.AreEqual(21, rateLimitingKeys.Count());
+
             var section = config.GetSection("TestConfiguration");
             Assert.NotNull(section);
             Assert.AreEqual("TestConfiguration", section.Key);

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Resources;
+using System.Text;
 using TypeSupport;
 using TypeSupport.Extensions;
 
@@ -68,7 +69,7 @@ namespace AnyConfig
             var rootNode = jsonParser.Parse(File.ReadAllText(filePath));
 
             var configuration = new ConfigurationRoot();
-            var provider = new MockJsonConfigurationProvider();
+            var provider = new JsonConfigurationProvider();
             configuration.AddProvider(provider);
             foreach (JsonNode node in rootNode.ChildNodes)
             {
@@ -94,13 +95,47 @@ namespace AnyConfig
             }
             else if (node.NodeType == JsonNodeType.Value)
             {
-                values.Add(new KeyValuePair<string, string>($"{node.FullPath.Replace("/", ":").Substring(1)}", GetNodeValue(node.Value, node.ValueType)));
+                var key = $"{node.FullPathWithArrayHints.Replace("/", ":").Substring(1)}";
+                key = RemapArrayPositionText(key);
+                var kvp = new KeyValuePair<string, string>(key, GetNodeValue(node.Value, node.ValueType));
+                values.Add(kvp);
+            }
+            else if (node.NodeType == JsonNodeType.Array)
+            {
+                foreach (JsonNode arrayNode in node.ArrayNodes)
+                    values = MapAllNodes(arrayNode, values);
             }
             else
             {
                 // not yet supported
             }
             return values;
+        }
+
+        /// <summary>
+        /// Remap array positions from [x] to :x
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        private static string RemapArrayPositionText(string key)
+        {
+            if (key.Contains('['))
+            {
+                var builder = new StringBuilder();
+                foreach (var c in key)
+                {
+                    if (c == '[')
+                    {
+                        builder.Append(':');
+                        continue;
+                    }
+                    else if (c == ']')
+                        continue;
+                    builder.Append(c);
+                }
+                return builder.ToString();
+            }
+            return key;
         }
 
         private static string GetNodeValue(string value, PrimitiveTypes type)
