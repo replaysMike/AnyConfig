@@ -48,6 +48,11 @@ namespace AnyConfig
         string OuterText { get; set; }
 
         /// <summary>
+        /// The value of a node (value types only)
+        /// </summary>
+        string Value { get; }
+
+        /// <summary>
         /// Get all values for an array
         /// </summary>
         List<INode> ArrayNodes { get; }

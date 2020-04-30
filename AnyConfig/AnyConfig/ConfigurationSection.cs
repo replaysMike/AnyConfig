@@ -48,7 +48,7 @@ namespace AnyConfig
 
         public ConfigurationSection(string path, string key, string value, string rawText)
         {
-            Path = path;
+            Path = FormatPath(path);
             Key = key;
             Value = value;
             RawText = rawText;
@@ -66,19 +66,26 @@ namespace AnyConfig
         {
             if (_jsonNode == null)
                 return new List<IConfigurationSection>();
+            // if the root node is an object, get the node inside it
             if (_jsonNode.NodeType == JsonNodeType.Object)
             {
                 var parentNode = _jsonNode.SelectNodeByName(Key);
                 switch (parentNode.NodeType)
                 {
                     case JsonNodeType.Array:
-                        return parentNode.ArrayValues.Select(x => new ConfigurationSection(parentNode.FullPath, parentNode.Name, x, parentNode.OuterText));
+                        return parentNode.ArrayValues
+                            .Select(x => new ConfigurationSection(parentNode.FullPath, parentNode.Name, x, parentNode.OuterText))
+                            .OrderBy(x => x.Key);
                     case JsonNodeType.Object:
                     default:
-                        return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText, x.OuterText));
+                        return parentNode.ChildNodes
+                            .Select(x => new ConfigurationSection(x.FullPath, x.Name, x.Value, x.OuterText))
+                            .OrderBy(x => x.Key);
                 }
             }
-            return _jsonNode.ChildNodes.Select(x => new ConfigurationSection(x.FullPath, x.Name, x.OuterText, x.OuterText));
+            return _jsonNode.ChildNodes
+                .Select(x => new ConfigurationSection(x.FullPath, x.Name, x.Value, x.OuterText))
+                .OrderBy(x => x.Key);
         }
 
         public IChangeToken GetReloadToken()
@@ -105,6 +112,15 @@ namespace AnyConfig
 
             // always return a configuration section
             return new ConfigurationSection(key, key, null, null);
+        }
+
+        internal string FormatPath(string path)
+        {
+            var newPath = path.Replace("/", ":");
+            if (newPath.StartsWith(":"))
+                newPath = newPath.Substring(1);
+
+            return newPath;
         }
 
         public override string ToString()
