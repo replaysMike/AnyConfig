@@ -103,22 +103,34 @@ namespace AnyConfig.Tests
             Assert.AreEqual(1, config.Providers.Count());
 
             var provider = config.Providers.First() as JsonConfigurationProvider;
+
+            // inspect this complicated config structure
+            var section = config.GetSection("NLog");
+            var targets = section.GetSection("targets");
+            var graylog = targets.GetSection("graylog");
+            var parms = graylog.GetSection("Parameters");
+            var children = parms.GetChildren();
+            var child1Value = children.First().GetChildren().First();
+
+            Assert.AreEqual("authv2", child1Value.Value);
+
             var success = provider.TryGet("TestConfiguration:BoolSetting", out var val);
 
             Assert.AreEqual(true, success);
             Assert.AreEqual("True", val);
 
             // provider should contain the right number of keys
-            Assert.AreEqual(31, provider.Data.Count);
+            Assert.AreEqual(86, provider.Data.Count);
 
             var rateLimitingKeys = provider.GetChildKeys("IpRateLimiting");
             Assert.AreEqual(21, rateLimitingKeys.Count());
 
-            var section = config.GetSection("TestConfiguration") as ConfigurationSection;
+            var section2 = config.GetSection("TestConfiguration") as ConfigurationSection;
             Assert.NotNull(section);
-            Assert.AreEqual("TestConfiguration", section.Key);
-            Assert.AreEqual("TestConfiguration", section.Path);
-            Assert.NotNull(section.RawText);
+            Assert.AreEqual("TestConfiguration", section2.Key);
+            Assert.AreEqual("TestConfiguration", section2.Path);
+            var structuredText = section2.GetNodeStructuredText();
+            Assert.NotNull(structuredText);
         }
     }
 }

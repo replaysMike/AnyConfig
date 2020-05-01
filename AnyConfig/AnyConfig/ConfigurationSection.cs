@@ -55,6 +55,8 @@ namespace AnyConfig
         /// <returns></returns>
         public string GetNodeStructuredText()
         {
+            if (_node == null)
+                return string.Empty;
             var path = ConvertToJsonPath(Path);
             var innerNode = _node.SelectNodeByPath(path);
             return innerNode?.OuterText;
