@@ -18,7 +18,7 @@ namespace AnyConfig
         {
             get
             {
-                return _node?.SelectValueByName(key);
+                return _node?.SelectValueByName(key, StringComparison.InvariantCultureIgnoreCase);
             }
             set
             {
@@ -99,18 +99,22 @@ namespace AnyConfig
 
         public IConfigurationSection GetSection(string key)
         {
-            var node = _node.SelectNodeByName(key) as JsonNode;
-            if (node != null)
+            var parentNode = _node?.SelectNodeByPath(ConvertToJsonPath(Path), StringComparison.InvariantCultureIgnoreCase) as JsonNode;
+            if (parentNode != null)
             {
-                switch (node.NodeType)
+                var node = parentNode.SelectNodeByName(key, StringComparison.InvariantCultureIgnoreCase) as JsonNode;
+                if (node != null)
                 {
-                    case JsonNodeType.Value:
-                        return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
-                    case JsonNodeType.Array:
-                        return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
-                    case JsonNodeType.Object:
-                    default:
-                        return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
+                    switch (node.NodeType)
+                    {
+                        case JsonNodeType.Value:
+                            return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
+                        case JsonNodeType.Array:
+                            return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
+                        case JsonNodeType.Object:
+                        default:
+                            return new ConfigurationSection(node.FullPathWithArrayHints, node.Name, node.Value, _node);
+                    }
                 }
             }
 

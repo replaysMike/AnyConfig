@@ -19,14 +19,14 @@ namespace AnyConfig
             get
             {
                 return _configurationSections
-                    .Where(x => x.Key == key)
+                    .Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
                     .Select(x => x.Value)
                     .FirstOrDefault();
             }
             set
             {
                 var item = _configurationSections
-                    .Where(x => x.Key == key)
+                    .Where(x => x.Key.Equals(value, StringComparison.InvariantCultureIgnoreCase))
                     .Select(x => x.Value)
                     .FirstOrDefault();
                 item = value;
@@ -52,7 +52,7 @@ namespace AnyConfig
 
         public IConfigurationSection GetSection(string key)
         {
-            var configSection = _configurationSections.FirstOrDefault(x => x.Key == key);
+            var configSection = _configurationSections.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase));
             if (configSection != null)
                 return configSection;
             // always return a configuration section
