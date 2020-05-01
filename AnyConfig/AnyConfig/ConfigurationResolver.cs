@@ -416,8 +416,8 @@ namespace AnyConfig
             else
             {
                 var nameOfSection = sectionName ?? typeof(T).Name;
-                var configSection = configuration.GetSection(nameOfSection);
-                if (string.IsNullOrEmpty(configSection.Value))
+                var configSection = configuration.GetSection(nameOfSection) as ConfigurationSection;
+                if (string.IsNullOrEmpty(configSection.RawText))
                 {
                     if (sectionName == null)
                     {
@@ -431,7 +431,7 @@ namespace AnyConfig
                     return defaultValue;
                 }
 
-                var value = JsonSerializer.Deserialize<T>(configSection.Value);
+                var value = JsonSerializer.Deserialize<T>(configSection.RawText);
                 return value;
             }
         }

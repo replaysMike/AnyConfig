@@ -114,11 +114,11 @@ namespace AnyConfig.Tests
             var rateLimitingKeys = provider.GetChildKeys("IpRateLimiting");
             Assert.AreEqual(21, rateLimitingKeys.Count());
 
-            var section = config.GetSection("TestConfiguration");
+            var section = config.GetSection("TestConfiguration") as ConfigurationSection;
             Assert.NotNull(section);
             Assert.AreEqual("TestConfiguration", section.Key);
-            Assert.AreEqual("/TestConfiguration", section.Path);
-            Assert.NotNull(section.Value);
+            Assert.AreEqual("TestConfiguration", section.Path);
+            Assert.NotNull(section.RawText);
         }
     }
 }
