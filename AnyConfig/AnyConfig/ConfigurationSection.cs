@@ -13,13 +13,12 @@ namespace AnyConfig
     public class ConfigurationSection : IConfigurationSection
     {
         private INode _node;
-        private JsonNode _jsonNode;
 
         public string this[string key]
         {
             get
             {
-                return _jsonNode?.SelectValueByName(key);
+                return _node?.SelectValueByName(key);
             }
             set
             {
@@ -42,28 +41,23 @@ namespace AnyConfig
         /// </summary>
         public string Value { get; set; }
 
-        /// <summary>
-        /// The original text of the ConfigurationSection
-        /// </summary>
-        public string RawSectionText { get; set; }
-
         public ConfigurationSection(string path, string key, string value, INode rootNode)
         {
             Path = ConvertToSectionPath(path);
             Key = key;
             Value = value;
             _node = rootNode;
-            // todo: support xml nodes as well
-            _jsonNode = _node as JsonNode;
-            /*RawSectionText = rawSectionText;
-            if (!string.IsNullOrEmpty(rawSectionText))
-                ParseConfigurationSection(rawSectionText);*/
         }
 
-        private void ParseConfigurationSection(string json)
+        /// <summary>
+        /// Get the text that makes up the section
+        /// </summary>
+        /// <returns></returns>
+        public string GetNodeStructuredText()
         {
-            var parser = new JsonParser();
-            _jsonNode = parser.Parse(json);
+            var path = ConvertToJsonPath(Path);
+            var innerNode = _node.SelectNodeByPath(path);
+            return innerNode?.OuterText;
         }
 
         public IEnumerable<IConfigurationSection> GetChildren()
@@ -103,7 +97,7 @@ namespace AnyConfig
 
         public IConfigurationSection GetSection(string key)
         {
-            var node = _jsonNode.SelectNodeByName(key) as JsonNode;
+            var node = _node.SelectNodeByName(key) as JsonNode;
             if (node != null)
             {
                 switch (node.NodeType)

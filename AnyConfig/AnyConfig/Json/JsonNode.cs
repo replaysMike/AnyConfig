@@ -190,6 +190,8 @@ namespace AnyConfig.Json
         /// <returns></returns>
         public INode SelectNodeByPath(string path, StringComparison comparisonType)
         {
+            if (FullPathWithArrayHints.Equals(path, comparisonType))
+                return this;
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
             var matches = nodes
                 .Where(x => x.FullPathWithArrayHints.Equals(path, comparisonType))
