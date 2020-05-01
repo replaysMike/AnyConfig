@@ -159,18 +159,40 @@ namespace AnyConfig.Json
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public JsonNode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
+        public INode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
 
         /// <summary>
         /// Select a node by name
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public JsonNode SelectNodeByName(string name, StringComparison comparisonType)
+        public INode SelectNodeByName(string name, StringComparison comparisonType)
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
             var matches = nodes
                 .Where(x => x.Name.Equals(name, comparisonType))
+                .Select(x => x.As<JsonNode>());
+            return matches
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Select a node by path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public INode SelectNodeByPath(string path) => SelectNodeByPath(path, StringComparison.InvariantCulture);
+
+        /// <summary>
+        /// Select a node by path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public INode SelectNodeByPath(string path, StringComparison comparisonType)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.FullPathWithArrayHints.Equals(path, comparisonType))
                 .Select(x => x.As<JsonNode>());
             return matches
                 .FirstOrDefault();
@@ -225,7 +247,7 @@ namespace AnyConfig.Json
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public IEnumerable<JsonNode> QueryNodes(Func<JsonNode, bool> condition)
+        public IEnumerable<INode> QueryNodes(Func<INode, bool> condition)
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes).Select(x => x.As<JsonNode>());
             var matches = nodes.Where(condition);

@@ -146,18 +146,31 @@ namespace AnyConfig.Xml
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public XmlNode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
+        public INode SelectNodeByName(string name) => SelectNodeByName(name, StringComparison.InvariantCulture);
 
         /// <summary>
         /// Select a node by name
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public XmlNode SelectNodeByName(string name, StringComparison comparisonType)
+        public INode SelectNodeByName(string name, StringComparison comparisonType)
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
             var matches = nodes
                 .Where(x => x.Name.Equals(name, comparisonType))
+                .Select(x => x.As<XmlNode>());
+            return matches
+                .FirstOrDefault();
+        }
+
+        public INode SelectNodeByPath(string path)
+            => SelectNodeByPath(path);
+
+        public INode SelectNodeByPath(string path, StringComparison comparisonType)
+        {
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
+                .Where(x => x.FullPath.Equals(path, comparisonType))
                 .Select(x => x.As<XmlNode>());
             return matches
                 .FirstOrDefault();
@@ -212,7 +225,7 @@ namespace AnyConfig.Xml
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public IEnumerable<XmlNode> QueryNodes(Func<XmlNode, bool> condition)
+        public IEnumerable<INode> QueryNodes(Func<INode, bool> condition)
         {
             var nodes = ChildNodes.SelectChildren(x => x.ChildNodes).Select(x => x.As<XmlNode>());
             var matches = nodes.Where(condition);

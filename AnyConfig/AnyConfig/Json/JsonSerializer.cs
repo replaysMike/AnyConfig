@@ -82,7 +82,7 @@ namespace AnyConfig.Json
                 var propertyType = property.Type;
                 if (propertyType.IsReferenceType && propertyType != typeof(string))
                 {
-                    var matchedNode = node.SelectNodeByName(property.Name);
+                    var matchedNode = node.SelectNodeByName(property.Name) as JsonNode;
                     if (matchedNode != null)
                         skipFlatMap = true;
                     var objectFactory = new ObjectFactory();
@@ -102,7 +102,7 @@ namespace AnyConfig.Json
                         if (!string.IsNullOrEmpty(propertyAttribute?.PrependChildrenName))
                             nodeName = $"{propertyAttribute.PrependChildrenName}{nodeName}";
                     }
-                    var matchedNode = node.SelectNodeByName(nodeName);
+                    var matchedNode = node.SelectNodeByName(nodeName) as JsonNode;
                     if (matchedNode != null)
                     {
                         switch (matchedNode.ValueType)

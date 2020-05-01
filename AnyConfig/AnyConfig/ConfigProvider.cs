@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Resources;
 using System.Text;
+using System.Text.RegularExpressions;
 using TypeSupport;
 using TypeSupport.Extensions;
 
@@ -96,7 +97,7 @@ namespace AnyConfig
             else if (node.NodeType == JsonNodeType.Value)
             {
                 var key = $"{node.FullPathWithArrayHints.Replace("/", ":").Substring(1)}";
-                key = RemapArrayPositionText(key);
+                key = RemapIConfigurationArrayPositionText(key);
                 var kvp = new KeyValuePair<string, string>(key, GetNodeValue(node.Value, node.ValueType));
                 values.Add(kvp);
             }
@@ -117,7 +118,7 @@ namespace AnyConfig
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        private static string RemapArrayPositionText(string key)
+        internal static string RemapIConfigurationArrayPositionText(string key)
         {
             if (key.Contains('['))
             {
@@ -134,6 +135,26 @@ namespace AnyConfig
                     builder.Append(c);
                 }
                 return builder.ToString();
+            }
+            return key;
+        }
+
+        /// <summary>
+        /// Remap array positions from :x to [x]
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        internal static string RemapINodeArrayPositionText(string key)
+        {
+            if (Regex.IsMatch(key, @"\/[0-9.]+$", RegexOptions.Compiled))
+            {
+                var lastSlashIndex = key.LastIndexOf('/');
+                if (lastSlashIndex > 0)
+                {
+                    var arrayIndex = key.Substring(lastSlashIndex + 1, key.Length - (lastSlashIndex + 1));
+                    var path = key.Substring(0, lastSlashIndex) + "[" + arrayIndex + "]";
+                    return path;
+                }
             }
             return key;
         }
@@ -763,8 +784,8 @@ namespace AnyConfig
                     // if no value is found, try selecting it from appSettings nodes
                     val = objects
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
-                        .QueryNodes(x => x.Name == "add" && x.Attributes.Any(y => y.Name == "key" && y.Value == optionName))
-                        .FirstOrDefault()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
+                        .QueryNodes(x => x.Name == "add" && ((XmlNode)x).Attributes.Any(y => y.Name == "key" && y.Value == optionName))
+                        .FirstOrDefault().As<XmlNode>()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
                         .Select(x => x.Value).FirstOrDefault();
                 }
                 result = ConvertStringToNativeType(valueType, val, defaultValue);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AnyConfig
 {
@@ -63,5 +64,69 @@ namespace AnyConfig
         /// <typeparam name="TNode"></typeparam>
         /// <returns></returns>
         TNode As<TNode>() where TNode : INode;
+
+        /// <summary>
+        /// Select a node by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        INode SelectNodeByName(string name);
+
+        /// <summary>
+        /// Select a node by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        INode SelectNodeByName(string name, StringComparison comparisonType);
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        string SelectValueByName(string name);
+
+        /// <summary>
+        /// Select a child node's value by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        string SelectValueByName(string name, StringComparison comparisonType);
+
+        /// <summary>
+        /// Select a child node by its path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        INode SelectNodeByPath(string path);
+
+        /// <summary>
+        /// Select a child node by its path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        INode SelectNodeByPath(string path, StringComparison comparisonType);
+
+        /// <summary>
+        /// Select a child node's value by its path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        string SelectValueByPath(string path);
+
+        /// <summary>
+        /// Select a child node's value by its path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        string SelectValueByPath(string path, StringComparison comparisonType);
+
+        /// <summary>
+        /// Query child nodes
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        IEnumerable<INode> QueryNodes(Func<INode, bool> condition);
+
     }
 }
