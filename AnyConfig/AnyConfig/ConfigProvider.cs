@@ -146,14 +146,17 @@ namespace AnyConfig
         /// <returns></returns>
         internal static string RemapINodeArrayPositionText(string key)
         {
-            if (Regex.IsMatch(key, @"\/[0-9.]+$", RegexOptions.Compiled))
+            var matches = Regex.Match(key, @"\/[\d+]+(?:\/)?", RegexOptions.Compiled);
+            if (matches.Success)
             {
-                var lastSlashIndex = key.LastIndexOf('/');
-                if (lastSlashIndex > 0)
+                foreach(Capture match in matches.Captures)
                 {
-                    var arrayIndex = key.Substring(lastSlashIndex + 1, key.Length - (lastSlashIndex + 1));
-                    var path = key.Substring(0, lastSlashIndex) + "[" + arrayIndex + "]";
-                    return path;
+                    var arrayIndex = key.Substring(match.Index + 1, match.Length - 1).Replace("/","");
+                    var pathStart = key.Substring(0, match.Index);
+                    var pathEnd = key.Substring(match.Index + match.Length, key.Length - (match.Index + match.Length));
+                    if (pathEnd.Length > 0)
+                        pathEnd = "/" + pathEnd;
+                    key = $"{pathStart}[{arrayIndex}]{pathEnd}";
                 }
             }
             return key;

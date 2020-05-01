@@ -71,7 +71,7 @@ namespace AnyConfig
             if (_jsonNode.NodeType == JsonNodeType.Object)
             {
                 var path = ConvertToJsonPath(Path);
-                var parentNode = _jsonNode.SelectNodeByPath(path) as JsonNode;
+                var parentNode = _node.SelectNodeByPath(path, StringComparison.InvariantCultureIgnoreCase) as JsonNode;
                 if (parentNode == null)
                     throw new InvalidOperationException($"Could not find configuration node in path '{path}'");
                 switch (parentNode.NodeType)
@@ -99,7 +99,8 @@ namespace AnyConfig
 
         public IConfigurationSection GetSection(string key)
         {
-            var parentNode = _node?.SelectNodeByPath(ConvertToJsonPath(Path), StringComparison.InvariantCultureIgnoreCase) as JsonNode;
+            var path = ConvertToJsonPath(Path);
+            var parentNode = _node?.SelectNodeByPath(path, StringComparison.InvariantCultureIgnoreCase) as JsonNode;
             if (parentNode != null)
             {
                 var node = parentNode.SelectNodeByName(key, StringComparison.InvariantCultureIgnoreCase) as JsonNode;
