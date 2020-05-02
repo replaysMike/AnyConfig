@@ -80,7 +80,7 @@ namespace AnyConfig.Json
             foreach(var property in properties)
             {
                 var propertyType = property.Type;
-                if (propertyType.IsReferenceType && propertyType != typeof(string))
+                if (propertyType.IsReferenceType && propertyType != typeof(string) && !propertyType.IsAbstract)
                 {
                     var matchedNode = node.SelectNodeByName(property.Name) as JsonNode;
                     if (matchedNode != null)

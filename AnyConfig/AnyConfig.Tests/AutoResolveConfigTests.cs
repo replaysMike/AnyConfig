@@ -1,5 +1,6 @@
 ﻿using AnyConfig.Exceptions;
 using AnyConfig.Scaffolding;
+using AnyConfig.Tests.Models;
 using NUnit.Framework;
 using System.Linq;
 using System.Reflection;

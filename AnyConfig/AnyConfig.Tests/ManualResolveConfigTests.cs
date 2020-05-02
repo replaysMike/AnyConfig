@@ -88,6 +88,21 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_Load_AuthorizationClientConfiguration()
+        {
+            var value = Config.GetFromJsonFile<AuthorizationClientConfiguration>("appsettings_full.json");
+            Assert.NotNull(value);
+            Assert.AreEqual("https://localhost:1111", value.Endpoint);
+            Assert.AreEqual(false, value.UseClientSideCaching);
+            Assert.AreEqual(true, value.AllowUntrustedCertificates);
+            Assert.NotNull(value.CertificateConfiguration);
+            Assert.AreEqual(LoadCertificateType.Embedded, value.CertificateConfiguration.CertificateType);
+            Assert.AreEqual("Root", value.CertificateConfiguration.Store);
+            Assert.AreEqual("CurrentUser", value.CertificateConfiguration.StoreLocation);
+            Assert.AreEqual("", value.CertificateConfiguration.IssuerName);
+        }
+
+        [Test]
         public void Should_Load_IConfiguration_AndBind()
         {
             var config = Config.GetConfiguration("appsettings_full.json");
