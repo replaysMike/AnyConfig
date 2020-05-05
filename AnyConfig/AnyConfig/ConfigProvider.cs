@@ -736,6 +736,7 @@ namespace AnyConfig
                 {
                     LastResolvedConfigurationFilename = filename;
                     json = File.ReadAllText(filename);
+                    ConfigAssert.WriteLine($"Filename: {filename}\r\nJSON: {json}");
                     _cachedConfigurationFiles.Add(filename, json);
                 }
                 else if (throwsException)
@@ -789,6 +790,7 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(optionName))
             {
+                ConfigAssert.WriteLine($"Filename: {filename}\r\nXML: {xml}");
                 var parser = new XmlParser();
                 var objects = parser.Parse(xml);
                 var val = objects?.SelectValueByName(optionName);
