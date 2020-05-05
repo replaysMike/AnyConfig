@@ -13,7 +13,7 @@ namespace AnyConfig
     /// </summary>
     public static class ConfigAssert
     {
-        private const string Prepend = "TEST: ";
+        internal static string Prepend = "";
         internal static StringBuilder _stringBuilder = new StringBuilder();
         internal static StringBuilder _conditionalBuilder = new StringBuilder();
         internal static Action<string> Target { get; set; } = Console.WriteLine;

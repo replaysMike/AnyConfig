@@ -155,12 +155,11 @@ namespace AnyConfig.Xml
         /// <returns></returns>
         public INode SelectNodeByName(string name, StringComparison comparisonType)
         {
-            var nodes = ChildNodes?.SelectChildren(x => x.ChildNodes);
-            var matches = nodes?
+            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
+            var matches = nodes
                 .Where(x => x.Name?.Equals(name, comparisonType) == true)
                 .Select(x => x.As<XmlNode>());
-            return matches
-                ?.FirstOrDefault();
+            return matches.FirstOrDefault();
         }
 
         public INode SelectNodeByPath(string path)

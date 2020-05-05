@@ -15,6 +15,7 @@ namespace AnyConfig.Tests
 
         public ConfigAssertions(Target target)
         {
+            ConfigAssert.Prepend = "TEST: ";
             switch (target)
             {
                 case Target.StdOut:
