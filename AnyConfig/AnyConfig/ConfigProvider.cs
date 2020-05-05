@@ -795,11 +795,18 @@ namespace AnyConfig
                 if (val == null)
                 {
                     // if no value is found, try selecting it from appSettings nodes
-                    val = objects
+                    var node = objects
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
-                        .QueryNodes(x => x.Name == "add" && ((XmlNode)x).Attributes.Any(y => y.Name.Equals("key", StringComparison.InvariantCultureIgnoreCase) && y.Value == optionName))
-                        .FirstOrDefault()?.As<XmlNode>()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
-                        .Select(x => x.Value).FirstOrDefault();
+                        .QueryNodes(x => x.Name == "add"
+                            && ((XmlNode)x).Attributes.Any(y => y.Name.Equals("key", StringComparison.InvariantCultureIgnoreCase) && y.Value == optionName))
+                        .FirstOrDefault();
+                    if (node != null)
+                    {
+                        val = node.As<XmlNode>()?.Attributes
+                            .Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
+                            .Select(x => x.Value)
+                            .FirstOrDefault();
+                    }
                 }
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
