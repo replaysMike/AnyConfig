@@ -15,7 +15,9 @@ namespace AnyConfig
     {
         private const string Prepend = "TEST: ";
         internal static StringBuilder _stringBuilder = new StringBuilder();
+        internal static StringBuilder _conditionalBuilder = new StringBuilder();
         internal static Action<string> Target { get; set; } = Console.WriteLine;
+        internal static int Length => _stringBuilder.Length;
 
         public static void WriteLine(string str)
         {
@@ -24,9 +26,18 @@ namespace AnyConfig
 #endif
         }
 
+        public static void WriteLineConditional(string str)
+        {
+#if DEBUG
+            _conditionalBuilder.AppendLine(str);
+#endif
+        }
+
         public static void FlushToConsole()
         {
 #if DEBUG
+            if (Length > 0)
+                Target.Invoke(_conditionalBuilder.ToString());
             Target.Invoke(_stringBuilder.ToString());
             Reset();
 #endif
@@ -36,6 +47,7 @@ namespace AnyConfig
         {
 #if DEBUG
             _stringBuilder.Clear();
+            _conditionalBuilder.Clear();
 #endif
         }
     }

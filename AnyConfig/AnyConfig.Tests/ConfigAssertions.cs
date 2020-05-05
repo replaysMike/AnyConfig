@@ -32,11 +32,15 @@ namespace AnyConfig.Tests
 
         public void AfterTest(ITest test)
         {
+            if (ConfigAssert.Length > 0)
+                ConfigAssert.WriteLine(Environment.NewLine);
             ConfigAssert.FlushToConsole();
         }
 
         public void BeforeTest(ITest test)
         {
+            ConfigAssert.WriteLineConditional($"{test.FullName}");
+            ConfigAssert.WriteLineConditional(new string('=', test.FullName.Length));
         }
     }
 
