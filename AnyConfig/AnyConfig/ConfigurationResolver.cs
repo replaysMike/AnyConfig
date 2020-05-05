@@ -6,6 +6,7 @@ using AnyConfig.Xml;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -357,15 +358,22 @@ namespace AnyConfig
             var configFile = filename;
             if (!string.IsNullOrEmpty(configFile))
             {
+                // try the default path
                 configFile = Path.GetFullPath(configFile);
                 if (!File.Exists(configFile))
                 {
+                    // try the entry assembly
                     if (_entryAssembly != null)
                         configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename);
                     else
                         configFile = Path.GetFullPath(filename);
                     if (!File.Exists(configFile))
-                        throw new FileNotFoundException($"Could not find configuration file '{configFile}'");
+                    {
+                        // try the current process
+                        configFile = Path.Combine(GetCurrentProcessPath(), filename);
+                    }
+                    if (!File.Exists(configFile))
+                        throw new ConfigurationMissingException($"Could not find configuration file '{configFile}'");
                 }
             }
             return configFile;
@@ -452,7 +460,11 @@ namespace AnyConfig
                     {
                         value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value == ConfigProvider.Empty)
-                            return defaultValue;
+                        {
+                            value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                            if (value == ConfigProvider.Empty)
+                                return defaultValue;
+                        }
                     }
                 }
                 return value;
@@ -486,7 +498,11 @@ namespace AnyConfig
                     {
                         value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value.IsNullOrEmpty())
-                            return defaultValue;
+                        {
+                            value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                            if (value.IsNullOrEmpty())
+                                return defaultValue;
+                        }
                     }
                 }
                 return (T)value;
@@ -571,8 +587,12 @@ namespace AnyConfig
                         if (value.IsNullOrEmpty())
                         {
                             value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
-                            if (isRequired && value.IsNullOrEmpty())
-                                throw new ConfigurationMissingException(propertyName, propertyType);
+                            if (value.IsNullOrEmpty())
+                            {
+                                value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                                if (isRequired && value.IsNullOrEmpty())
+                                    throw new ConfigurationMissingException(propertyName, propertyType);
+                            }
                         }
                     }
                 }
@@ -592,6 +612,18 @@ namespace AnyConfig
             }
             return returnObject;
         }
+
+        /// <summary>
+        /// Get the path of the current process
+        /// </summary>
+        /// <returns></returns>
+        private string GetCurrentProcessPath() => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+
+        /// <summary>
+        /// Get the path of the current process
+        /// </summary>
+        /// <returns></returns>
+        private string GetCurrentProcessFilename() => Process.GetCurrentProcess().MainModule.FileName;
 
         private string GetAssemblyName()
         {

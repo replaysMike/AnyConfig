@@ -108,10 +108,14 @@ namespace AnyConfig.Tests
             // inspect this complicated config structure
             var section = config.GetSection("NLog");
             var targets = section.GetSection("targets");
+            var console = targets.GetSection("console");
             var graylog = targets.GetSection("graylog");
             var parms = graylog.GetSection("Parameters");
             var children = parms.GetChildren();
-            var child1Value = children.First().GetChildren().First();
+            var children2 = children.First().GetChildren().First();
+            var z = children2.GetChildren();
+            var child = children.First();
+            var child1Value = child.GetSection("Layout");
 
             Assert.AreEqual("authv2", child1Value.Value);
 
