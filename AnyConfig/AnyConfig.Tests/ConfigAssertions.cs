@@ -3,7 +3,7 @@ using NUnit.Framework.Interfaces;
 using System;
 
 #if DEBUG
-[assembly: AnyConfig.Tests.ConfigAssertions(AnyConfig.Tests.Target.TestContext)]
+[assembly: AnyConfig.Tests.ConfigAssertions(AnyConfig.Tests.Target.StdError)]
 #endif
 
 namespace AnyConfig.Tests
@@ -33,8 +33,6 @@ namespace AnyConfig.Tests
 
         public void AfterTest(ITest test)
         {
-            if (ConfigAssert.Length > 0)
-                ConfigAssert.WriteLine(Environment.NewLine);
             ConfigAssert.FlushToConsole();
         }
 
