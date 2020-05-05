@@ -155,12 +155,12 @@ namespace AnyConfig.Xml
         /// <returns></returns>
         public INode SelectNodeByName(string name, StringComparison comparisonType)
         {
-            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes);
-            var matches = nodes
-                .Where(x => x.Name.Equals(name, comparisonType))
+            var nodes = ChildNodes?.SelectChildren(x => x.ChildNodes);
+            var matches = nodes?
+                .Where(x => x.Name?.Equals(name, comparisonType) == true)
                 .Select(x => x.As<XmlNode>());
             return matches
-                .FirstOrDefault();
+                ?.FirstOrDefault();
         }
 
         public INode SelectNodeByPath(string path)
@@ -227,9 +227,11 @@ namespace AnyConfig.Xml
         /// <returns></returns>
         public IEnumerable<INode> QueryNodes(Func<INode, bool> condition)
         {
-            var nodes = ChildNodes.SelectChildren(x => x.ChildNodes).Select(x => x.As<XmlNode>());
-            var matches = nodes.Where(condition);
-            return matches.Select(y => y.As<XmlNode>());
+            var nodes = ChildNodes?.SelectChildren(x => x.ChildNodes)
+                ?.Select(x => x.As<XmlNode>());
+            var matches = nodes?.Where(condition);
+            return matches?
+                .Select(y => y.As<XmlNode>());
         }
 
         /// <summary>
