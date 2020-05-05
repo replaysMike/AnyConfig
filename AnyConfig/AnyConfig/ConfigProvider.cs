@@ -27,6 +27,8 @@ namespace AnyConfig
         private static readonly Dictionary<string, string> _cachedConfigurationFiles = new Dictionary<string, string>();
 
         public static ConfigValueNotSet Empty => ConfigValueNotSet.Instance;
+        public static string LastResolvedConfigurationFilename { get; private set; }
+
 
         public static string GetConnectionString(string name)
         {
@@ -60,17 +62,22 @@ namespace AnyConfig
         /// <returns></returns>
         public static IConfigurationRoot GetConfiguration(string appSettingsJson, string path)
         {
+            var filename = appSettingsJson ?? DotNetCoreSettingsFilename;
             if (string.IsNullOrEmpty(path))
-                path = Directory.GetCurrentDirectory();
-            var filePath = Path.Combine(path, appSettingsJson ?? DotNetCoreSettingsFilename);
+            {
+                var resolver = new ConfigurationResolver();
+                path = Path.GetDirectoryName(resolver.ResolveFilenamePath(filename));
+            }
+
+            var filePath = Path.Combine(path, filename);
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The configuration file named '{filePath}' was not found.");
 
             var jsonParser = new JsonParser();
             var rootNode = jsonParser.Parse(File.ReadAllText(filePath));
 
-            var configuration = new ConfigurationRoot();
-            var provider = new JsonConfigurationProvider();
+            var configuration = new ConfigurationRoot(filePath);
+            var provider = new JsonConfigurationProvider(filePath);
             configuration.AddProvider(provider);
             foreach (JsonNode node in rootNode.ChildNodes)
             {
@@ -727,6 +734,7 @@ namespace AnyConfig
             {
                 if (File.Exists(filename))
                 {
+                    LastResolvedConfigurationFilename = filename;
                     json = File.ReadAllText(filename);
                     _cachedConfigurationFiles.Add(filename, json);
                 }
@@ -759,7 +767,8 @@ namespace AnyConfig
         {
             var xml = string.Empty;
             var result = defaultValue;
-            var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
+            var filenameExpressionValue = configParameters.GetExpressionValue("Filename");
+            var filename = Path.GetFullPath(filenameExpressionValue);
             if (_cachedConfigurationFiles.ContainsKey(filename))
             {
                 xml = _cachedConfigurationFiles[filename];
@@ -768,6 +777,7 @@ namespace AnyConfig
             {
                 if (File.Exists(filename))
                 {
+                    LastResolvedConfigurationFilename = filename;
                     xml = File.ReadAllText(filename);
                     _cachedConfigurationFiles.Add(filename, xml);
                 }
@@ -787,8 +797,8 @@ namespace AnyConfig
                     // if no value is found, try selecting it from appSettings nodes
                     val = objects
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
-                        .QueryNodes(x => x.Name == "add" && ((XmlNode)x).Attributes.Any(y => y.Name == "key" && y.Value == optionName))
-                        .FirstOrDefault().As<XmlNode>()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
+                        .QueryNodes(x => x.Name == "add" && ((XmlNode)x).Attributes.Any(y => y.Name.Equals("key", StringComparison.InvariantCultureIgnoreCase) && y.Value == optionName))
+                        .FirstOrDefault()?.As<XmlNode>()?.Attributes.Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
                         .Select(x => x.Value).FirstOrDefault();
                 }
                 result = ConvertStringToNativeType(valueType, val, defaultValue);

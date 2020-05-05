@@ -10,16 +10,17 @@ namespace AnyConfig
     {
         private readonly List<IConfigurationProvider> _configurationProviders = new List<IConfigurationProvider>();
 
-        public ConfigurationRoot()
-        {
-
-        }
-
-        public ConfigurationRoot(List<IConfigurationSection> configurationSections) : base(configurationSections)
+        public ConfigurationRoot(string resolvedConfigurationFile) : base(resolvedConfigurationFile)
         {
         }
 
-        public ConfigurationRoot(List<IConfigurationSection> configurationSections, List<IConfigurationProvider> configurationProviders) : base(configurationSections)
+        public ConfigurationRoot(List<IConfigurationSection> configurationSections, string resolvedConfigurationFile) 
+            : base(configurationSections, resolvedConfigurationFile)
+        {
+        }
+
+        public ConfigurationRoot(List<IConfigurationSection> configurationSections, List<IConfigurationProvider> configurationProviders, string resolvedConfigurationFile) 
+            : base(configurationSections, resolvedConfigurationFile)
         {
             _configurationProviders = configurationProviders;
         }

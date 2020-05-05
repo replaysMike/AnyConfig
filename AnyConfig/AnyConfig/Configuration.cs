@@ -33,9 +33,17 @@ namespace AnyConfig
             }
         }
 
-        public Configuration() { }
+        /// <summary>
+        /// The configuration file that was resolved
+        /// </summary>
+        public string ResolvedConfigurationFile { get; internal set; }
 
-        public Configuration(List<IConfigurationSection> configurationSections)
+        public Configuration(string resolvedConfigurationFile)
+        {
+            ResolvedConfigurationFile = resolvedConfigurationFile;
+        }
+
+        public Configuration(List<IConfigurationSection> configurationSections, string resolvedConfigurationFile) : this(resolvedConfigurationFile)
         {
             _configurationSections = configurationSections;
         }

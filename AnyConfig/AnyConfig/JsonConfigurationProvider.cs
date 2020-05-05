@@ -11,6 +11,16 @@ namespace AnyConfig
         public ICollection<KeyValuePair<string, string>> Data { get; private set; }
         public ICollection<string> Source { get; }
 
+        /// <summary>
+        /// The configuration file that was resolved
+        /// </summary>
+        public string ResolvedConfigurationFile { get; internal set; }
+
+        public JsonConfigurationProvider(string resolvedConfigurationFile)
+        {
+            ResolvedConfigurationFile = resolvedConfigurationFile;
+        }
+
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath) 
             => Data.Select(x => x.Key).ToList();
 

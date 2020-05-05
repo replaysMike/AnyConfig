@@ -9,6 +9,8 @@ namespace AnyConfig
     /// </summary>
     public static class Config
     {
+        public static string LastResolvedConfigurationFilename { get; internal set; }
+
         /// <summary>
         /// Get a specific configuration
         /// </summary>
@@ -216,7 +218,9 @@ namespace AnyConfig
         public static IConfigurationRoot GetConfiguration()
         {
             var resolver = CreateResolver();
-            return resolver.GetConfiguration();
+            var config = resolver.GetConfiguration();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -226,7 +230,9 @@ namespace AnyConfig
         public static IConfigurationRoot GetConfiguration(Assembly assembly)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.GetConfiguration();
+            var config = resolver.GetConfiguration();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -237,7 +243,9 @@ namespace AnyConfig
         public static IConfigurationRoot GetConfiguration(string filename)
         {
             var resolver = CreateResolver();
-            return resolver.GetConfiguration(filename);
+            var config = resolver.GetConfiguration(filename);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -248,7 +256,9 @@ namespace AnyConfig
         public static T GetFromXml<T>()
         {
             var resolver = CreateResolver();
-            return resolver.GetFromXml<T>();
+            var config = resolver.GetFromXml<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -259,7 +269,9 @@ namespace AnyConfig
         public static object GetFromXml(string sectionName, Type type)
         {
             var resolver = CreateResolver();
-            return resolver.LoadXmlConfiguration(null, type, sectionName: sectionName);
+            var config = resolver.LoadXmlConfiguration(null, type, sectionName: sectionName);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -270,7 +282,9 @@ namespace AnyConfig
         public static T GetFromXml<T>(Assembly assembly)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.GetFromXml<T>();
+            var config = resolver.GetFromXml<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -282,7 +296,9 @@ namespace AnyConfig
         public static T GetFromXmlFile<T>(string filename)
         {
             var resolver = CreateResolver();
-            return resolver.GetFromXmlFile<T>(filename);
+            var config = resolver.GetFromXmlFile<T>(filename);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -295,7 +311,9 @@ namespace AnyConfig
         public static T GetFromXmlFile<T>(string filename, string sectionName)
         {
             var resolver = CreateResolver();
-            return resolver.GetFromXmlFile<T>(filename, sectionName);
+            var config = resolver.GetFromXmlFile<T>(filename, sectionName);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -306,7 +324,9 @@ namespace AnyConfig
         public static T GetFromJson<T>()
         {
             var resolver = CreateResolver();
-            return resolver.GetFromJson<T>();
+            var config = resolver.GetFromJson<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -317,7 +337,9 @@ namespace AnyConfig
         public static T GetFromJson<T>(Assembly assembly)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.GetFromJson<T>();
+            var config = resolver.GetFromJson<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -329,7 +351,9 @@ namespace AnyConfig
         public static T GetFromJsonFile<T>(string filename)
         {
             var resolver = CreateResolver();
-            return resolver.GetFromJsonFile<T>(filename);
+            var config = resolver.GetFromJsonFile<T>(filename);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         /// <summary>
@@ -342,67 +366,89 @@ namespace AnyConfig
         public static T GetFromJsonFile<T>(string filename, string sectionName)
         {
             var resolver = CreateResolver();
-            return resolver.GetFromJsonFile<T>(filename, sectionName);
+            var config = resolver.GetFromJsonFile<T>(filename, sectionName);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T Resolve<T>()
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfiguration<T>();
+            var config = resolver.ResolveConfiguration<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T Resolve<T>(Assembly assembly)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.ResolveConfiguration<T>();
+            var config = resolver.ResolveConfiguration<T>();
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T Resolve<T>(string settingName, T defaultValue)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfiguration<T>(settingName, defaultValue);
+            var config = resolver.ResolveConfiguration<T>(settingName, defaultValue);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T Resolve<T>(Assembly assembly, string settingName, T defaultValue)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.ResolveConfiguration<T>(settingName, defaultValue);
+            var config = resolver.ResolveConfiguration<T>(settingName, defaultValue);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static object Resolve(string settingName, Type type, object defaultValue)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfiguration(settingName, type, defaultValue);
+            var config = resolver.ResolveConfiguration(settingName, type, defaultValue);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static object Resolve(Assembly assembly, string settingName, Type type, object defaultValue)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfiguration(settingName, type, defaultValue);
+            var config = resolver.ResolveConfiguration(settingName, type, defaultValue);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T ResolveSection<T>(string sectionName, T defaultValue, bool throwsException)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
+            var config = resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static T ResolveSection<T>(Assembly assembly, string sectionName, T defaultValue, bool throwsException)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
+            var config = resolver.ResolveConfigurationSection<T>(sectionName, defaultValue, throwsException);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static object ResolveSection(string sectionName, Type type, object defaultValue, bool throwsException)
         {
             var resolver = CreateResolver();
-            return resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
+            var config = resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
-        
+
         private static object ResolveSection(Assembly assembly, string sectionName, Type type, object defaultValue, bool throwsException)
         {
             var resolver = CreateResolver(assembly);
-            return resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
+            var config = resolver.ResolveConfigurationSection(sectionName, type, defaultValue, throwsException);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
         }
 
         private static ConfigurationResolver CreateResolver() => new ConfigurationResolver();

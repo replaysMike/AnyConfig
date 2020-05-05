@@ -27,6 +27,11 @@ namespace AnyConfig
         private LegacyConfigurationLoader _legacyConfigurationLoader;
 
         /// <summary>
+        /// The last configuration filename that was resolved
+        /// </summary>
+        public string LastResolvedConfigurationFilename { get; private set; }
+
+        /// <summary>
         /// Register an entry assembly with the resolver
         /// </summary>
         /// <param name="entryAssembly"></param>
@@ -353,7 +358,12 @@ namespace AnyConfig
             return ConfigProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
         }
 
-        private string ResolveFilenamePath(string filename)
+        /// <summary>
+        /// Resolve the configuration filename path
+        /// </summary>
+        /// <param name="filename">The configuration filename to resolve</param>
+        /// <returns></returns>
+        public string ResolveFilenamePath(string filename)
         {
             var configFile = filename;
             if (!string.IsNullOrEmpty(configFile))
@@ -376,6 +386,7 @@ namespace AnyConfig
                         throw new ConfigurationMissingException($"Could not find configuration file '{configFile}'");
                 }
             }
+            LastResolvedConfigurationFilename = configFile;
             return configFile;
         }
 
@@ -461,7 +472,8 @@ namespace AnyConfig
                         value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value == ConfigProvider.Empty)
                         {
-                            value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                            var currentProcessFilename = GetCurrentProcessFilename() + ".config";
+                            value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                             if (value == ConfigProvider.Empty)
                                 return defaultValue;
                         }
@@ -499,7 +511,8 @@ namespace AnyConfig
                         value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value.IsNullOrEmpty())
                         {
-                            value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                            var currentProcessFilename = GetCurrentProcessFilename() + ".config";
+                            value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                             if (value.IsNullOrEmpty())
                                 return defaultValue;
                         }
@@ -589,7 +602,8 @@ namespace AnyConfig
                             value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                             if (value.IsNullOrEmpty())
                             {
-                                value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => Path.Combine(GetCurrentProcessFilename(), ".config"));
+                                var currentProcessFilename = GetCurrentProcessFilename() + ".config";
+                                value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                                 if (isRequired && value.IsNullOrEmpty())
                                     throw new ConfigurationMissingException(propertyName, propertyType);
                             }
@@ -610,6 +624,7 @@ namespace AnyConfig
                 else
                     returnObject = defaultValue;
             }
+            LastResolvedConfigurationFilename = ConfigProvider.LastResolvedConfigurationFilename;
             return returnObject;
         }
 
@@ -617,13 +632,23 @@ namespace AnyConfig
         /// Get the path of the current process
         /// </summary>
         /// <returns></returns>
-        private string GetCurrentProcessPath() => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        private string GetCurrentProcessPath()
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            var path = Path.GetDirectoryName(currentProcess.MainModule.FileName);
+            return path;
+        }
 
         /// <summary>
         /// Get the path of the current process
         /// </summary>
         /// <returns></returns>
-        private string GetCurrentProcessFilename() => Process.GetCurrentProcess().MainModule.FileName;
+        private string GetCurrentProcessFilename()
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            var filename = currentProcess.MainModule.FileName;
+            return filename;
+        }
 
         private string GetAssemblyName()
         {
