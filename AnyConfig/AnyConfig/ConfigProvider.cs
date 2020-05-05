@@ -794,6 +794,7 @@ namespace AnyConfig
                 var val = objects?.SelectValueByName(optionName);
                 if (val == null && objects != null)
                 {
+                    throw new InvalidOperationException("test");
                     // if no value is found, try selecting it from appSettings nodes
                     var node = objects
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
