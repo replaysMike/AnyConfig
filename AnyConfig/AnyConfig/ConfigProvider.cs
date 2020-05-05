@@ -797,13 +797,13 @@ namespace AnyConfig
                     // if no value is found, try selecting it from appSettings nodes
                     var node = objects
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
-                        .QueryNodes(x => x.Name == "add"
-                            && ((XmlNode)x).Attributes.Any(y => y.Name.Equals("key", StringComparison.InvariantCultureIgnoreCase) && y.Value == optionName))
+                        .QueryNodes(x => x.Name?.Equals("add", StringComparison.InvariantCultureIgnoreCase) == true
+                            && ((XmlNode)x).Attributes?.Any(y => y.Name?.Equals("key", StringComparison.InvariantCultureIgnoreCase) == true && y.Value?.Equals(optionName, StringComparison.InvariantCultureIgnoreCase) == true) == true)
                         .FirstOrDefault();
                     if (node != null)
                     {
                         val = node.As<XmlNode>()?.Attributes
-                            .Where(x => x.Name.Equals("value", StringComparison.InvariantCultureIgnoreCase))
+                            .Where(x => x.Name?.Equals("value", StringComparison.InvariantCultureIgnoreCase) == true)
                             .Select(x => x.Value)
                             .FirstOrDefault();
                     }
