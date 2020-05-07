@@ -33,6 +33,34 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_InvalidBoolGet_ReturnDefault()
+        {
+            var config = Config.Get("SomeInvalidValue", true);
+            Assert.AreEqual(true, config);
+        }
+
+        [Test]
+        public void Should_InvalidStringGet_ReturnDefault()
+        {
+            var config = Config.Get("SomeInvalidValue", "DefaultValue");
+            Assert.AreEqual("DefaultValue", config);
+        }
+
+        [Test]
+        public void Should_InvalidNullableBoolGet_ReturnDefault()
+        {
+            var config = Config.Get<bool?>("SomeInvalidValue", true);
+            Assert.AreEqual(true, config);
+        }
+
+        [Test]
+        public void Should_InvalidNullableBoolGet_ReturnNull()
+        {
+            bool? config = Config.Get<bool?>("SomeInvalidValue");
+            Assert.AreEqual(null, config);
+        }
+
+        [Test]
         public void Should_Load_Config()
         {
             var config = Config.Get<TestConfiguration>();

@@ -951,6 +951,7 @@ namespace AnyConfig
         {
             var result = defaultValue;
             var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+
             // support nullable types
             if (isNullable)
             {
@@ -959,6 +960,10 @@ namespace AnyConfig
                     return result;
                 type = Nullable.GetUnderlyingType(type);
             }
+
+            if (val == null)
+                return defaultValue;
+
             // support enums
             if (type.IsEnum)
                 result = Convert.ChangeType(Enum.Parse(type, val), type);
