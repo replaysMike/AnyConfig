@@ -1,5 +1,6 @@
 ﻿using AnyConfig.Exceptions;
 using AnyConfig.Json;
+using AnyConfig.Models;
 using AnyConfig.Xml;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -779,6 +780,8 @@ namespace AnyConfig
                 {
                     LastResolvedConfigurationFilename = filename;
                     xml = File.ReadAllText(filename);
+                    if (string.IsNullOrEmpty(xml))
+                        return null;
                     _cachedConfigurationFiles.Add(filename, xml);
                 }
                 else if (throwsException)
@@ -787,7 +790,7 @@ namespace AnyConfig
                 }
             }
 
-            if (!string.IsNullOrEmpty(optionName))
+            if (!string.IsNullOrEmpty(optionName) && !string.IsNullOrEmpty(xml))
             {
                 var parser = new XmlParser();
                 var objects = parser.Parse(xml);
@@ -810,7 +813,7 @@ namespace AnyConfig
                 }
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
-            else
+            else if (!string.IsNullOrEmpty(xml))
             {
                 // mapping an entire object
                 return XmlSerializer.Deserialize(xml, valueType);

@@ -182,18 +182,21 @@ namespace AnyConfig
                     {
                         foreach (XmlNode configSectionNode in sections)
                         {
+                            var configSectionName = configSectionNode.Attributes.GetNamedItem("name")?.InnerText;
+                            var configSectionTypeName = configSectionNode.Attributes.GetNamedItem("type")?.InnerText;
                             var configSectionPair = new ConfigSectionPair
                             {
-                                Name = configSectionNode.Attributes.GetNamedItem("name")?.InnerText,
-                                Type = configSectionNode.Attributes.GetNamedItem("type")?.InnerText,
+                                Name = configSectionName,
+                                Type = configSectionTypeName,
                             };
                             try
                             {
-                                configSectionPair.TypeValue = ResolveType(configSectionNode.Attributes.GetNamedItem("type")?.InnerText);
+                                configSectionPair.TypeValue = ResolveType(configSectionTypeName);
                             }
-                            catch (TypeLoadException)
+                            catch (TypeLoadException ex)
                             {
                                 // could not load this type
+                                throw new TypeLoadException($"Could not load configuration section '{configSectionName}'. Could not load type '{configSectionTypeName}'", ex);
                             }
                             config.Configuration.ConfigSections.Add(configSectionPair);
                         }

@@ -505,10 +505,10 @@ namespace AnyConfig
                     value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                 if (value.IsNullOrEmpty())
                 {
-                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig, throwsException);
                     if (value.IsNullOrEmpty())
                     {
-                        value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                        value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
                         if (value.IsNullOrEmpty())
                         {
                             var currentProcessFilename = GetCurrentProcessFilename() + ".config";
