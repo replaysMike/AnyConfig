@@ -302,6 +302,13 @@ namespace AnyConfig
         public T GetFromXmlFile<T>(string filename, string sectionName) => LoadXmlConfiguration<T>(default, null, filename, sectionName, true);
 
         /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetFromXmlFile<T>(string filename, string settingName, T defaultValue) => LoadXmlConfiguration(defaultValue, settingName, filename);
+
+        /// <summary>
         /// Get configuration as an object from Json configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -331,6 +338,13 @@ namespace AnyConfig
         /// <param name="sectionName"></param>
         /// <returns></returns>
         public T GetFromJsonFile<T>(string filename, string sectionName) => LoadJsonConfiguration<T>(default, null, filename, sectionName, true);
+
+        /// <summary>
+        /// Get configuration as an object from Json configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetFromJsonFile<T>(string filename, string settingName, T defaultValue) => LoadJsonConfiguration(defaultValue, settingName, filename);
 
         /// <summary>
         /// Get an IConfiguration

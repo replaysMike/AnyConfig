@@ -320,6 +320,21 @@ namespace AnyConfig
         /// Get a specific configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="filename">Filename of xml configuration to load</param>
+        /// <param name="sectionName">Section name to retrieve</param>
+        /// <returns></returns>
+        public static T GetFromXmlFile<T>(string filename, string settingName, T defaultValue)
+        {
+            var resolver = CreateResolver();
+            var config = resolver.GetFromXmlFile<T>(filename, settingName, defaultValue);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static T GetFromJson<T>()
         {
@@ -367,6 +382,21 @@ namespace AnyConfig
         {
             var resolver = CreateResolver();
             var config = resolver.GetFromJsonFile<T>(filename, sectionName);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="filename">Filename of json configuration to load</param>
+        /// <param name="sectionName">Section name to retrieve</param>
+        /// <returns></returns>
+        public static T GetFromJsonFile<T>(string filename, string settingName, T defaultValue)
+        {
+            var resolver = CreateResolver();
+            var config = resolver.GetFromJsonFile<T>(filename, settingName, defaultValue);
             LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
             return config;
         }

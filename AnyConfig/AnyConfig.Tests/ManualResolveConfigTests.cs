@@ -156,6 +156,20 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_Load_Setting_FromXmlFile()
+        {
+            var value = Config.GetFromXmlFile<int>("empty.config", "Invalid", 999);
+            Assert.AreEqual(999, value);
+        }
+
+        [Test]
+        public void Should_Load_Setting_FromJsonFile()
+        {
+            var value = Config.GetFromJsonFile<int>("empty.json", "Invalid", 999);
+            Assert.AreEqual(999, value);
+        }
+
+        [Test]
         [Category("RequiresEncryption")]
         [Ignore("Temporarily disabled because of AppVeyor failures")]
         public void Should_Load_Protected_Dapi_Xml()
