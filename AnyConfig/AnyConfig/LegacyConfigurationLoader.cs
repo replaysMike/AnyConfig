@@ -196,7 +196,12 @@ namespace AnyConfig
                             catch (TypeLoadException ex)
                             {
                                 // could not load this type
+#if NETFRAMEWORK
                                 throw new TypeLoadException($"Could not load configuration section '{configSectionName}'. Could not load type '{configSectionTypeName}'", ex);
+#else
+                                // don't throw an exception, because there are instances where the type might be available 
+                                // in .Net Framework but not .Net Core
+#endif
                             }
                             config.Configuration.ConfigSections.Add(configSectionPair);
                         }
