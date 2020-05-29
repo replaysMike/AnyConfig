@@ -4,6 +4,7 @@ using AnyConfig.Tests.Models;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace AnyConfig.Tests
@@ -160,6 +161,19 @@ namespace AnyConfig.Tests
         {
             var value = Config.GetFromXmlFile<int>("empty.config", "Invalid", 999);
             Assert.AreEqual(999, value);
+        }
+
+        [Test]
+        public void Should_Load_Setting_FromXmlFile2()
+        {
+            var value = Config.GetFromXmlFile<int>("empty2.config", "IsMockedEportEnvironment", 999);
+            Assert.AreEqual(999, value);
+        }
+
+        [Test]
+        public void Should_Load_Setting_FromXmlFile_NoDefault()
+        {
+            Assert.Throws<KeyNotFoundException>(() => Config.GetSettingFromXmlFile<bool>("empty2.config", "IsMockedEportEnvironment"));
         }
 
         [Test]

@@ -11,11 +11,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using TypeSupport;
 using TypeSupport.Extensions;
 
+[assembly: InternalsVisibleTo("AnyConfig.Tests")]
 namespace AnyConfig
 {
     /// <summary>
@@ -157,9 +159,9 @@ namespace AnyConfig
             var matches = Regex.Match(key, @"\/[\d+]+(?:\/)?", RegexOptions.Compiled);
             if (matches.Success)
             {
-                foreach(Capture match in matches.Captures)
+                foreach (Capture match in matches.Captures)
                 {
-                    var arrayIndex = key.Substring(match.Index + 1, match.Length - 1).Replace("/","");
+                    var arrayIndex = key.Substring(match.Index + 1, match.Length - 1).Replace("/", "");
                     var pathStart = key.Substring(0, match.Index);
                     var pathEnd = key.Substring(match.Index + match.Length, key.Length - (match.Index + match.Length));
                     if (pathEnd.Length > 0)
@@ -811,6 +813,8 @@ namespace AnyConfig
                             .FirstOrDefault();
                     }
                 }
+                if (val == null && throwsException)
+                    throw new KeyNotFoundException($"The configuration key '{optionName}' does not exist.");
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
             else if (!string.IsNullOrEmpty(xml))
@@ -897,7 +901,7 @@ namespace AnyConfig
         /// <param name="val"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        private static object ConvertStringToNativeType(Type type, string val, object defaultValue)
+        internal static object ConvertStringToNativeType(Type type, string val, object defaultValue)
         {
             var result = defaultValue;
             var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
@@ -918,9 +922,13 @@ namespace AnyConfig
                 result = (object)val;
             else if (type == typeof(bool))
             {
-                var boolval = val.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase)
-                    || val.Trim().Equals("1");
-                result = boolval;
+                if (val == null)
+                    result = (bool)(defaultValue ?? false);
+                else {
+                    var boolval = val.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase)
+                        || val.Trim().Equals("1");
+                    result = boolval;
+                }
             }
             else if (type == typeof(float))
             {

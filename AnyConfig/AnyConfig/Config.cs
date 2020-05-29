@@ -335,6 +335,21 @@ namespace AnyConfig
         /// Get a specific configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="filename">Filename of xml configuration to load</param>
+        /// <param name="sectionName">Section name to retrieve</param>
+        /// <returns></returns>
+        public static T GetSettingFromXmlFile<T>(string filename, string settingName)
+        {
+            var resolver = CreateResolver();
+            var config = resolver.GetSettingFromXmlFile<T>(filename, settingName);
+            LastResolvedConfigurationFilename = resolver.LastResolvedConfigurationFilename;
+            return config;
+        }
+
+        /// <summary>
+        /// Get a specific configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static T GetFromJson<T>()
         {

@@ -305,6 +305,14 @@ namespace AnyConfig
         /// Get configuration as an object from Xml configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        public T GetSettingFromXmlFile<T>(string filename, string settingName) => LoadXmlConfiguration<T>(default, settingName, filename, null, true);
+
+        /// <summary>
+        /// Get configuration as an object from Xml configuration
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public T GetFromXmlFile<T>(string filename, string settingName, T defaultValue) => LoadXmlConfiguration(defaultValue, settingName, filename);
 

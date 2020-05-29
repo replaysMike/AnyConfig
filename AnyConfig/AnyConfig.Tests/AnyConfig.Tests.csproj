@@ -10,6 +10,7 @@
     <None Remove="DapiProtectedApp.config" />
     <None Remove="empty.config" />
     <None Remove="empty.json" />
+    <None Remove="empty2.config" />
     <None Remove="legacyappsettings.json" />
     <None Remove="legacyflatmap.config" />
     <None Remove="legacyflatmap.json" />
@@ -27,6 +28,9 @@
 
   <ItemGroup>
     <Content Include="appsettings_full.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="empty2.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="empty.config">
