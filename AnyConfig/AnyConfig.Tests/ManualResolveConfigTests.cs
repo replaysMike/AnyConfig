@@ -1,4 +1,5 @@
 ﻿using AnyConfig.Collections;
+using AnyConfig.Exceptions;
 using AnyConfig.Models;
 using AnyConfig.Tests.Models;
 using Microsoft.Extensions.Configuration;
@@ -173,7 +174,7 @@ namespace AnyConfig.Tests
         [Test]
         public void Should_Load_Setting_FromXmlFile_NoDefault()
         {
-            Assert.Throws<KeyNotFoundException>(() => Config.GetSettingFromXmlFile<bool>("empty2.config", "IsMockedEportEnvironment"));
+            Assert.Throws<ConfigurationMissingException>(() => Config.GetSettingFromXmlFile<bool>("empty2.config", "IsMockedEportEnvironment"));
         }
 
         [Test]

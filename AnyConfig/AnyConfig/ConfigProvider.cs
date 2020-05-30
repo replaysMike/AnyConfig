@@ -814,7 +814,7 @@ namespace AnyConfig
                     }
                 }
                 if (val == null && throwsException)
-                    throw new KeyNotFoundException($"The configuration key '{optionName}' does not exist.");
+                    throw new ConfigurationMissingException($"The configuration key '{optionName}' does not exist.");
                 result = ConvertStringToNativeType(valueType, val, defaultValue);
             }
             else if (!string.IsNullOrEmpty(xml))
