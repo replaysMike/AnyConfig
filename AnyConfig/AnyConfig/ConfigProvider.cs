@@ -905,6 +905,7 @@ namespace AnyConfig
         {
             var result = defaultValue;
             var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+
             // support nullable types
             if (isNullable)
             {
@@ -923,7 +924,7 @@ namespace AnyConfig
             else if (type == typeof(bool))
             {
                 if (val == null)
-                    result = (bool)(defaultValue ?? false);
+                    result = defaultValue;
                 else {
                     var boolval = val.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase)
                         || val.Trim().Equals("1");

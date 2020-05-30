@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 
 namespace AnyConfig.Tests
 {
@@ -9,7 +10,7 @@ namespace AnyConfig.Tests
         public void Should_ConvertStringToNativeType_NullDefaultNullBool()
         {
             var obj = ConfigProvider.ConvertStringToNativeType(typeof(bool), null, null);
-            Assert.AreEqual(false, obj);
+            Assert.AreEqual(null, obj);
         }
 
         [Test]
@@ -45,6 +46,13 @@ namespace AnyConfig.Tests
         {
             var obj = ConfigProvider.ConvertStringToNativeType(typeof(int), "asdf", null);
             Assert.AreEqual(null, obj);
+        }
+
+        [Test]
+        public void Should_ConvertStringToNativeType_MismatchedDefaultValue()
+        {
+            var obj = ConfigProvider.ConvertStringToNativeType(typeof(int), "asdf", true);
+            Assert.AreEqual(true, obj);
         }
     }
 }
