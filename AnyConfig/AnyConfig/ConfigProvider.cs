@@ -910,12 +910,12 @@ namespace AnyConfig
             if (isNullable)
             {
                 // if type is nullable and value is empty, return null (undefined)
-                if (string.IsNullOrEmpty(val))
+                if (val == null)
                     return result;
                 type = Nullable.GetUnderlyingType(type);
             }
             // support enums
-            if (type.IsEnum)
+            if (type.IsEnum && val != null)
                 result = Convert.ChangeType(Enum.Parse(type, val), type);
 
             // support built-in types

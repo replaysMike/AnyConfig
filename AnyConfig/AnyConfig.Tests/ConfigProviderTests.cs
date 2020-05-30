@@ -54,5 +54,19 @@ namespace AnyConfig.Tests
             var obj = ConfigProvider.ConvertStringToNativeType(typeof(int), "asdf", true);
             Assert.AreEqual(true, obj);
         }
+
+        [Test]
+        public void Should_ConvertStringToNativeType_Enum()
+        {
+            var obj = ConfigProvider.ConvertStringToNativeType(typeof(ConsoleColor), "Red", null);
+            Assert.AreEqual(ConsoleColor.Red, obj);
+        }
+
+        [Test]
+        public void Should_ConvertStringToNativeType_NullEnum()
+        {
+            var obj = ConfigProvider.ConvertStringToNativeType(typeof(ConsoleColor), null, null);
+            Assert.AreEqual(null, obj);
+        }
     }
 }
