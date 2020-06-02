@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using TypeSupport;
 using TypeSupport.Extensions;
 
@@ -23,6 +24,7 @@ namespace AnyConfig
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private readonly Assembly _entryAssembly;
+        private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
         private static Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
         private LegacyConfigurationLoader _legacyConfigurationLoader;
 
@@ -37,11 +39,16 @@ namespace AnyConfig
         /// <param name="entryAssembly"></param>
         public static void RegisterEntryAssembly(Assembly entryAssembly)
         {
-            lock (_registeredEntryAssemblies)
+            _cacheLock.Wait();
+            try
             {
                 var runtime = RuntimeEnvironment.DetectRuntime(entryAssembly);
                 if (!_registeredEntryAssemblies.ContainsKey(runtime.DetectedRuntimeFrameworkDescription))
                     _registeredEntryAssemblies.Add(runtime.DetectedRuntimeFrameworkDescription, entryAssembly);
+            }
+            finally
+            {
+                _cacheLock.Release();
             }
         }
 
@@ -56,11 +63,16 @@ namespace AnyConfig
         public ConfigurationResolver()
         {
             DetectedRuntime = RuntimeEnvironment.DetectRuntime();
-            lock (_registeredEntryAssemblies)
+            _cacheLock.Wait();
+            try
             {
                 if (_registeredEntryAssemblies.ContainsKey(DetectedRuntime.DetectedRuntimeFrameworkDescription))
                     _entryAssembly = _registeredEntryAssemblies[DetectedRuntime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
                 _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
+            }
+            finally
+            {
+                _cacheLock.Release();
             }
         }
 

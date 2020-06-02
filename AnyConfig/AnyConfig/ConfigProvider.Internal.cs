@@ -12,6 +12,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using TypeSupport.Extensions;
 
 [assembly: InternalsVisibleTo("AnyConfig.Tests")]
@@ -21,6 +22,7 @@ namespace AnyConfig
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private const string DotNetFrameworkSettingsFilename = "App.config";
+        private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
         private static readonly Dictionary<string, string> _cachedConfigurationFiles = new Dictionary<string, string>();
 
         private static bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
@@ -319,22 +321,30 @@ namespace AnyConfig
 
             var json = string.Empty;
             var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            if (_cachedConfigurationFiles.ContainsKey(filename))
+            _cacheLock.Wait();
+            try
             {
-                json = _cachedConfigurationFiles[filename];
+                if (_cachedConfigurationFiles.ContainsKey(filename))
+                {
+                    json = _cachedConfigurationFiles[filename];
+                }
+                else
+                {
+                    if (File.Exists(filename))
+                    {
+                        LastResolvedConfigurationFilename = filename;
+                        json = File.ReadAllText(filename);
+                        _cachedConfigurationFiles.Add(filename, json);
+                    }
+                    else if (throwsException)
+                    {
+                        throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                    }
+                }
             }
-            else
+            finally
             {
-                if (File.Exists(filename))
-                {
-                    LastResolvedConfigurationFilename = filename;
-                    json = File.ReadAllText(filename);
-                    _cachedConfigurationFiles.Add(filename, json);
-                }
-                else if (throwsException)
-                {
-                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-                }
+                _cacheLock.Release();
             }
             if (!string.IsNullOrEmpty(optionName))
             {
@@ -369,26 +379,35 @@ namespace AnyConfig
             var xml = string.Empty;
             var filenameExpressionValue = configParameters.GetExpressionValue("Filename");
             var filename = Path.GetFullPath(filenameExpressionValue);
-            if (_cachedConfigurationFiles.ContainsKey(filename))
+
+            _cacheLock.Wait();
+            try
             {
-                xml = _cachedConfigurationFiles[filename];
-            }
-            else
-            {
-                if (File.Exists(filename))
+                if (_cachedConfigurationFiles.ContainsKey(filename))
                 {
-                    LastResolvedConfigurationFilename = filename;
-                    xml = File.ReadAllText(filename);
-                    if (string.IsNullOrEmpty(xml))
+                    xml = _cachedConfigurationFiles[filename];
+                }
+                else
+                {
+                    if (File.Exists(filename))
                     {
-                        return false;
+                        LastResolvedConfigurationFilename = filename;
+                        xml = File.ReadAllText(filename);
+                        if (string.IsNullOrEmpty(xml))
+                        {
+                            return false;
+                        }
+                        _cachedConfigurationFiles.Add(filename, xml);
                     }
-                    _cachedConfigurationFiles.Add(filename, xml);
+                    else if (throwsException)
+                    {
+                        throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                    }
                 }
-                else if (throwsException)
-                {
-                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-                }
+            }
+            finally
+            {
+                _cacheLock.Release();
             }
 
             if (!string.IsNullOrEmpty(optionName) && !string.IsNullOrEmpty(xml))

@@ -2,11 +2,13 @@
 using Microsoft.Extensions.Primitives;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace AnyConfig
 {
     public class JsonConfigurationProvider : IConfigurationProvider
     {
+        private readonly SemaphoreSlim _dataLock = new SemaphoreSlim(1, 1);
         public ICollection<KeyValuePair<string, string>> Data { get; private set; }
         public ICollection<string> Source { get; }
 
@@ -20,8 +22,20 @@ namespace AnyConfig
             ResolvedConfigurationFile = resolvedConfigurationFile;
         }
 
-        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath) 
-            => Data.Select(x => x.Key).ToList();
+        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
+        {
+            _dataLock.Wait();
+            try
+            {
+                return Data
+                    .Select(x => x.Key)
+                    .ToList();
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
+        }
 
         /// <summary>
         /// Get child keys that start with <paramref name="key"/>
@@ -29,7 +43,20 @@ namespace AnyConfig
         /// <param name="key"></param>
         /// <returns></returns>
         public IEnumerable<string> GetChildKeys(string key)
-            => Data.Where(x => x.Key.StartsWith(key)).Select(x => x.Key).ToList();
+        {
+            _dataLock.Wait();
+            try
+            {
+                return Data
+                    .Where(x => x.Key.StartsWith(key))
+                    .Select(x => x.Key)
+                    .ToList();
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
+        }
 
         /// <summary>
         /// Get child keys containing certain text
@@ -37,7 +64,20 @@ namespace AnyConfig
         /// <param name="key"></param>
         /// <returns></returns>
         public IEnumerable<string> GetChildKeysContaining(string key)
-            => Data.Where(x => x.Key.Contains(key)).Select(x => x.Key).ToList();
+        {
+            _dataLock.Wait();
+            try
+            {
+                return Data
+                    .Where(x => x.Key.Contains(key))
+                    .Select(x => x.Key)
+                    .ToList();
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
+        }
 
         public IChangeToken GetReloadToken() => new ConfigurationReloadToken();
 
@@ -46,43 +86,67 @@ namespace AnyConfig
             // does nothing
         }
 
-        private void SortData()
+        internal void SetData(ICollection<KeyValuePair<string, string>> data)
+        {
+            _dataLock.Wait();
+            try
+            {
+                Data = data;
+                SortDataInternal();
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
+        }
+
+        private void SortDataInternal()
         {
             // sorting the data mimick's Microsoft's behavior
             Data = Data.OrderBy(x => x.Key).ToList();
         }
 
-        internal void SetData(ICollection<KeyValuePair<string, string>> data)
-        {
-            Data = data;
-            SortData();
-        }
 
         public void Set(string key, string value)
         {
-            Data.Add(new KeyValuePair<string, string>(key, value));
+            _dataLock.Wait();
+            try
+            {
+                Data.Add(new KeyValuePair<string, string>(key, value));
+            }
+            finally
+            {
+                _dataLock.Release();
+            }
         }
 
         public bool TryGet(string key, out string value)
         {
             value = string.Empty;
-            if (Data.Any(x => x.Key == key))
+            _dataLock.Wait();
+            try
             {
-                value = Data
-                    .Where(x => x.Key == key)
-                    .Select(x => x.Value)
-                    .FirstOrDefault();
-                return true;
+                if (Data.Any(x => x.Key == key))
+                {
+                    value = Data
+                        .Where(x => x.Key == key)
+                        .Select(x => x.Value)
+                        .FirstOrDefault();
+                    return true;
+                }
+                if (Data.Any(x => x.Key.EndsWith($":{key}")))
+                {
+                    value = Data
+                        .Where(x => x.Key.EndsWith($":{key}"))
+                        .Select(x => x.Value)
+                        .FirstOrDefault();
+                    return true;
+                }
             }
-            if (Data.Any(x => x.Key.EndsWith($":{key}")))
+            finally
             {
-                value = Data
-                    .Where(x => x.Key.EndsWith($":{key}"))
-                    .Select(x => x.Value)
-                    .FirstOrDefault();
-                return true;
+                _dataLock.Release();
             }
-
             return false;
         }
     }

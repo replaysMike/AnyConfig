@@ -425,8 +425,6 @@ namespace AnyConfig
         }
 
         private Type ResolveType(string typeName)
-        {
-            return Type.GetType(typeName, true, true);
-        }
+            => Type.GetType(typeName, true, true);
     }
 }
