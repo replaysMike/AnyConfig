@@ -4,6 +4,9 @@ using System.Threading;
 
 namespace AnyConfig
 {
+    /// <summary>
+    /// AnyConfig reload token
+    /// </summary>
     public class ConfigurationReloadToken : IChangeToken
     {
         private CancellationTokenSource _cts = new CancellationTokenSource();
