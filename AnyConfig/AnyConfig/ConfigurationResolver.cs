@@ -522,25 +522,27 @@ namespace AnyConfig
             filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
-                object value = null;
+                var valueExists = false;
+                object value = defaultValue;
                 if (!string.IsNullOrEmpty(filename))
-                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
-                if (value.IsNullOrEmpty())
+                    valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                if (!valueExists)
                 {
-                    value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig, throwsException);
-                    if (value.IsNullOrEmpty())
+                    valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig, throwsException);
+                    if (!valueExists)
                     {
-                        value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
-                        if (value.IsNullOrEmpty())
+                        valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
+                        if (!valueExists)
                         {
                             var currentProcessFilename = GetCurrentProcessFilename() + ".config";
-                            value = ConfigProvider.Get(typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
-                            if (value.IsNullOrEmpty())
-                                return defaultValue;
+                            valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                         }
                     }
                 }
-                return (T)value;
+                if (valueExists)
+                    return (T)value;
+                else
+                    return defaultValue;
             }
             else
             {
