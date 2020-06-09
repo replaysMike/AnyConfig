@@ -72,10 +72,9 @@ namespace AnyConfig.Json
             return value;
         }
 
-        private static object DeserializeNode(Type type, object value, JsonNode node, bool skipFlatMap, LegacyConfigurationNameAttribute propertyAttribute = null)
+        private static object DeserializeNode(ExtendedType type, object value, JsonNode node, bool skipFlatMap, LegacyConfigurationNameAttribute propertyAttribute = null)
         {
-            var extendedType = type.GetExtendedType();
-            var properties = extendedType.Properties;
+            var properties = type.Properties;
 
             foreach(var property in properties)
             {
@@ -110,7 +109,7 @@ namespace AnyConfig.Json
                             case PrimitiveTypes.Object:
                                 var factory = new ObjectFactory();
                                 var obj = factory.CreateEmptyObject(value.GetProperty(property.Name).PropertyType);
-                                obj = DeserializeNode(value.GetProperty(property.Name).PropertyType, obj, matchedNode, skipFlatMap);
+                                obj = DeserializeNode(value.GetProperty(property.Name).PropertyType.GetExtendedType(), obj, matchedNode, skipFlatMap);
                                 value.SetPropertyValue(property.Name, obj);
                                 break;
                             case PrimitiveTypes.String:
@@ -145,7 +144,7 @@ namespace AnyConfig.Json
 
         private static T DeserializeNode<T>(T value, JsonNode node)
         {
-            return (T)DeserializeNode(typeof(T), value, node, false);
+            return (T)DeserializeNode(typeof(T).GetExtendedType(), value, node, false);
         }
     }
 }

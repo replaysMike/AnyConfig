@@ -51,7 +51,7 @@ namespace AnyConfig.Xml
             // process the root node
             if (string.IsNullOrEmpty(rootXmlElementName) || rootNode.Name.Equals(rootXmlElementName, StringComparison.InvariantCultureIgnoreCase))
             {
-                value = DeserializeNode(type, value, rootNode);
+                value = DeserializeNode(type.GetExtendedType(), value, rootNode);
             }
 
             return value;
@@ -80,13 +80,12 @@ namespace AnyConfig.Xml
             return value;
         }
 
-        private static object DeserializeNodeArray(Type type, object value, XmlNode node)
+        private static object DeserializeNodeArray(ExtendedType type, object value, XmlNode node)
         {
-            var extendedType = type.GetExtendedType();
-            var genericArgumentType = extendedType.GenericArgumentTypes.First();
+            var genericArgumentType = type.GenericArgumentTypes.First();
             var factory = new ObjectFactory();
-            var properties = extendedType.Properties;
-            var addMethod = extendedType.Methods.FirstOrDefault(x => x.Name == "Add" && x.Parameters.Any(y => y.ParameterType == genericArgumentType));
+            var properties = type.Properties;
+            var addMethod = type.Methods.FirstOrDefault(x => x.Name == "Add" && x.Parameters.Any(y => y.ParameterType == genericArgumentType));
             foreach (XmlNode childNode in node.ChildNodes)
             {
                 // add to array
@@ -97,10 +96,9 @@ namespace AnyConfig.Xml
             return value;
         }
 
-        private static object DeserializeNode(Type type, object value, XmlNode node)
+        private static object DeserializeNode(ExtendedType type, object value, XmlNode node)
         {
-            var extendedType = type.GetExtendedType();
-            var properties = extendedType.Properties;
+            var properties = type.Properties;
 
             foreach (XmlNode childNode in node.ChildNodes)
             {
@@ -167,8 +165,8 @@ namespace AnyConfig.Xml
                             break;
                         }
                         var factory = new ObjectFactory();
-                        var obj = factory.CreateEmptyObject(property.Type);
-                        var propertyExtendedType = property.Type.GetExtendedType();
+                        var obj = factory.CreateEmptyObject(property.Type.Type);
+                        var propertyExtendedType = property.Type;
                         if (propertyExtendedType.IsEnumerable)
                         {
                             obj = DeserializeNodeArray(property.Type, obj, childNode);
