@@ -12,7 +12,7 @@ namespace AnyConfig.PerformanceTesting
             var startTime = Stopwatch.StartNew();
 
             var options = new ParallelOptions();
-            options.MaxDegreeOfParallelism = 32; // 16 cores * 2
+            options.MaxDegreeOfParallelism = 16; // 16 cores * 2
 
             Test_AnyConfig_Get(options);
             //Test_AnyConfig_ConfigurationManager(options);

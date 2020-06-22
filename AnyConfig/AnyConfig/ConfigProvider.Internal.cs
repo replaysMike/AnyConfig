@@ -491,8 +491,9 @@ namespace AnyConfig
                     result = defaultValue;
                 else
                 {
-                    var boolval = value.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase)
-                        || value.Trim().Equals("1");
+                    var boolval = 
+                        value.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase) // case insensitive
+                        || value.Trim().Equals("1"); // support integer to bool
                     result = boolval;
                 }
             }
@@ -553,7 +554,7 @@ namespace AnyConfig
             }
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
-                // generic list
+                // generic list support, comma delimited values
                 var genericArgumentType = type.GenericTypeArguments.First();
                 var values = value.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 var genericListType = typeof(List<>).MakeGenericType(genericArgumentType);

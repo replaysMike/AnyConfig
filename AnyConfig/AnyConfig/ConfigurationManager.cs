@@ -35,7 +35,7 @@ namespace AnyConfig
         /// <summary>
         /// Application settings
         /// </summary>
-        public static GenericNameValueCollection AppSettings => _cachedAppSettings.Value;
+        public static GenericNameValueCollectionFast AppSettings => _cachedAppSettings.Value;
 
         /// <summary>
         /// Application settings

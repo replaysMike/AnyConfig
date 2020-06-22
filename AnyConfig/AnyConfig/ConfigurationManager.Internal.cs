@@ -14,7 +14,7 @@ namespace AnyConfig
         private static Lazy<LegacyConfiguration> _legacyConfiguration = new Lazy<LegacyConfiguration>(() => LoadConfiguration());
         private static Lazy<ConnectionStringSettingsCollection> _cachedConnectionStrings = new Lazy<ConnectionStringSettingsCollection>(() => GetConnectionStrings());
         private static Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>> _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
-        private static Lazy<GenericNameValueCollection> _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
+        private static Lazy<GenericNameValueCollectionFast> _cachedAppSettings = new Lazy<GenericNameValueCollectionFast>(() => GetAppSettings());
         private static Lazy<ReadOnlyDictionary<string, string>> _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
         private static Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>> _cachedAnyConfigGroupedAppSettings = new Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>>(() => GetAnyConfigGroupedAppSettings());
 
@@ -28,9 +28,9 @@ namespace AnyConfig
             return new ReadOnlyDictionary<string, ConnectionStringSetting>(_legacyConfiguration.Value.Configuration.ConnectionStrings.ToDictionary(x => x.Name, x => x.ConnectionStringSetting));
         }
 
-        private static GenericNameValueCollection GetAppSettings()
+        private static GenericNameValueCollectionFast GetAppSettings()
         {
-            return new GenericNameValueCollection(_legacyConfiguration.Value.Configuration.AppSettings.Aggregate(new GenericNameValueCollection(), (seed, current) =>
+            return new GenericNameValueCollectionFast(_legacyConfiguration.Value.Configuration.AppSettings.Aggregate(new GenericNameValueCollectionFast(), (seed, current) =>
             {
                 seed.Add(current.Key, current.Value);
                 return seed;
@@ -112,7 +112,7 @@ namespace AnyConfig
             if (_cachedConnectionStringsDictionary.IsValueCreated)
                 _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
             if (_cachedAppSettings.IsValueCreated)
-                _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
+                _cachedAppSettings = new Lazy<GenericNameValueCollectionFast>(() => GetAppSettings());
             if (_cachedAppSettingsDictionary.IsValueCreated)
                 _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
             if (_cachedAnyConfigGroupedAppSettings.IsValueCreated)

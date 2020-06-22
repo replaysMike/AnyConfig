@@ -125,7 +125,7 @@ namespace AnyConfig.Tests
             Assert.AreEqual("True", val);
 
             // provider should contain the right number of keys
-            Assert.AreEqual(86, provider.Data.Count);
+            Assert.AreEqual(91, provider.Data.Count);
 
             var rateLimitingKeys = provider.GetChildKeys("IpRateLimiting");
             Assert.AreEqual(21, rateLimitingKeys.Count());
