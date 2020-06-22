@@ -157,7 +157,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            InternalTryGet(out var value, valueType, optionName, configSource, defaultValue, throwsException, configParameters);
+            InternalTryGet(out var value, valueType, optionName, configSource, defaultValue, throwsException, false, configParameters);
             return value;
         }
 
@@ -199,7 +199,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static T Get<T>(string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            InternalTryGet<T>(out var value, optionName, configSource, defaultValue, throwsException, configParameters);
+            InternalTryGet<T>(out var value, optionName, configSource, defaultValue, throwsException, false, configParameters);
             return value;
         }
 
@@ -213,7 +213,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static T Get<T>(ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            InternalTryGet<T>(out var value, string.Empty, configSource, default, throwsException, configParameters);
+            InternalTryGet<T>(out var value, string.Empty, configSource, default, throwsException, false, configParameters);
             return value;
         }
 
@@ -228,7 +228,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static T Get<T>(T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            InternalTryGet<T>(out var value, string.Empty, configSource, defaultValue, throwsException, configParameters);
+            InternalTryGet<T>(out var value, string.Empty, configSource, defaultValue, throwsException, false, configParameters);
             return value;
         }
 
@@ -307,7 +307,23 @@ namespace AnyConfig
         /// <returns></returns>
         public static T Get<T>(string optionName, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            InternalTryGet<T>(out var value, optionName, configSource, default, throwsException, configParameters);
+            InternalTryGet<T>(out var value, optionName, configSource, default, throwsException, false, configParameters);
+            return value;
+        }
+
+        /// <summary>
+        /// Get a configuration setting
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="optionName"></param>
+        /// <param name="configSource"></param>
+        /// <param name="throwsException">True to throw exception if key is not found</param>
+        /// <param name="expandEnvironmentVariables">True to expand environment variables</param>
+        /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
+        /// <returns></returns>
+        public static T Get<T>(string optionName, ConfigSource configSource, bool throwsException, bool expandEnvironmentVariables, params Expression<Func<object, object>>[] configParameters)
+        {
+            InternalTryGet<T>(out var value, optionName, configSource, default, throwsException, expandEnvironmentVariables, configParameters);
             return value;
         }
 
@@ -363,7 +379,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static bool TryGet(out object value, Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            return InternalTryGet(out value, valueType, optionName, configSource, defaultValue, throwsException, configParameters);
+            return InternalTryGet(out value, valueType, optionName, configSource, defaultValue, throwsException, false, configParameters);
         }
 
         /// <summary>
@@ -378,7 +394,7 @@ namespace AnyConfig
         /// <returns></returns>
         public static bool TryGet<T>(out T value, string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
-            return InternalTryGet<T>(out value, optionName, configSource, defaultValue, throwsException, configParameters);
+            return InternalTryGet<T>(out value, optionName, configSource, defaultValue, throwsException, false, configParameters);
         }
     }
 }

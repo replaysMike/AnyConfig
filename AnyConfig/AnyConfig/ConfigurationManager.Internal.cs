@@ -107,11 +107,16 @@ namespace AnyConfig
 
         private static void ResetCachedData()
         {
-            _cachedConnectionStrings = new Lazy<ConnectionStringSettingsCollection>(() => GetConnectionStrings());
-            _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
-            _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
-            _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
-            _cachedAnyConfigGroupedAppSettings = new Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>>(() => GetAnyConfigGroupedAppSettings());
+            if(_cachedConnectionStrings.IsValueCreated)
+                _cachedConnectionStrings = new Lazy<ConnectionStringSettingsCollection>(() => GetConnectionStrings());
+            if (_cachedConnectionStringsDictionary.IsValueCreated)
+                _cachedConnectionStringsDictionary = new Lazy<ReadOnlyDictionary<string, ConnectionStringSetting>>(() => GetConnectionStringsAsDictionary());
+            if (_cachedAppSettings.IsValueCreated)
+                _cachedAppSettings = new Lazy<GenericNameValueCollection>(() => GetAppSettings());
+            if (_cachedAppSettingsDictionary.IsValueCreated)
+                _cachedAppSettingsDictionary = new Lazy<ReadOnlyDictionary<string, string>>(() => GetAppSettingsAsDictionary());
+            if (_cachedAnyConfigGroupedAppSettings.IsValueCreated)
+                _cachedAnyConfigGroupedAppSettings = new Lazy<ReadOnlyDictionary<string, AnyConfigAppSettingCollection>>(() => GetAnyConfigGroupedAppSettings());
         }
     }
 }

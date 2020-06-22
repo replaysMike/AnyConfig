@@ -25,7 +25,7 @@ namespace AnyConfig
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private readonly Assembly _entryAssembly;
         private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
-        private static Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
+        private static readonly Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
         private LegacyConfigurationLoader _legacyConfigurationLoader;
 
         /// <summary>
@@ -63,17 +63,9 @@ namespace AnyConfig
         public ConfigurationResolver()
         {
             DetectedRuntime = RuntimeEnvironment.DetectRuntime();
-            _cacheLock.Wait();
-            try
-            {
-                if (_registeredEntryAssemblies.ContainsKey(DetectedRuntime.DetectedRuntimeFrameworkDescription))
-                    _entryAssembly = _registeredEntryAssemblies[DetectedRuntime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-                _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
-            }
-            finally
-            {
-                _cacheLock.Release();
-            }
+            if (_registeredEntryAssemblies.ContainsKey(DetectedRuntime.DetectedRuntimeFrameworkDescription))
+                _entryAssembly = _registeredEntryAssemblies[DetectedRuntime.DetectedRuntimeFrameworkDescription] ?? Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+            _legacyConfigurationLoader = new LegacyConfigurationLoader(_entryAssembly);
         }
 
         /// <summary>

@@ -25,7 +25,7 @@ namespace AnyConfig
         private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
         private static readonly Dictionary<string, string> _cachedConfigurationFiles = new Dictionary<string, string>();
 
-        private static bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        private static bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -34,11 +34,11 @@ namespace AnyConfig
             {
                 case ConfigSource.WebConfig:
                     // Standard web.config file
-                    valueExists = GetWebConfigSetting(out value, valueType, optionName, defaultValue, throwsException, configParameters);
+                    valueExists = GetWebConfigSetting(out value, valueType, optionName, defaultValue, throwsException, expandEnvironmentVariables, configParameters);
                     break;
                 case ConfigSource.ApplicationConfig:
                     // Standard app.config file
-                    valueExists = GetWebConfigSetting(out value, valueType, optionName, defaultValue, throwsException, configParameters);
+                    valueExists = GetWebConfigSetting(out value, valueType, optionName, defaultValue, throwsException, expandEnvironmentVariables, configParameters);
                     break;
                 case ConfigSource.EmbeddedResource:
                     // embedded resource dictionary value
@@ -65,7 +65,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        private static bool InternalTryGet<T>(out T value, string optionName, ConfigSource configSource, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        private static bool InternalTryGet<T>(out T value, string optionName, ConfigSource configSource, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -75,7 +75,7 @@ namespace AnyConfig
                 case ConfigSource.WebConfig:
                 case ConfigSource.ApplicationConfig:
                     // Standard .net config file
-                    valueExists = GetWebConfigSetting<T>(out value, optionName, defaultValue, throwsException, configParameters);
+                    valueExists = GetWebConfigSetting<T>(out value, optionName, defaultValue, throwsException, expandEnvironmentVariables, configParameters);
                     break;
                 case ConfigSource.EmbeddedResource:
                     // embedded resource dictionary value
@@ -102,7 +102,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting<T>(out T value, string optionName, string configSectionName, T defaultValue, bool throwsException = false)
+        internal static bool GetWebConfigSetting<T>(out T value, string optionName, string configSectionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
         {
             var valueExists = false;
             value = defaultValue;
@@ -118,7 +118,8 @@ namespace AnyConfig
                     }
                     else
                     {
-                        var valueAsString = System.Environment.ExpandEnvironmentVariables(config[optionName]);
+
+                        var valueAsString = expandEnvironmentVariables ? System.Environment.ExpandEnvironmentVariables(config[optionName]) : config[optionName];
                         value = ConvertStringToNativeType<T>(valueAsString, defaultValue);
                         valueExists = true;
                     }
@@ -139,7 +140,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, string configSectionName, object defaultValue, bool throwsException = false)
+        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, string configSectionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
         {
             var valueExists = false;
             value = defaultValue;
@@ -155,7 +156,7 @@ namespace AnyConfig
                     }
                     else
                     {
-                        var valueAsString = System.Environment.ExpandEnvironmentVariables(config[optionName]);
+                        var valueAsString = expandEnvironmentVariables ? System.Environment.ExpandEnvironmentVariables(config[optionName]) : config[optionName];
                         value = ConvertStringToNativeType(valueType, valueAsString, defaultValue);
                         valueExists = true;
                     }
@@ -176,7 +177,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal static bool GetWebConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -199,9 +200,10 @@ namespace AnyConfig
             else
             {
                 // process an appsettings config value
-                if (ConfigurationManager.AppSettings[optionName] != null)
+                var valueFromConfig = ConfigurationManager.AppSettings[optionName];
+                if (valueFromConfig != null)
                 {
-                    var valueAsString = System.Environment.ExpandEnvironmentVariables(ConfigurationManager.AppSettings[optionName]);
+                    var valueAsString = expandEnvironmentVariables ? System.Environment.ExpandEnvironmentVariables(valueFromConfig.Value) : valueFromConfig.Value;
                     value = ConvertStringToNativeType<T>(valueAsString, defaultValue);
                 }
                 else
@@ -214,7 +216,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -237,9 +239,10 @@ namespace AnyConfig
             else
             {
                 // process an appsettings config value
-                if (ConfigurationManager.AppSettings[optionName] != null)
+                var valueFromConfig = ConfigurationManager.AppSettings[optionName];
+                if (valueFromConfig != null)
                 {
-                    var valueAsString = System.Environment.ExpandEnvironmentVariables(ConfigurationManager.AppSettings[optionName]);
+                    var valueAsString = expandEnvironmentVariables ? System.Environment.ExpandEnvironmentVariables(valueFromConfig.Value) : valueFromConfig.Value;
                     value = ConvertStringToNativeType(valueType, valueAsString, defaultValue);
                     valueExists = value != null && value != ConfigProvider.Empty;
                 }
@@ -479,7 +482,7 @@ namespace AnyConfig
             if (type.IsEnum && value != null)
                 result = Convert.ChangeType(Enum.Parse(type, value), type);
 
-            // support built-in types
+            // support built-in types. Type checks are in order of most used types, small optimization
             if (type == typeof(string))
                 result = (object)value;
             else if (type == typeof(bool))
@@ -493,30 +496,60 @@ namespace AnyConfig
                     result = boolval;
                 }
             }
-            else if (type == typeof(float))
+            else if (type == typeof(int))
             {
-                if (float.TryParse(value, out var fltval))
-                    result = fltval;
+                if (int.TryParse(value, out var intval))
+                    result = intval;
             }
             else if (type == typeof(double))
             {
                 if (double.TryParse(value, out var dblval))
                     result = dblval;
             }
-            else if (type == typeof(decimal))
+            else if (type == typeof(long))
             {
-                if (decimal.TryParse(value, out var decval))
-                    result = decval;
+                if (long.TryParse(value, out var longval))
+                    result = longval;
             }
-            else if (type == typeof(int))
+            else if (type == typeof(ulong))
             {
-                if (int.TryParse(value, out var intval))
-                    result = intval;
+                if (ulong.TryParse(value, out var ulongval))
+                    result = ulongval;
+            }
+            else if (type == typeof(uint))
+            {
+                if (uint.TryParse(value, out var uintval))
+                    result = uintval;
+            }
+            else if (type == typeof(short))
+            {
+                if (short.TryParse(value, out var shortval))
+                    result = shortval;
+            }
+            else if (type == typeof(ushort))
+            {
+                if (ushort.TryParse(value, out var ushortval))
+                    result = ushortval;
             }
             else if (type == typeof(byte))
             {
                 if (byte.TryParse(value, out var byteval))
                     result = byteval;
+            }
+            else if (type == typeof(sbyte))
+            {
+                if (sbyte.TryParse(value, out var sbyteval))
+                    result = sbyteval;
+            }
+            else if (type == typeof(float))
+            {
+                if (float.TryParse(value, out var fltval))
+                    result = fltval;
+            }
+            else if (type == typeof(decimal))
+            {
+                if (decimal.TryParse(value, out var decval))
+                    result = decval;
             }
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
