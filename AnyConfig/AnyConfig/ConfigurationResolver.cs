@@ -657,26 +657,16 @@ namespace AnyConfig
         }
 
         /// <summary>
-        /// Get the path of the current process
+        /// Get the path of the current process (cached)
         /// </summary>
         /// <returns></returns>
-        private string GetCurrentProcessPath()
-        {
-            var currentProcess = Process.GetCurrentProcess();
-            var path = Path.GetDirectoryName(currentProcess.MainModule.FileName);
-            return path;
-        }
+        private string GetCurrentProcessPath() => Path.GetDirectoryName(GetCurrentProcessFilename());
 
         /// <summary>
-        /// Get the path of the current process
+        /// Get the path of the current process (cached)
         /// </summary>
         /// <returns></returns>
-        private string GetCurrentProcessFilename()
-        {
-            var currentProcess = Process.GetCurrentProcess();
-            var filename = currentProcess.MainModule.FileName;
-            return filename;
-        }
+        private string GetCurrentProcessFilename() => CachedProcess.GetCurrentProcessFilename();
 
         private string GetAssemblyName()
         {
