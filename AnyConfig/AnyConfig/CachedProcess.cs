@@ -9,7 +9,12 @@ namespace AnyConfig
     public class CachedProcess : Process
     {
         private static Lazy<string> _currentProcessFilename = new Lazy<string>(() => _currentProcess.Value.GetProcessPath());
-        private static Lazy<Process> _currentProcess = new Lazy<Process>(() => Process.GetCurrentProcess());
+        private static Lazy<Process> _currentProcess = new Lazy<Process>(() => InitGetCurrentProcess());
+
+        private static Process InitGetCurrentProcess()
+        {
+            return Process.GetCurrentProcess();
+        }
 
         /// <summary>
         /// Get the current process (cached)

@@ -14,7 +14,8 @@ namespace AnyConfig.PerformanceTesting
             var options = new ParallelOptions();
             options.MaxDegreeOfParallelism = 16; // 16 cores * 2
 
-            Test_AnyConfig_Get(options);
+            //Test_AnyConfig_Get(options);
+            Test_AnyConfig_GetDefault(options);
             //Test_AnyConfig_ConfigurationManager(options);
             //Test_Microsoft_ConfigurationManager(options);
 
@@ -35,6 +36,18 @@ namespace AnyConfig.PerformanceTesting
                 var stringValue = AnyConfig.Config.Get<string>("StringValue");
                 if (stringValue != "Test.String.Value")
                     throw new ArgumentException(nameof(stringValue));
+                if (i % 50000 == 0)
+                    System.Diagnostics.Debug.WriteLine(i);
+            });
+        }
+
+        static void Test_AnyConfig_GetDefault(ParallelOptions options)
+        {
+            Parallel.For(0, 1000 * 1000, options, (i) =>
+            {
+                var intValue = AnyConfig.Config.Get<int>("NonExistantValue", 6666);
+                if (intValue != 6666)
+                    throw new ArgumentException(nameof(intValue));
                 if (i % 50000 == 0)
                     System.Diagnostics.Debug.WriteLine(i);
             });

@@ -403,11 +403,11 @@ namespace AnyConfig
                         configFile = Path.Combine(Path.GetDirectoryName(_entryAssembly.Location), filename);
                     else
                         configFile = Path.GetFullPath(filename);
-                    /*if (!File.Exists(configFile))
+                    if (!File.Exists(configFile))
                     {
                         // try the current process
                         configFile = Path.Combine(GetCurrentProcessPath(), filename);
-                    }*/
+                    }
                     if (!File.Exists(configFile))
                         throw new ConfigurationMissingException($"Could not find configuration file '{configFile}'");
                 }
@@ -498,9 +498,9 @@ namespace AnyConfig
                         value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value == ConfigProvider.Empty)
                         {
-                            /*var currentProcessFilename = GetCurrentProcessFilename() + ".config";
+                            var currentProcessFilename = GetCurrentProcessFilename() + ".config";
                             value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
-                            if (value == ConfigProvider.Empty)*/
+                            if (value == ConfigProvider.Empty)
                                 return defaultValue;
                         }
                     }
@@ -536,11 +536,11 @@ namespace AnyConfig
                     if (!valueExists)
                     {
                         valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
-                        /*if (!valueExists)
+                        if (!valueExists)
                         {
                             var currentProcessFilename = GetCurrentProcessFilename() + ".config";
                             valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
-                        }*/
+                        }
                     }
                 }
                 if (valueExists)
@@ -630,13 +630,13 @@ namespace AnyConfig
                             value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                             if (isRequired && value.IsNullOrEmpty())
                                 throw new ConfigurationMissingException(propertyName, propertyType);
-                            /*if (value.IsNullOrEmpty())
+                            if (value.IsNullOrEmpty())
                             {
                                 var currentProcessFilename = GetCurrentProcessFilename() + ".config";
                                 value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                                 if (isRequired && value.IsNullOrEmpty())
                                     throw new ConfigurationMissingException(propertyName, propertyType);
-                            }*/
+                            }
                         }
                     }
                 }

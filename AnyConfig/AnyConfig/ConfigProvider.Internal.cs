@@ -2,6 +2,7 @@
 using AnyConfig.Json;
 using AnyConfig.Xml;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -22,8 +23,8 @@ namespace AnyConfig
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private const string DotNetFrameworkSettingsFilename = "App.config";
-        private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
-        private static readonly Dictionary<string, string> _cachedConfigurationFiles = new Dictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, CachedConfiguration> _cachedConfigurationFiles = new ConcurrentDictionary<string, CachedConfiguration>();
+        private static readonly ConcurrentDictionary<ObjectCacheKey, object> _cachedConfigurationValues = new ConcurrentDictionary<ObjectCacheKey, object>();
 
         private static bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
@@ -324,36 +325,52 @@ namespace AnyConfig
 
             var json = string.Empty;
             var filename = Path.GetFullPath(configParameters.GetExpressionValue("Filename"));
-            _cacheLock.Wait();
-            try
+            var cacheKey = new ObjectCacheKey
             {
-                if (_cachedConfigurationFiles.ContainsKey(filename))
+                Filename = filename,
+                OptionName = optionName,
+                Type = valueType
+            };
+
+            if (_cachedConfigurationValues.ContainsKey(cacheKey))
+            {
+                value = _cachedConfigurationValues[cacheKey];
+                return value != null && value != ConfigProvider.Empty;
+            }
+            var cachedConfiguration = new CachedConfiguration();
+
+            if (_cachedConfigurationFiles.ContainsKey(filename))
+            {
+                // use json from cache
+                json = _cachedConfigurationFiles[filename].OriginalText;
+            }
+            else
+            {
+                // load json from file
+                if (File.Exists(filename))
                 {
-                    json = _cachedConfigurationFiles[filename];
+                    LastResolvedConfigurationFilename = filename;
+                    json = File.ReadAllText(filename);
+                    cachedConfiguration = new CachedConfiguration { OriginalText = json };
+                    _cachedConfigurationFiles.AddOrUpdate(filename, cachedConfiguration, (key, existingValue) => existingValue);
                 }
-                else
+                else if (throwsException)
                 {
-                    if (File.Exists(filename))
-                    {
-                        LastResolvedConfigurationFilename = filename;
-                        json = File.ReadAllText(filename);
-                        _cachedConfigurationFiles.Add(filename, json);
-                    }
-                    else if (throwsException)
-                    {
-                        throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-                    }
+                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
                 }
             }
-            finally
-            {
-                _cacheLock.Release();
-            }
+
             if (!string.IsNullOrEmpty(optionName))
             {
-                var parser = new JsonParser();
-                var objects = parser.Parse(json);
-                var valueAsString = objects.SelectValueByName(optionName);
+                if (cachedConfiguration.RootNode == null)
+                {
+                    // parse the json for the first time
+                    var parser = new JsonParser();
+                    // cache the parsed root node
+                    cachedConfiguration.RootNode = parser.Parse(json);
+                }
+
+                var valueAsString = cachedConfiguration.RootNode.SelectValueByName(optionName);
                 value = ConvertStringToNativeType(valueType, valueAsString, defaultValue);
                 valueExists = value != null && value != ConfigProvider.Empty;
             }
@@ -362,8 +379,11 @@ namespace AnyConfig
                 // mapping an entire object
                 value = JsonSerializer.Deserialize(json, valueType);
                 valueExists = value != null && value != ConfigProvider.Empty;
-                return valueExists;
             }
+
+            // cache the result
+            _cachedConfigurationValues.AddOrUpdate(cacheKey, value, (key, existingValue) => existingValue);
+
             return valueExists;
         }
 
@@ -382,46 +402,60 @@ namespace AnyConfig
             var xml = string.Empty;
             var filenameExpressionValue = configParameters.GetExpressionValue("Filename");
             var filename = Path.GetFullPath(filenameExpressionValue);
+            var cacheKey = new ObjectCacheKey
+            {
+                Filename = filename,
+                OptionName = optionName,
+                Type = valueType
+            };
 
-            _cacheLock.Wait();
-            try
+            if (_cachedConfigurationValues.ContainsKey(cacheKey))
             {
-                if (_cachedConfigurationFiles.ContainsKey(filename))
-                {
-                    xml = _cachedConfigurationFiles[filename];
-                }
-                else
-                {
-                    if (File.Exists(filename))
-                    {
-                        LastResolvedConfigurationFilename = filename;
-                        xml = File.ReadAllText(filename);
-                        if (string.IsNullOrEmpty(xml))
-                        {
-                            return false;
-                        }
-                        _cachedConfigurationFiles.Add(filename, xml);
-                    }
-                    else if (throwsException)
-                    {
-                        throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
-                    }
-                }
+                value = _cachedConfigurationValues[cacheKey];
+                return value != null && value != ConfigProvider.Empty;
             }
-            finally
+
+            var cachedConfiguration = new CachedConfiguration();
+
+            if (_cachedConfigurationFiles.ContainsKey(filename))
             {
-                _cacheLock.Release();
+                // use xml from cache
+                xml = _cachedConfigurationFiles[filename].OriginalText;
+            }
+            else
+            {
+                // load xml from file
+                if (File.Exists(filename))
+                {
+                    LastResolvedConfigurationFilename = filename;
+                    xml = File.ReadAllText(filename);
+                    if (string.IsNullOrEmpty(xml))
+                    {
+                        return false;
+                    }
+                    cachedConfiguration = new CachedConfiguration { OriginalText = xml };
+                    _cachedConfigurationFiles.AddOrUpdate(filename, cachedConfiguration, (key, existingValue) => existingValue);
+                }
+                else if (throwsException)
+                {
+                    throw new ConfigurationMissingException($"Configuration file '{filename}' not found.");
+                }
             }
 
             if (!string.IsNullOrEmpty(optionName) && !string.IsNullOrEmpty(xml))
             {
-                var parser = new XmlParser();
-                var objects = parser.Parse(xml);
-                var val = objects?.SelectValueByName(optionName);
-                if (val == null && objects != null)
+                if (cachedConfiguration.RootNode == null)
+                {
+                    // parse the xml for the first time
+                    var parser = new XmlParser();
+                    // cache the parsed root node
+                    cachedConfiguration.RootNode = parser.Parse(xml);
+                }
+                var val = cachedConfiguration.RootNode?.SelectValueByName(optionName);
+                if (val == null && cachedConfiguration.RootNode != null)
                 {
                     // if no value is found, try selecting it from appSettings nodes
-                    var node = objects
+                    var node = cachedConfiguration.RootNode
                         .SelectNodeByName("appSettings", StringComparison.InvariantCultureIgnoreCase)
                         ?.QueryNodes(x => x.Name?.Equals("add", StringComparison.InvariantCultureIgnoreCase) == true
                             && ((XmlNode)x).Attributes?.Any(y => y.Name?.Equals("key", StringComparison.InvariantCultureIgnoreCase) == true && y.Value?.Equals(optionName, StringComparison.InvariantCultureIgnoreCase) == true) == true)
@@ -445,6 +479,10 @@ namespace AnyConfig
                 value = XmlSerializer.Deserialize(xml, valueType);
                 valueExists = value != null && value != ConfigProvider.Empty;
             }
+
+            // cache the result
+            _cachedConfigurationValues.AddOrUpdate(cacheKey, value, (key, existingValue) => existingValue);
+
 
             return valueExists;
         }
@@ -491,7 +529,7 @@ namespace AnyConfig
                     result = defaultValue;
                 else
                 {
-                    var boolval = 
+                    var boolval =
                         value.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase) // case insensitive
                         || value.Trim().Equals("1"); // support integer to bool
                     result = boolval;
