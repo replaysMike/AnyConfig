@@ -21,16 +21,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
-    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
-    <PackageReference Include="TypeSupport" Version="1.1.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+	<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
+	<PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
+	<PackageReference Include="TypeSupport" Version="1.1.4" PrivateAssets="all" />
   </ItemGroup>
 
   <Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' != ''">
@@ -38,6 +39,8 @@
       <WorkingDirectory>$(OutputPath)</WorkingDirectory>
     </PropertyGroup>
     <ItemGroup>
+	  <!--<InputAssemblies Include="Microsoft.Extensions.Configuration.Binder" />
+      <InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions" />-->
       <InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
       <InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
       <InputAssemblies Include="TypeSupport.dll" />

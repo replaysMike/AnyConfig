@@ -1,6 +1,4 @@
 ﻿using AnyConfig.Exceptions;
-using AnyConfig.Scaffolding;
-using AnyConfig.Tests.Models;
 using NLog.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
