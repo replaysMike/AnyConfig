@@ -1,53 +1,57 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
-    <Product>AnyConfig</Product>
-    <ProductName>AnyConfig</ProductName>
-    <Authors>Michael Brown</Authors>
-    <Company>Refactor Software</Company>
-    <Description>A .net configuration library to make configuration of multi-target applications easier</Description>
-    <RepositoryUrl>https://github.com/replaysMike/AnyConfig</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/replaysMike/AnyConfig</PackageProjectUrl>
-    <PackageTags>anyconfig config configuration configurationmanager iconfiguration json xml appsettings asp.net core dotnet-standard refactor software michael brown</PackageTags>
-    <PackageReleaseNotes>A .net configuration library to make configuration of multi-target applications easier</PackageReleaseNotes>
-    <Version>1.0.0</Version>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageId>Any-Config</PackageId>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
+		<Product>AnyConfig</Product>
+		<ProductName>AnyConfig</ProductName>
+		<Authors>Michael Brown</Authors>
+		<Company>Refactor Software</Company>
+		<Description>A .net configuration library to make configuration of multi-target applications easier</Description>
+		<RepositoryUrl>https://github.com/replaysMike/AnyConfig</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/replaysMike/AnyConfig</PackageProjectUrl>
+		<PackageTags>anyconfig config configuration configurationmanager iconfiguration json xml appsettings asp.net core dotnet-standard refactor software michael brown</PackageTags>
+		<PackageReleaseNotes>A .net configuration library to make configuration of multi-target applications easier</PackageReleaseNotes>
+		<Version>1.0.0</Version>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageId>Any-Config</PackageId>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
 
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
-    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
-    <PackageReference Include="TypeSupport" Version="1.1.4" PrivateAssets="all" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="TypeSupport" Version="1.1.4" PrivateAssets="all" />
+	</ItemGroup>
 
-  <Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' != ''">
-    <PropertyGroup>
-      <WorkingDirectory>$(OutputPath)</WorkingDirectory>
-    </PropertyGroup>
-    <ItemGroup>
-      <InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
-      <InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
-      <InputAssemblies Include="TypeSupport.dll" />
-    </ItemGroup>
-    <ItemGroup>
-      <!-- Dot not internalize any types inside this assembly -->
-      <!--<InternalizeExcludeAssemblies Include="AnyConfig.dll" />-->
-    </ItemGroup>
-    <Message Text="MERGING: $(TargetFramework) @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
-    <ILRepack Parallel="true" AllowDuplicateResources="false" DebugInfo="true" OutputType="$(OutputType)" MainAssembly="$(AssemblyName).dll" OutputAssembly="$(AssemblyName).dll" InputAssemblies="@(InputAssemblies)" InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)" WorkingDirectory="$(WorkingDirectory)" />
-  </Target>
+	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' != ''">
+		<PropertyGroup>
+			<WorkingDirectory>$(OutputPath)</WorkingDirectory>
+		</PropertyGroup>
+		<ItemGroup>
+			<InputAssemblies Include="ILRepack.Lib.MSBuild.Task" />
+			<InputAssemblies Include="Microsoft.Extensions.Configuration.Binder" />
+			<InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions" />
+			<InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
+			<InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
+			<InputAssemblies Include="TypeSupport.dll" />
+		</ItemGroup>
+		<ItemGroup>
+			<!-- Dot not internalize any types inside this assembly -->
+			<!--<InternalizeExcludeAssemblies Include="AnyConfig.dll" />-->
+		</ItemGroup>
+		<Message Text="MERGING: $(TargetFramework) @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
+		<ILRepack Parallel="true" AllowDuplicateResources="false" DebugInfo="true" OutputType="$(OutputType)" MainAssembly="$(AssemblyName).dll" OutputAssembly="$(AssemblyName).dll" InputAssemblies="@(InputAssemblies)" InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)" WorkingDirectory="$(WorkingDirectory)" />
+	</Target>
 
 </Project>
