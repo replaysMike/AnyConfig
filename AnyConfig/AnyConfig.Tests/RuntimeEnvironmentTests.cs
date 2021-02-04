@@ -3,6 +3,7 @@
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class RuntimeEnvironmentTests
     {
         [Test]

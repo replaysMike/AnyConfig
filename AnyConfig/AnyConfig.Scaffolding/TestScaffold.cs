@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using NLog.Extensions.Logging;
 using System;
 using System.Configuration;
 using System.IO;
@@ -29,6 +30,10 @@ namespace AnyConfig.Scaffolding
             Root = builder.Build();
             Config = (IConfiguration)Root;
             var boolSetting = Config["TestConfiguration:BoolSetting"];
+
+            var nlogConfiguration = Config.GetSection("NLog");
+            var targets = nlogConfiguration.GetSection("targets");
+            //NLog.LogManager.Configuration = new NLogLoggingConfiguration(nlogConfiguration);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Reflection;
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class ConfigurationManagerTests
     {
         [OneTimeSetUp]
