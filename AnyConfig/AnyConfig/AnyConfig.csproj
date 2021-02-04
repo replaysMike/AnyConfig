@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net48</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net48;net5.0</TargetFrameworks>
     <Product>AnyConfig</Product>
     <ProductName>AnyConfig</ProductName>
     <Authors>Michael Brown</Authors>
@@ -26,11 +26,11 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
     <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" PrivateAssets="all" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.7.0" PrivateAssets="all" />
-    <PackageReference Include="TypeSupport" Version="1.1.3" PrivateAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="TypeSupport" Version="1.1.4" PrivateAssets="all" />
   </ItemGroup>
 
   <Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' != ''">

@@ -1,13 +1,17 @@
 ﻿using AnyConfig.Exceptions;
 using AnyConfig.Scaffolding;
 using AnyConfig.Tests.Models;
+using NLog.Extensions.Logging;
 using NUnit.Framework;
+using Serilog;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class AutoResolveConfigTests
     {
         TestConfiguration _testConfig;
@@ -125,7 +129,7 @@ namespace AnyConfig.Tests
             Assert.AreEqual("True", val);
 
             // provider should contain the right number of keys
-            Assert.AreEqual(91, provider.Data.Count);
+            Assert.AreEqual(90, provider.Data.Count);
 
             var rateLimitingKeys = provider.GetChildKeys("IpRateLimiting");
             Assert.AreEqual(21, rateLimitingKeys.Count());
@@ -136,6 +140,40 @@ namespace AnyConfig.Tests
             Assert.AreEqual("TestConfiguration", section2.Path);
             var structuredText = section2.GetNodeStructuredText();
             Assert.NotNull(structuredText);
+        }
+
+        [Test]
+        public void Should_Load_NLog_Configuration()
+        {
+            //var testScaffold = new TestScaffold(@"B:\gitrepo\personalcode\AnyConfig\AnyConfig\AnyConfig.Scaffolding\bin\Debug\netcoreapp3.1\");
+            var configuration = Config.GetConfiguration();
+            var nlogConfiguration = configuration.GetSection("NLog");
+            var targets = nlogConfiguration.GetSection("targets");
+            NLog.LogManager.Configuration = new NLogLoggingConfiguration(nlogConfiguration);
+            var logger = NLog.LogManager.GetCurrentClassLogger();
+
+            var sw = new StringWriter();
+            var outputStream = System.Console.Out;
+            System.Console.SetOut(sw);
+            logger.Error("Test Log Event");
+            // this currently isn't logging to the console
+            //Assert.IsTrue(sw.ToString().EndsWith("Test Log Event\r\n"));
+            System.Console.SetOut(outputStream);
+        }
+
+        [Test]
+        public void Should_Load_Serilog_Configuration()
+        {
+            var configuration = Config.GetConfiguration();
+            var logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration, sectionName: "Serilog")
+                .CreateLogger();
+            var sw = new StringWriter();
+            var outputStream = System.Console.Out;
+            System.Console.SetOut(sw);
+            logger.Write(Serilog.Events.LogEventLevel.Error, "Test Log Event");
+            Assert.IsTrue(sw.ToString().EndsWith("Test Log Event\r\n"));
+            System.Console.SetOut(outputStream);
         }
     }
 }

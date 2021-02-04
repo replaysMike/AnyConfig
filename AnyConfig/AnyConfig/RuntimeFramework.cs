@@ -13,6 +13,10 @@
         /// <summary>
         /// .Net Framework
         /// </summary>
-        DotNetFramework
+        DotNetFramework,
+        /// <summary>
+        /// .Net 5
+        /// </summary>
+        DotNet5
     }
 }

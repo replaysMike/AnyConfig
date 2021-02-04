@@ -4,6 +4,7 @@ using System;
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class ConfigProviderTests
     {
         [Test]

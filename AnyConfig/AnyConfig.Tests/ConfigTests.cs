@@ -6,6 +6,7 @@ using System.Text;
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class ConfigTests
     {
         [Test]

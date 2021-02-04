@@ -4,6 +4,7 @@ using System.Reflection;
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class LegacyConfigurationNameAttributeTests
     {
         [OneTimeSetUp]

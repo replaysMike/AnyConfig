@@ -94,7 +94,8 @@ namespace AnyConfig
 
         public IChangeToken GetReloadToken()
         {
-            throw new NotImplementedException();
+            // this is not really supported yet
+            return new ConfigurationReloadToken();
         }
 
         public IConfigurationSection GetSection(string key)

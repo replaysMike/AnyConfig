@@ -89,6 +89,7 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
                     return LoadJsonConfiguration<T>(default);
                 case RuntimeFramework.DotNetFramework:
@@ -129,6 +130,7 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
                     return LoadJsonConfiguration<T>(defaultValue, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
@@ -172,6 +174,7 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
                     return LoadJsonConfiguration(defaultValue, type, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
@@ -205,6 +208,7 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
                     return LoadJsonConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
@@ -240,6 +244,7 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
                     return LoadJsonConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:

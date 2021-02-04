@@ -11,6 +11,7 @@ using System.Reflection;
 namespace AnyConfig.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class ManualResolveConfigTests
     {
         TestConfiguration _testConfig;
