@@ -39,9 +39,6 @@
 			<WorkingDirectory>$(OutputPath)</WorkingDirectory>
 		</PropertyGroup>
 		<ItemGroup>
-			<InputAssemblies Include="ILRepack.Lib.MSBuild.Task" />
-			<InputAssemblies Include="Microsoft.Extensions.Configuration.Binder" />
-			<InputAssemblies Include="Microsoft.Extensions.Configuration.Abstractions" />
 			<InputAssemblies Include="System.Security.Cryptography.ProtectedData.dll" />
 			<InputAssemblies Include="System.Security.Cryptography.Xml.dll" />
 			<InputAssemblies Include="TypeSupport.dll" />
