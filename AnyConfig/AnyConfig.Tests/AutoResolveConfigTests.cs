@@ -175,5 +175,11 @@ namespace AnyConfig.Tests
             Assert.IsTrue(sw.ToString().EndsWith("Test Log Event\r\n"));
             System.Console.SetOut(outputStream);
         }
+
+        [Test]
+        public void Should_Throw_InvalidSetting()
+        {
+            var setting = ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true);
+        }
     }
 }
