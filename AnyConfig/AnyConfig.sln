@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnyConfig.Scaffolding", "An
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnyConfig.PerformanceTesting", "AnyConfig.PerformanceTesting\AnyConfig.PerformanceTesting.csproj", "{76C434D2-490E-41E9-920E-CE71305AD770}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnyConfig.NetFrameworkOnlyTests", "AnyConfig.NetFrameworkOnlyTests\AnyConfig.NetFrameworkOnlyTests.csproj", "{2BF7117F-DEF9-4F1D-81BD-B8BC98F62064}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{76C434D2-490E-41E9-920E-CE71305AD770}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76C434D2-490E-41E9-920E-CE71305AD770}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76C434D2-490E-41E9-920E-CE71305AD770}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BF7117F-DEF9-4F1D-81BD-B8BC98F62064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BF7117F-DEF9-4F1D-81BD-B8BC98F62064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BF7117F-DEF9-4F1D-81BD-B8BC98F62064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BF7117F-DEF9-4F1D-81BD-B8BC98F62064}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace AnyConfig.Tests
@@ -77,6 +78,14 @@ namespace AnyConfig.Tests
         {
             var value = Config.Get<CustomEnum>("CustomEnumNumericSetting");
             Assert.AreEqual(CustomEnum.Second, value);
+        }
+
+        [Test]
+        public void Should_Get_DefaultValue()
+        {
+            ConfigurationResolver.RegisterEntryAssembly(Assembly.GetExecutingAssembly());
+            var value = Config.Get<int>("NonExistantValue123", 12345);
+            Assert.AreEqual(12345, value);
         }
     }
 }

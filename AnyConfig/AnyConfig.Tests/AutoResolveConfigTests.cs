@@ -1,4 +1,7 @@
-﻿using AnyConfig.Exceptions;
+﻿using System.Collections.Generic;
+using AnyConfig.Exceptions;
+using AnyConfig.Scaffolding;
+using AnyConfig.Tests.Models;
 using NLog.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
@@ -172,6 +175,20 @@ namespace AnyConfig.Tests
             logger.Write(Serilog.Events.LogEventLevel.Error, "Test Log Event");
             Assert.IsTrue(sw.ToString().EndsWith("Test Log Event\r\n"));
             System.Console.SetOut(outputStream);
+        }
+
+        [Test]
+        public void Should_Throw_InvalidSetting()
+        {
+            Assert.Throws<KeyNotFoundException>(() =>
+                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true));
+        }
+
+        [Test]
+        public void Should_NotThrow_InvalidSetting()
+        {
+            Assert.DoesNotThrow(() =>
+                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, false));
         }
     }
 }
