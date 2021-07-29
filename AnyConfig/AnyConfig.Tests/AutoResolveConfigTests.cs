@@ -1,4 +1,5 @@
-﻿using AnyConfig.Exceptions;
+﻿using System.Collections.Generic;
+using AnyConfig.Exceptions;
 using AnyConfig.Scaffolding;
 using AnyConfig.Tests.Models;
 using NLog.Extensions.Logging;
@@ -179,7 +180,15 @@ namespace AnyConfig.Tests
         [Test]
         public void Should_Throw_InvalidSetting()
         {
-            var setting = ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true);
+            Assert.Throws<KeyNotFoundException>(() =>
+                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true));
+        }
+
+        [Test]
+        public void Should_NotThrow_InvalidSetting()
+        {
+            Assert.DoesNotThrow(() =>
+                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, false));
         }
     }
 }

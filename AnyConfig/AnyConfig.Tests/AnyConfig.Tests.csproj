@@ -1,111 +1,113 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\AnyConfigStrongNameKey.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="appsettings.json" />
-    <None Remove="appsettings_full.json" />
-    <None Remove="DapiProtectedApp.config" />
-    <None Remove="empty.config" />
-    <None Remove="empty.json" />
-    <None Remove="empty2.config" />
-    <None Remove="legacyappsettings.json" />
-    <None Remove="legacyflatmap.config" />
-    <None Remove="legacyflatmap.json" />
-    <None Remove="legacyrootappsettings.json" />
-    <None Remove="legacysettingname.config" />
-    <None Remove="legacysettingname.json" />
-    <None Remove="ParsingData\AllTypesResponse.json" />
-    <None Remove="ParsingData\ArrayResponse.json" />
-    <None Remove="ParsingData\ComplexResponse.json" />
-    <None Remove="ParsingData\RootArrayResponse.json" />
-    <None Remove="ParsingData\RootObjectResponse.json" />
-    <None Remove="ParsingData\SimpleResponse.json" />
-    <None Remove="RsaProtectedApp.config" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="appsettings.json" />
+		<None Remove="appsettings_full.json" />
+		<None Remove="DapiProtectedApp.config" />
+		<None Remove="empty.config" />
+		<None Remove="empty.json" />
+		<None Remove="empty2.config" />
+		<None Remove="legacyappsettings.json" />
+		<None Remove="legacyflatmap.config" />
+		<None Remove="legacyflatmap.json" />
+		<None Remove="legacyrootappsettings.json" />
+		<None Remove="legacysettingname.config" />
+		<None Remove="legacysettingname.json" />
+		<None Remove="ParsingData\AllTypesResponse.json" />
+		<None Remove="ParsingData\ArrayResponse.json" />
+		<None Remove="ParsingData\ComplexResponse.json" />
+		<None Remove="ParsingData\RootArrayResponse.json" />
+		<None Remove="ParsingData\RootObjectResponse.json" />
+		<None Remove="ParsingData\SimpleResponse.json" />
+		<None Remove="RsaProtectedApp.config" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="appsettings_full.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="empty2.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="empty.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="empty.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="RsaProtectedApp.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacyflatmap.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacyflatmap.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacysettingname.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacysettingname.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacyrootappsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="legacyappsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DapiProtectedApp.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="appsettings_full.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="empty2.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="empty.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="empty.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="RsaProtectedApp.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacyflatmap.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacyflatmap.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacysettingname.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacysettingname.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacyrootappsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="legacyappsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="DapiProtectedApp.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="ParsingData\AllTypesResponse.json" />
-    <EmbeddedResource Include="ParsingData\ArrayResponse.json" />
-    <EmbeddedResource Include="ParsingData\ComplexResponse.json" />
-    <EmbeddedResource Include="ParsingData\RootArrayResponse.json" />
-    <EmbeddedResource Include="ParsingData\RootObjectResponse.json" />
-    <EmbeddedResource Include="ParsingData\SimpleResponse.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="ParsingData\AllTypesResponse.json" />
+		<EmbeddedResource Include="ParsingData\ArrayResponse.json" />
+		<EmbeddedResource Include="ParsingData\ComplexResponse.json" />
+		<EmbeddedResource Include="ParsingData\RootArrayResponse.json" />
+		<EmbeddedResource Include="ParsingData\RootObjectResponse.json" />
+		<EmbeddedResource Include="ParsingData\SimpleResponse.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="coverlet.msbuild" Version="2.8.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="EntityFramework" Version="6.4.0" />
-    <PackageReference Include="EntityFramework6.Npgsql" Version="6.4.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
-    <PackageReference Include="NLog" Version="4.7.2" />
-    <PackageReference Include="NLog.Config" Version="4.7.2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.4" />
-    <PackageReference Include="NLog.Gelf" Version="1.1.4" />
-    <PackageReference Include="NLog.Targets.Graylog" Version="0.0.1" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.2" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+		<PackageReference Include="coverlet.msbuild" Version="2.8.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="EntityFramework" Version="6.4.0" />
+		<PackageReference Include="EntityFramework6.Npgsql" Version="6.4.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.3" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+		<PackageReference Include="NLog" Version="4.7.2" />
+		<PackageReference Include="NLog.Config" Version="4.7.2" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="1.6.4" />
+		<PackageReference Include="NLog.Gelf" Version="1.1.4" />
+		<PackageReference Include="NLog.Targets.Graylog" Version="0.0.1" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="4.9.2" />
+		<PackageReference Include="NUnit" Version="3.12.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Serilog" Version="2.10.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AnyConfig.Scaffolding\AnyConfig.Scaffolding.csproj" />
-    <ProjectReference Include="..\AnyConfig\AnyConfig.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AnyConfig.Scaffolding\AnyConfig.Scaffolding.csproj" />
+		<ProjectReference Include="..\AnyConfig\AnyConfig.csproj" />
+	</ItemGroup>
 
 </Project>

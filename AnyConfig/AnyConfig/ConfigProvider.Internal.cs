@@ -13,10 +13,9 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using TypeSupport.Extensions;
 
-[assembly: InternalsVisibleTo("AnyConfig.Tests")]
+[assembly: InternalsVisibleTo("AnyConfig.Tests,PublicKey=00240000048000009400000006020000002400005253413100040000010001001996994e108c546699147c2adcce1926f2c7045588113cdccfe7c8a0c87830ac7f23347fe7ee39c65ded9cef5a82568da5dd2329434c20912db075e4af8ecbf162f108d3afadd0215a17b6ccdbf58b3501244c56a853b22e243d5b731daf9810394ae16bc1511937bbf764d3c344fcf2a31ff59fe9375ad93ed5932147ad7d9c")]
 namespace AnyConfig
 {
     public static partial class ConfigProvider
