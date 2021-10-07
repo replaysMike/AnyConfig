@@ -27,6 +27,7 @@ namespace AnyConfig
         private static readonly SemaphoreSlim _cacheLock = new SemaphoreSlim(1, 1);
         private static readonly Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
         private LegacyConfigurationLoader _legacyConfigurationLoader;
+        private static IConfiguration _appConfiguration;
 
         /// <summary>
         /// The last configuration filename that was resolved
@@ -51,6 +52,11 @@ namespace AnyConfig
                 _cacheLock.Release();
             }
         }
+
+        /// <summary>
+        /// Gives AnyConfig a pre-configured IConfiguration instance to use for getting config on .net core platforms
+        /// </summary>
+        public static void SetAppConfiguration(IConfiguration configuration) => _appConfiguration = configuration;
 
         /// <summary>
         /// The detected runtime framework
@@ -430,6 +436,8 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(settingName))
             {
+                if (_appConfiguration is not null)
+                    return _appConfiguration.GetValue(type, settingName, defaultValue);
                 if (configuration.Providers.First().TryGet(settingName, out var value))
                     return ((StringValue)value).As(type);
                 return defaultValue;
