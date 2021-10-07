@@ -467,6 +467,8 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(settingName))
             {
+                if (_appConfiguration is not null)
+                    return _appConfiguration.GetValue(settingName, defaultValue);
                 if (configuration.Providers.First().TryGet(settingName, out var value))
                     return ((StringValue)value).As<T>();
                 return defaultValue;
@@ -500,6 +502,9 @@ namespace AnyConfig
             filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
+                if (_appConfiguration is not null)
+                    return _appConfiguration.GetValue(type, settingName, defaultValue);
+
                 object value = null;
                 if (!string.IsNullOrEmpty(filename))
                     value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
@@ -539,6 +544,9 @@ namespace AnyConfig
             filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
+                if (_appConfiguration is not null)
+                    return _appConfiguration.GetValue(settingName, defaultValue);
+
                 var valueExists = false;
                 object value = defaultValue;
                 if (!string.IsNullOrEmpty(filename))
