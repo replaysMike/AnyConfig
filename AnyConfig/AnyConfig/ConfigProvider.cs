@@ -14,6 +14,8 @@ namespace AnyConfig
     {
         public static ConfigValueNotSet Empty => ConfigValueNotSet.Instance;
         public static string LastResolvedConfigurationFilename { get; private set; }
+        private static CachedDataProvider<object> _cachedObjects = new CachedDataProvider<object>();
+        private static CachedFileProvider _cachedFiles = new CachedFileProvider();
 
         /// <summary>
         /// Get a connection string by name
@@ -60,27 +62,29 @@ namespace AnyConfig
             }
 
             var filePath = Path.Combine(path, filename);
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"The configuration file named '{filePath}' was not found.");
+            var configurationFileContents = _cachedFiles.AddOrGetFile(filePath);
+            var configuration = _cachedObjects.AddOrGet(filePath, () => {
+                var jsonParser = new JsonParser();
+                var rootNode = jsonParser.Parse(_cachedFiles.AddOrGetFile(filePath));
 
-            var jsonParser = new JsonParser();
-            var rootNode = jsonParser.Parse(File.ReadAllText(filePath));
+                var configurationRoot = new ConfigurationRoot(filePath);
+                var provider = new JsonConfigurationProvider(filePath);
+                configurationRoot.AddProvider(provider);
+                foreach (JsonNode node in rootNode.ChildNodes)
+                {
+                    if (node.ValueType == PrimitiveTypes.Object)
+                    {
+                        configurationRoot.AddSection(node);
+                    }
+                    else
+                    {
+                        // not supported yet
+                    }
+                }
+                provider.SetData(MapAllNodes(rootNode, new List<KeyValuePair<string, string>>()));
+                return configurationRoot;
+            });
 
-            var configuration = new ConfigurationRoot(filePath);
-            var provider = new JsonConfigurationProvider(filePath);
-            configuration.AddProvider(provider);
-            foreach (JsonNode node in rootNode.ChildNodes)
-            {
-                if (node.ValueType == PrimitiveTypes.Object)
-                {
-                    configuration.AddSection(node);
-                }
-                else
-                {
-                    // not supported yet
-                }
-            }
-            provider.SetData(MapAllNodes(rootNode, new List<KeyValuePair<string, string>>()));
             return configuration as IConfigurationRoot;
         }
 

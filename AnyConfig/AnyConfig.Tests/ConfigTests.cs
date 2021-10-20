@@ -87,5 +87,13 @@ namespace AnyConfig.Tests
             var value = Config.Get<int>("NonExistantValue123", 12345);
             Assert.AreEqual(12345, value);
         }
+
+        [Test]
+        public void Should_Get_HierarchicalValue()
+        {
+            ConfigurationResolver.RegisterEntryAssembly(Assembly.GetExecutingAssembly());
+            var value = Config.Get<string>("ConnectionStrings:TestConnection");
+            Assert.AreEqual("Server=127.0.0.1;Port=5432;Database=TestDatabase;Userid=user;Password=password", value);
+        }
     }
 }

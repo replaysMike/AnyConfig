@@ -177,6 +177,16 @@ namespace AnyConfig.Tests
         }
 
         [Test]
+        public void Should_Load_ConfigurationManagerFromXml_HierarchicalValue()
+        {
+            ConfigurationManager.ResetDefaults();
+            ConfigurationManager.ConfigurationSource = ConfigurationManagerSource.Xml;
+            ConfigurationManager.Reload();
+            var rootName = ConfigurationManager.Get<string>("appSettings:StringSetting");
+            Assert.AreEqual("TestValue", rootName);
+        }
+
+        [Test]
         public void Should_Load_ConfigurationManagerCustomSectionFromJson()
         {
             ConfigurationManager.ConfigurationFilename = "appsettings.json";

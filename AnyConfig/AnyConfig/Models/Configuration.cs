@@ -38,6 +38,13 @@ namespace AnyConfig.Models
             if (anyConfigSetting != null)
                 return new StringValue(anyConfigSetting).As<T>();
 
+            if (key.Contains(":"))
+            {
+                var value = GetHeirarchyValue(key);
+                if (value != null)
+                    return new StringValue(value).As<T>();
+            }
+
             var appSetting = AppSettings.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
                 .Select(x => x.Value)
                 .FirstOrDefault();
@@ -116,6 +123,24 @@ namespace AnyConfig.Models
                 default:
                     return new LegacyConfigurationSection(this, ConfigSections.FirstOrDefault(x => x.Name.Equals(name)).Configuration);
             }
+        }
+
+        public string GetHeirarchyValue(string key)
+        {
+            var parts = key.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 0)
+            {
+                switch (parts[0].ToLower())
+                {
+                    case "appsettings":
+                        return AppSettings[parts[1]].Value;
+                    case "connectionstrings":
+                        return ConnectionStrings[parts[1]].ConnectionStringSetting.ConnectionString;
+                    case "anyconfig":
+                        return AnyConfigSettings[parts[1]].Value;
+                }
+            }
+            return null;
         }
     }
 

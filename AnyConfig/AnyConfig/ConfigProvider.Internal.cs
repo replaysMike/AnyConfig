@@ -349,7 +349,7 @@ namespace AnyConfig
                 if (File.Exists(filename))
                 {
                     LastResolvedConfigurationFilename = filename;
-                    json = File.ReadAllText(filename);
+                    json = _cachedFiles.AddOrGetFile(filename);
                     cachedConfiguration = new CachedConfiguration { OriginalText = json };
                     _cachedConfigurationFiles.AddOrUpdate(filename, cachedConfiguration, (key, existingValue) => existingValue);
                 }
@@ -427,7 +427,7 @@ namespace AnyConfig
                 if (File.Exists(filename))
                 {
                     LastResolvedConfigurationFilename = filename;
-                    xml = File.ReadAllText(filename);
+                    xml = _cachedFiles.AddOrGetFile(filename);
                     if (string.IsNullOrEmpty(xml))
                     {
                         return false;
