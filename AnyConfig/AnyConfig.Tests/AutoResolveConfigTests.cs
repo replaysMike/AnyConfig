@@ -181,14 +181,14 @@ namespace AnyConfig.Tests
         public void Should_Throw_InvalidSetting()
         {
             Assert.Throws<KeyNotFoundException>(() =>
-                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true));
+                new ConfigProvider().Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, true));
         }
 
         [Test]
         public void Should_NotThrow_InvalidSetting()
         {
             Assert.DoesNotThrow(() =>
-                ConfigProvider.Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, false));
+                new ConfigProvider().Get<bool>("SomethingThatDoesntExist", ConfigSource.WebConfig, false));
         }
     }
 }
