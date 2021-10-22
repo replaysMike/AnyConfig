@@ -31,6 +31,11 @@ namespace AnyConfig
         private ConfigProvider _configProvider = new ConfigProvider();
 
         /// <summary>
+        /// Get the pre-configured IConfiguration. To set, see <see cref="SetAppConfiguration"/>
+        /// </summary>
+        public IConfiguration AppConfiguration => _appConfiguration;
+
+        /// <summary>
         /// The last configuration filename that was resolved
         /// </summary>
         public string LastResolvedConfigurationFilename { get; private set; }
@@ -434,7 +439,7 @@ namespace AnyConfig
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
-                throw new ConfigurationMissingException($"Could not load configuration.");
+                throw new ConfigurationMissingException($"Could not load configuration from file named '{filename}'.");
 
             if (!string.IsNullOrEmpty(settingName))
             {
@@ -467,8 +472,9 @@ namespace AnyConfig
             if (configuration == null)
                 throw new ConfigurationMissingException($"Could not load configuration from file named '{filename}'!");
 
-            /*if (!string.IsNullOrEmpty(settingName))
+            if (!string.IsNullOrEmpty(settingName))
             {
+                // if we were injected an IConfiguration, simply use it
                 if (_appConfiguration is not null)
                     return _appConfiguration.GetValue(settingName, defaultValue);
                 if(!configuration.Providers.Any())
@@ -489,7 +495,7 @@ namespace AnyConfig
                     if (sectionName == null)
                     {
                         // try flat mapping
-                        var flatMapValue = ConfigProvider.Get<T>(ConfigSource.JsonFile, throwsException, Filename => filename);
+                        var flatMapValue = new ConfigProvider().Get<T>(ConfigSource.JsonFile, throwsException, Filename => filename);
                         if (flatMapValue != null)
                             return flatMapValue;
                     }
@@ -500,7 +506,7 @@ namespace AnyConfig
 
                 var value = JsonSerializer.Deserialize<T>(configSection.GetNodeStructuredText());
                 return value;
-            }*/
+            }
             return default;
         }
 
