@@ -26,6 +26,7 @@ namespace AnyConfig
         }
 
         public IEnumerable<IConfigurationProvider> Providers => _configurationProviders;
+        IEnumerable<IConfigurationProvider> IConfigurationRoot.Providers => Providers;
 
         internal void AddProvider(IConfigurationProvider configurationProvider)
         {
@@ -36,5 +37,7 @@ namespace AnyConfig
         {
             // does nothing
         }
+
+        void IConfigurationRoot.Reload() => Reload();
     }
 }

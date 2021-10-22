@@ -51,6 +51,12 @@ namespace AnyConfig
             }
         }
 
+        string IConfiguration.this[string key]
+        {
+            get { return this[key]; }
+            set { this[key] = value; }
+        }
+
         /// <summary>
         /// The configuration file that was resolved
         /// </summary>
@@ -101,7 +107,11 @@ namespace AnyConfig
             }
         }
 
+        IEnumerable<IConfigurationSection> IConfiguration.GetChildren() => GetChildren();
+
         public IChangeToken GetReloadToken() => new ConfigurationReloadToken();
+
+        IChangeToken IConfiguration.GetReloadToken() => GetReloadToken();
 
         public IConfigurationSection GetSection(string key)
         {
@@ -119,5 +129,7 @@ namespace AnyConfig
             // always return a configuration section
             return new ConfigurationSection(key, key, null, null);
         }
+
+        IConfigurationSection IConfiguration.GetSection(string key) => GetSection(key);
     }
 }

@@ -58,6 +58,8 @@ namespace AnyConfig
             }
         }
 
+        IEnumerable<string> IConfigurationProvider.GetChildKeys(IEnumerable<string> earlierKeys, string parentPath) => GetChildKeys(earlierKeys, parentPath);
+
         /// <summary>
         /// Get child keys containing certain text
         /// </summary>
@@ -81,10 +83,14 @@ namespace AnyConfig
 
         public IChangeToken GetReloadToken() => new ConfigurationReloadToken();
 
+        IChangeToken IConfigurationProvider.GetReloadToken() => GetReloadToken();
+
         public void Load()
         {
             // does nothing
         }
+
+        void IConfigurationProvider.Load() => Load();
 
         internal void SetData(ICollection<KeyValuePair<string, string>> data)
         {
@@ -120,6 +126,8 @@ namespace AnyConfig
             }
         }
 
+        void IConfigurationProvider.Set(string key, string value) => Set(key, value);
+
         public bool TryGet(string key, out string value)
         {
             value = string.Empty;
@@ -149,5 +157,7 @@ namespace AnyConfig
             }
             return false;
         }
+
+        bool IConfigurationProvider.TryGet(string key, out string value) => TryGet(key, out value);
     }
 }

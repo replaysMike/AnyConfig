@@ -10,17 +10,17 @@ namespace AnyConfig
     /// <summary>
     /// Configuration retrieval management
     /// </summary>
-    public static partial class ConfigProvider
+    public partial class ConfigProvider
     {
         public static ConfigValueNotSet Empty => ConfigValueNotSet.Instance;
-        public static string LastResolvedConfigurationFilename { get; private set; }
+        public string LastResolvedConfigurationFilename { get; private set; }
 
         /// <summary>
         /// Get a connection string by name
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string GetConnectionString(string name)
+        public string GetConnectionString(string name)
         {
             return InternalGetConnectionString(name);
         }
@@ -29,7 +29,7 @@ namespace AnyConfig
         /// Get a configuration object from a json serialized configuration file
         /// </summary>
         /// <returns></returns>
-        public static IConfigurationRoot GetConfiguration()
+        public IConfigurationRoot GetConfiguration()
         {
             return GetConfiguration(DotNetCoreSettingsFilename, null);
         }
@@ -39,7 +39,7 @@ namespace AnyConfig
         /// </summary>
         /// <param name="appSettingsJson">Name of json settings file</param>
         /// <returns></returns>
-        public static IConfigurationRoot GetConfiguration(string appSettingsJson)
+        public IConfigurationRoot GetConfiguration(string appSettingsJson)
         {
             return GetConfiguration(appSettingsJson, null);
         }
@@ -50,9 +50,10 @@ namespace AnyConfig
         /// <param name="appSettingsJson">Name of json settings file</param>
         /// <param name="path">Optional path to json settings file</param>
         /// <returns></returns>
-        public static IConfigurationRoot GetConfiguration(string appSettingsJson, string path)
+        public IConfigurationRoot GetConfiguration(string appSettingsJson, string path)
         {
             var filename = appSettingsJson ?? DotNetCoreSettingsFilename;
+            
             if (string.IsNullOrEmpty(path))
             {
                 var resolver = new ConfigurationResolver();
@@ -66,7 +67,7 @@ namespace AnyConfig
             var jsonParser = new JsonParser();
             var rootNode = jsonParser.Parse(File.ReadAllText(filePath));
 
-            var configuration = new ConfigurationRoot(filePath);
+            var configuration = new ConfigurationRoot(filePath); // offending line of code!!!!!!!
             var provider = new JsonConfigurationProvider(filePath);
             configuration.AddProvider(provider);
             foreach (JsonNode node in rootNode.ChildNodes)
@@ -81,7 +82,7 @@ namespace AnyConfig
                 }
             }
             provider.SetData(MapAllNodes(rootNode, new List<KeyValuePair<string, string>>()));
-            return configuration as IConfigurationRoot;
+            return configuration;
         }
 
         /// <summary>
@@ -90,7 +91,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static string Get(string optionName, string defaultValue)
+        public string Get(string optionName, string defaultValue)
         {
             InternalTryGet<string>(out var value, optionName, ConfigSource.WebConfig, defaultValue, false);
             return value;
@@ -102,7 +103,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static string Get(string optionName, string defaultValue, ConfigSource configSource)
+        public string Get(string optionName, string defaultValue, ConfigSource configSource)
         {
             InternalTryGet<string>(out var value, optionName, configSource, defaultValue, false);
             return value;
@@ -116,7 +117,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static string Get(string optionName, string defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public string Get(string optionName, string defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<string>(out var value, optionName, configSource, defaultValue, throwsException);
             return value;
@@ -127,7 +128,7 @@ namespace AnyConfig
         /// </summary>
         /// <param name="optionName"></param>
         /// <returns></returns>
-        public static object Get(Type valueType, string optionName, object defaultValue)
+        public object Get(Type valueType, string optionName, object defaultValue)
         {
             InternalTryGet(out var value, valueType, optionName, ConfigSource.WebConfig, defaultValue, false);
             return value;
@@ -141,7 +142,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource)
+        public object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource)
         {
             InternalTryGet(out var value, valueType, optionName, configSource, defaultValue, false);
             return value;
@@ -155,7 +156,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public object Get(Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet(out var value, valueType, optionName, configSource, defaultValue, throwsException, false, configParameters);
             return value;
@@ -168,7 +169,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, T defaultValue)
+        public T Get<T>(string optionName, T defaultValue)
         {
             InternalTryGet<T>(out var value, optionName, ConfigSource.WebConfig, defaultValue, false);
             return value;
@@ -181,7 +182,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, T defaultValue, ConfigSource configSource)
+        public T Get<T>(string optionName, T defaultValue, ConfigSource configSource)
         {
             InternalTryGet<T>(out var value, optionName, configSource, defaultValue, false);
             return value;
@@ -197,7 +198,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public T Get<T>(string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<T>(out var value, optionName, configSource, defaultValue, throwsException, false, configParameters);
             return value;
@@ -211,7 +212,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static T Get<T>(ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public T Get<T>(ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<T>(out var value, string.Empty, configSource, default, throwsException, false, configParameters);
             return value;
@@ -226,7 +227,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static T Get<T>(T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public T Get<T>(T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<T>(out var value, string.Empty, configSource, defaultValue, throwsException, false, configParameters);
             return value;
@@ -238,7 +239,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static string Get(string optionName)
+        public string Get(string optionName)
         {
             InternalTryGet<string>(out var value, optionName, ConfigSource.WebConfig, default, false);
             return value;
@@ -250,7 +251,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static string Get(string optionName, ConfigSource configSource)
+        public string Get(string optionName, ConfigSource configSource)
         {
             InternalTryGet<string>(out var value, optionName, configSource, default, false);
             return value;
@@ -264,7 +265,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static string Get(string optionName, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public string Get(string optionName, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<string>(out var value, optionName, configSource, default, throwsException);
             return value;
@@ -277,7 +278,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static T Get<T>(string optionName)
+        public T Get<T>(string optionName)
         {
             InternalTryGet<T>(out var value, optionName, ConfigSource.WebConfig, default, false);
             return value;
@@ -290,7 +291,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="configSource"></param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, ConfigSource configSource)
+        public T Get<T>(string optionName, ConfigSource configSource)
         {
             InternalTryGet<T>(out var value, optionName, configSource, default, false);
             return value;
@@ -305,7 +306,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public T Get<T>(string optionName, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<T>(out var value, optionName, configSource, default, throwsException, false, configParameters);
             return value;
@@ -321,7 +322,7 @@ namespace AnyConfig
         /// <param name="expandEnvironmentVariables">True to expand environment variables</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static T Get<T>(string optionName, ConfigSource configSource, bool throwsException, bool expandEnvironmentVariables, params Expression<Func<object, object>>[] configParameters)
+        public T Get<T>(string optionName, ConfigSource configSource, bool throwsException, bool expandEnvironmentVariables, params Expression<Func<object, object>>[] configParameters)
         {
             InternalTryGet<T>(out var value, optionName, configSource, default, throwsException, expandEnvironmentVariables, configParameters);
             return value;
@@ -333,7 +334,7 @@ namespace AnyConfig
         /// <typeparam name="T"></typeparam>
         /// <param name="optionName"></param>
         /// <returns></returns>
-        public static T GetFromSection<T>(string optionName)
+        public T GetFromSection<T>(string optionName)
         {
             GetWebConfigSetting<T>(out var value, optionName, "appSettings", default, false);
             return value;
@@ -346,7 +347,7 @@ namespace AnyConfig
         /// <param name="optionName"></param>
         /// <param name="sectionName">The config section name to read from</param>
         /// <returns></returns>
-        public static T GetFromSection<T>(string optionName, string sectionName)
+        public T GetFromSection<T>(string optionName, string sectionName)
         {
             GetWebConfigSetting<T>(out var value, optionName, sectionName, default, false);
             return value;
@@ -360,7 +361,7 @@ namespace AnyConfig
         /// <param name="sectionName">The config section name to read from</param>
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <returns></returns>
-        public static T GetFromSection<T>(string optionName, string sectionName, bool throwsException)
+        public T GetFromSection<T>(string optionName, string sectionName, bool throwsException)
         {
             GetWebConfigSetting<T>(out var value, optionName, sectionName, default, throwsException);
             return value;
@@ -377,7 +378,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static bool TryGet(out object value, Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public bool TryGet(out object value, Type valueType, string optionName, object defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             return InternalTryGet(out value, valueType, optionName, configSource, defaultValue, throwsException, false, configParameters);
         }
@@ -392,7 +393,7 @@ namespace AnyConfig
         /// <param name="throwsException">True to throw exception if key is not found</param>
         /// <param name="configParameters">An optional list of key/value parameters to pass to the lookup method. Example: Get(..., SomeKey=>SomeValue, SomeKey2=>SomeValue)</param>
         /// <returns></returns>
-        public static bool TryGet<T>(out T value, string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
+        public bool TryGet<T>(out T value, string optionName, T defaultValue, ConfigSource configSource, bool throwsException, params Expression<Func<object, object>>[] configParameters)
         {
             return InternalTryGet<T>(out value, optionName, configSource, defaultValue, throwsException, false, configParameters);
         }

@@ -20,7 +20,7 @@ namespace AnyConfig
     /// Multi-framework configuration resolver
     /// Supports .Net Framework and .Net Core configurations
     /// </summary>
-    public class ConfigurationResolver : IConfigurationResolver
+    public sealed class ConfigurationResolver : IConfigurationResolver
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private readonly Assembly _entryAssembly;
@@ -28,6 +28,7 @@ namespace AnyConfig
         private static readonly Dictionary<string, Assembly> _registeredEntryAssemblies = new Dictionary<string, Assembly>();
         private LegacyConfigurationLoader _legacyConfigurationLoader;
         private static IConfiguration _appConfiguration;
+        private ConfigProvider _configProvider = new ConfigProvider();
 
         /// <summary>
         /// The last configuration filename that was resolved
@@ -392,7 +393,8 @@ namespace AnyConfig
         {
             // for .net core configs such as appsettings.json we can serialize from json directly
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
-            return ConfigProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
+            var configuration = _configProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
+            return configuration;
         }
 
         /// <summary>
@@ -463,13 +465,18 @@ namespace AnyConfig
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
-                throw new ConfigurationMissingException($"Could not load configuration.");
+                throw new ConfigurationMissingException($"Could not load configuration from file named '{filename}'!");
 
-            if (!string.IsNullOrEmpty(settingName))
+            /*if (!string.IsNullOrEmpty(settingName))
             {
                 if (_appConfiguration is not null)
                     return _appConfiguration.GetValue(settingName, defaultValue);
-                if (configuration.Providers.First().TryGet(settingName, out var value))
+                if(!configuration.Providers.Any())
+                    throw new ConfigurationMissingException($"Could not resolve a json configuration provider!");
+                if (configuration.Providers
+                        .Where(x => x?.GetType() == typeof(JsonConfigurationProvider))
+                        .First()
+                        .TryGet(settingName, out var value))
                     return ((StringValue)value).As<T>();
                 return defaultValue;
             }
@@ -493,7 +500,8 @@ namespace AnyConfig
 
                 var value = JsonSerializer.Deserialize<T>(configSection.GetNodeStructuredText());
                 return value;
-            }
+            }*/
+            return default;
         }
 
         public object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
@@ -507,17 +515,17 @@ namespace AnyConfig
 
                 object value = null;
                 if (!string.IsNullOrEmpty(filename))
-                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                    value = _configProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                 if (value == ConfigProvider.Empty)
                 {
-                    value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                    value = _configProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.WebConfig);
                     if (value == ConfigProvider.Empty)
                     {
-                        value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                        value = _configProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                         if (value == ConfigProvider.Empty)
                         {
                             var currentProcessFilename = GetCurrentProcessFilename() + ".config";
-                            value = ConfigProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
+                            value = _configProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                             if (value == ConfigProvider.Empty)
                                 return defaultValue;
                         }
@@ -550,17 +558,17 @@ namespace AnyConfig
                 var valueExists = false;
                 object value = defaultValue;
                 if (!string.IsNullOrEmpty(filename))
-                    valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                    valueExists = _configProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                 if (!valueExists)
                 {
-                    valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig, throwsException);
+                    valueExists = _configProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.WebConfig, throwsException);
                     if (!valueExists)
                     {
-                        valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
+                        valueExists = _configProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.ApplicationConfig, throwsException);
                         if (!valueExists)
                         {
                             var currentProcessFilename = GetCurrentProcessFilename() + ".config";
-                            valueExists = ConfigProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
+                            valueExists = _configProvider.TryGet(out value, typeof(T), settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                         }
                     }
                 }
@@ -642,19 +650,19 @@ namespace AnyConfig
                 if (value.IsNullOrEmpty())
                 {
                     if (!string.IsNullOrEmpty(filename))
-                        value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
+                        value = _configProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
                     if (value.IsNullOrEmpty())
                     {
-                        value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
+                        value = _configProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.WebConfig);
                         if (value.IsNullOrEmpty())
                         {
-                            value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
+                            value = _configProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.ApplicationConfig);
                             if (isRequired && value.IsNullOrEmpty())
                                 throw new ConfigurationMissingException(propertyName, propertyType);
                             if (value.IsNullOrEmpty())
                             {
                                 var currentProcessFilename = GetCurrentProcessFilename() + ".config";
-                                value = ConfigProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
+                                value = _configProvider.Get(propertyType, propertyName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => currentProcessFilename);
                                 if (isRequired && value.IsNullOrEmpty())
                                     throw new ConfigurationMissingException(propertyName, propertyType);
                             }
@@ -675,7 +683,7 @@ namespace AnyConfig
                 else
                     returnObject = defaultValue;
             }
-            LastResolvedConfigurationFilename = ConfigProvider.LastResolvedConfigurationFilename;
+            LastResolvedConfigurationFilename = _configProvider.LastResolvedConfigurationFilename;
             return returnObject;
         }
 

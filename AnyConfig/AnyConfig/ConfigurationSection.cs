@@ -4,6 +4,8 @@ using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AnyConfig
 {
@@ -92,11 +94,11 @@ namespace AnyConfig
                 .OrderBy(x => x.Key);
         }
 
-        public IChangeToken GetReloadToken()
-        {
-            // this is not really supported yet
-            return new ConfigurationReloadToken();
-        }
+        IEnumerable<IConfigurationSection> IConfiguration.GetChildren() => GetChildren();
+
+        public IChangeToken GetReloadToken() => new ConfigurationReloadToken();
+
+        IChangeToken IConfiguration.GetReloadToken() => GetReloadToken();
 
         public IConfigurationSection GetSection(string key)
         {
@@ -124,12 +126,14 @@ namespace AnyConfig
             return new ConfigurationSection(key, key, null, null);
         }
 
+        IConfigurationSection IConfiguration.GetSection(string key) => GetSection(key);
+
         internal string ConvertToJsonPath(string path)
         {
             var newPath = path.Replace(":", "/");
             if (!newPath.StartsWith("/"))
                 newPath = "/" + newPath;
-            return ConfigProvider.RemapINodeArrayPositionText(newPath);
+            return NodeHelpers.RemapINodeArrayPositionText(newPath);
         }
 
         internal string ConvertToSectionPath(string path)
@@ -138,12 +142,9 @@ namespace AnyConfig
             if (newPath.StartsWith(":"))
                 newPath = newPath.Substring(1);
 
-            return ConfigProvider.RemapIConfigurationArrayPositionText(newPath);
+            return NodeHelpers.RemapIConfigurationArrayPositionText(newPath);
         }
 
-        public override string ToString()
-        {
-            return Key;
-        }
+        public override string ToString() => Key;
     }
 }

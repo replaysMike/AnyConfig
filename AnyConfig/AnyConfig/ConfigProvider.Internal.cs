@@ -18,14 +18,14 @@ using TypeSupport.Extensions;
 [assembly: InternalsVisibleTo("AnyConfig.Tests,PublicKey=00240000048000009400000006020000002400005253413100040000010001001996994e108c546699147c2adcce1926f2c7045588113cdccfe7c8a0c87830ac7f23347fe7ee39c65ded9cef5a82568da5dd2329434c20912db075e4af8ecbf162f108d3afadd0215a17b6ccdbf58b3501244c56a853b22e243d5b731daf9810394ae16bc1511937bbf764d3c344fcf2a31ff59fe9375ad93ed5932147ad7d9c")]
 namespace AnyConfig
 {
-    public static partial class ConfigProvider
+    public partial class ConfigProvider
     {
         private const string DotNetCoreSettingsFilename = "appsettings.json";
         private const string DotNetFrameworkSettingsFilename = "App.config";
         private static readonly ConcurrentDictionary<string, CachedConfiguration> _cachedConfigurationFiles = new ConcurrentDictionary<string, CachedConfiguration>();
         private static readonly ConcurrentDictionary<ObjectCacheKey, object> _cachedConfigurationValues = new ConcurrentDictionary<ObjectCacheKey, object>();
 
-        private static bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
+        private bool InternalTryGet(out object value, Type valueType, string optionName, ConfigSource configSource, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -65,7 +65,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        private static bool InternalTryGet<T>(out T value, string optionName, ConfigSource configSource, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
+        private bool InternalTryGet<T>(out T value, string optionName, ConfigSource configSource, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -102,7 +102,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting<T>(out T value, string optionName, string configSectionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
+        internal bool GetWebConfigSetting<T>(out T value, string optionName, string configSectionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
         {
             var valueExists = false;
             value = defaultValue;
@@ -140,7 +140,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, string configSectionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
+        internal bool GetWebConfigSetting(out object value, Type valueType, string optionName, string configSectionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false)
         {
             var valueExists = false;
             value = defaultValue;
@@ -177,7 +177,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetWebConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -216,7 +216,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetWebConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetWebConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, bool expandEnvironmentVariables = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -256,7 +256,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetEmbeddedResourceSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetEmbeddedResourceSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -283,7 +283,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetEmbeddedResourceSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetEmbeddedResourceSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -310,14 +310,14 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetJsonConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetJsonConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var exists = GetJsonConfigSetting(out object result, typeof(T), optionName, defaultValue, throwsException, configParameters);
             value = (T)result;
             return exists;
         }
 
-        internal static bool GetJsonConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetJsonConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -386,14 +386,14 @@ namespace AnyConfig
             return valueExists;
         }
 
-        internal static bool GetXmlConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetXmlConfigSetting<T>(out T value, string optionName, T defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = GetXmlConfigSetting(out object result, typeof(T), optionName, defaultValue, throwsException, configParameters);
             value = (T)result;
             return valueExists;
         }
 
-        internal static bool GetXmlConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
+        internal bool GetXmlConfigSetting(out object value, Type valueType, string optionName, object defaultValue, bool throwsException = false, params Expression<Func<object, object>>[] configParameters)
         {
             var valueExists = false;
             value = defaultValue;
@@ -486,7 +486,7 @@ namespace AnyConfig
             return valueExists;
         }
 
-        private static string InternalGetConnectionString(string name)
+        private string InternalGetConnectionString(string name)
         {
             var connectionStringKey = ConfigurationManager.ConnectionStrings[name];
             if (connectionStringKey != null)
@@ -502,7 +502,7 @@ namespace AnyConfig
         /// <param name="value"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        internal static object ConvertStringToNativeType(Type type, string value, object defaultValue)
+        internal object ConvertStringToNativeType(Type type, string value, object defaultValue)
         {
             var result = defaultValue;
             var isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
@@ -604,8 +604,6 @@ namespace AnyConfig
             return result;
         }
 
-
-
         /// <summary>
         /// Convert a string to a native type using parsing or casting.
         /// </summary>
@@ -613,7 +611,7 @@ namespace AnyConfig
         /// <param name="value"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        internal static T ConvertStringToNativeType<T>(string value, T defaultValue)
+        internal T ConvertStringToNativeType<T>(string value, T defaultValue)
             => (T)ConvertStringToNativeType(typeof(T), value, defaultValue);
 
         /// <summary>
@@ -622,7 +620,7 @@ namespace AnyConfig
         /// <param name="type"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        internal static object ConvertStringToNativeType(Type type, string value) => ConvertStringToNativeType(type, value, null);
+        internal object ConvertStringToNativeType(Type type, string value) => ConvertStringToNativeType(type, value, null);
 
         /// <summary>
         /// Get the value of an expression of type Func<object, object>
@@ -630,42 +628,9 @@ namespace AnyConfig
         /// <param name="expressions"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        private static string GetExpressionValue(this Expression<Func<object, object>>[] expressions, string name)
-        {
-            var val = "";
-            foreach (var expression in expressions)
-            {
-                if (expression.Parameters[0].Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    switch (expression.Body)
-                    {
-                        case BlockExpression e:
-                            break;
-                        case DefaultExpression e:
-                            break;
-                        case DynamicExpression e:
-                            break;
-                        case MemberExpression e:
-                            var m = e.Expression as ConstantExpression;
-                            val = m.Value.GetFieldValue(e.Member.Name).ToString();
-                            break;
-                        case MethodCallExpression e:
-                            break;
-                        case LambdaExpression e:
-                            break;
-                        case ConstantExpression e:
-                            val = e.Value.ToString().Replace("\"", "");
-                            break;
-                        case UnaryExpression e:
-                            break;
-                    }
-                    break;
-                }
-            }
-            return val;
-        }
+        
 
-        private static List<KeyValuePair<string, string>> MapAllNodes(JsonNode node, List<KeyValuePair<string, string>> values)
+        private List<KeyValuePair<string, string>> MapAllNodes(JsonNode node, List<KeyValuePair<string, string>> values)
         {
             if (node.NodeType == JsonNodeType.Object)
             {
@@ -675,7 +640,7 @@ namespace AnyConfig
             else if (node.NodeType == JsonNodeType.Value)
             {
                 var key = $"{node.FullPathWithArrayHints.Replace("/", ":").Substring(1)}";
-                key = RemapIConfigurationArrayPositionText(key);
+                key = NodeHelpers.RemapIConfigurationArrayPositionText(key);
                 var kvp = new KeyValuePair<string, string>(key, GetNodeValue(node.Value, node.ValueType));
                 values.Add(kvp);
             }
@@ -690,57 +655,8 @@ namespace AnyConfig
             }
             return values;
         }
-
-        /// <summary>
-        /// Remap array positions from [x] to :x
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        internal static string RemapIConfigurationArrayPositionText(string key)
-        {
-            if (key.Contains('['))
-            {
-                var builder = new StringBuilder();
-                foreach (var c in key)
-                {
-                    if (c == '[')
-                    {
-                        builder.Append(':');
-                        continue;
-                    }
-                    else if (c == ']')
-                        continue;
-                    builder.Append(c);
-                }
-                return builder.ToString();
-            }
-            return key;
-        }
-
-        /// <summary>
-        /// Remap array positions from :x to [x]
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        internal static string RemapINodeArrayPositionText(string key)
-        {
-            var matches = Regex.Match(key, @"\/[\d+]+(?:\/)?", RegexOptions.Compiled);
-            if (matches.Success)
-            {
-                foreach (Capture match in matches.Captures)
-                {
-                    var arrayIndex = key.Substring(match.Index + 1, match.Length - 1).Replace("/", "");
-                    var pathStart = key.Substring(0, match.Index);
-                    var pathEnd = key.Substring(match.Index + match.Length, key.Length - (match.Index + match.Length));
-                    if (pathEnd.Length > 0)
-                        pathEnd = "/" + pathEnd;
-                    key = $"{pathStart}[{arrayIndex}]{pathEnd}";
-                }
-            }
-            return key;
-        }
-
-        private static string GetNodeValue(string value, PrimitiveTypes type)
+        
+        private string GetNodeValue(string value, PrimitiveTypes type)
         {
             switch (type)
             {

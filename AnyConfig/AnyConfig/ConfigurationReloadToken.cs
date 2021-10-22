@@ -16,10 +16,13 @@ namespace AnyConfig
         /// </summary>
         public bool ActiveChangeCallbacks => true;
 
+        bool IChangeToken.ActiveChangeCallbacks => ActiveChangeCallbacks;
+
         /// <summary>
         /// Gets a value that indicates if a change has occurred.
         /// </summary>
         public bool HasChanged => _cts.IsCancellationRequested;
+        bool IChangeToken.HasChanged => HasChanged;
 
         /// <summary>
         /// Registers for a callback that will be invoked when the entry has changed. <see cref="IChangeToken.HasChanged"/>
@@ -29,6 +32,8 @@ namespace AnyConfig
         /// <param name="state">State to be passed into the callback.</param>
         /// <returns></returns>
         public IDisposable RegisterChangeCallback(Action<object> callback, object state) => _cts.Token.Register(callback, state);
+
+        IDisposable IChangeToken.RegisterChangeCallback(Action<object> callback, object state) => RegisterChangeCallback(callback, state);
 
         /// <summary>
         /// Used to trigger the change token when a reload occurs.
