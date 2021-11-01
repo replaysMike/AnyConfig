@@ -11,7 +11,7 @@ namespace AnyConfig
     internal class CachedDataProvider<T>
     {
         private static object _dataLock = new object();
-        internal static Dictionary<string, T> _cachedObjects = new Dictionary<string, T>();
+        private static Dictionary<string, T> _cachedObjects = new Dictionary<string, T>();
 
         /// <summary>
         /// Returns the number of items in the cache
