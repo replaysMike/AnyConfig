@@ -5,6 +5,7 @@ using AnyConfig.Models;
 using AnyConfig.Xml;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -29,6 +30,8 @@ namespace AnyConfig
         private LegacyConfigurationLoader _legacyConfigurationLoader;
         private static IConfiguration _appConfiguration;
         private ConfigProvider _configProvider = new ConfigProvider();
+        private static readonly ConcurrentDictionary<string, CachedConfiguration> _cachedConfigurationFiles = new ConcurrentDictionary<string, CachedConfiguration>();
+        private static readonly ConcurrentDictionary<ObjectCacheKey, object> _cachedConfigurationValues = new ConcurrentDictionary<ObjectCacheKey, object>();
 
         /// <summary>
         /// Get the pre-configured IConfiguration. To set, see <see cref="SetAppConfiguration"/>
@@ -398,6 +401,9 @@ namespace AnyConfig
         {
             // for .net core configs such as appsettings.json we can serialize from json directly
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
+
+            if (_cachedConfigurationFiles.ContainsKey(filename))
+                return _cachedConfigurationFiles[filename];
             var configuration = _configProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
             return configuration;
         }
@@ -436,6 +442,9 @@ namespace AnyConfig
 
         public object LoadJsonConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            if (_appConfiguration is not null)
+                return _appConfiguration.GetValue(type, settingName, defaultValue);
+
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
@@ -443,71 +452,73 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(settingName))
             {
-                if (_appConfiguration is not null)
-                    return _appConfiguration.GetValue(type, settingName, defaultValue);
-                if (configuration.Providers.First().TryGet(settingName, out var value))
-                    return ((StringValue)value).As(type);
+                if (configuration.Providers.First().TryGet(settingName, out var settingValue))
+                    return ((StringValue)settingValue).As(type);
                 return defaultValue;
             }
-            else
-            {
-                var nameOfSection = sectionName ?? type.Name;
-                var configSection = configuration.GetSection(nameOfSection);
-                if (configSection == null)
-                {
-                    if (throwsException)
-                        throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
-                    return defaultValue;
-                }
 
-                var value = JsonSerializer.Deserialize(configSection.Value, type);
-                return value;
+            var nameOfSection = sectionName ?? type.Name;
+            var configSection = configuration.GetSection(nameOfSection);
+            if (configSection == null)
+            {
+                if (throwsException)
+                    throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+                return defaultValue;
             }
+
+            var value = JsonSerializer.Deserialize(configSection.Value, type);
+            return value;
         }
 
         public T LoadJsonConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            // if we were injected an IConfiguration, simply use it
+            if (_appConfiguration is not null)
+                return _appConfiguration.GetValue(settingName, defaultValue);
+
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
+
+            var cacheKey = new ObjectCacheKey
+            {
+                Filename = filename,
+                OptionName = settingName,
+                Type = typeof(T)
+            };
+
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
                 throw new ConfigurationMissingException($"Could not load configuration from file named '{filename}'!");
 
             if (!string.IsNullOrEmpty(settingName))
             {
-                // if we were injected an IConfiguration, simply use it
-                if (_appConfiguration is not null)
-                    return _appConfiguration.GetValue(settingName, defaultValue);
                 if(!configuration.Providers.Any())
                     throw new ConfigurationMissingException($"Could not resolve a json configuration provider!");
                 if (configuration.Providers
                         .Where(x => x?.GetType() == typeof(JsonConfigurationProvider))
                         .First()
-                        .TryGet(settingName, out var value))
-                    return ((StringValue)value).As<T>();
+                        .TryGet(settingName, out var settingValue))
+                    return ((StringValue)settingValue).As<T>();
                 return defaultValue;
             }
-            else
-            {
-                var nameOfSection = sectionName ?? typeof(T).Name;
-                var configSection = configuration.GetSection(nameOfSection) as ConfigurationSection;
-                if (string.IsNullOrEmpty(configSection.GetNodeStructuredText()))
-                {
-                    if (sectionName == null)
-                    {
-                        // try flat mapping
-                        var flatMapValue = new ConfigProvider().Get<T>(ConfigSource.JsonFile, throwsException, Filename => filename);
-                        if (flatMapValue != null)
-                            return flatMapValue;
-                    }
-                    if (throwsException)
-                        throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
-                    return defaultValue;
-                }
 
-                var value = JsonSerializer.Deserialize<T>(configSection.GetNodeStructuredText());
-                return value;
+            var nameOfSection = sectionName ?? typeof(T).Name;
+            var configSection = configuration.GetSection(nameOfSection) as ConfigurationSection;
+            if (string.IsNullOrEmpty(configSection.GetNodeStructuredText()))
+            {
+                if (sectionName == null)
+                {
+                    // try flat mapping
+                    var flatMapValue = new ConfigProvider().Get<T>(ConfigSource.JsonFile, throwsException, Filename => filename);
+                    if (flatMapValue != null)
+                        return flatMapValue;
+                }
+                if (throwsException)
+                    throw new ConfigurationMissingException($"Unable to resolve configuration section of type '{nameOfSection}'. Please ensure your application '{GetAssemblyName()}' is configured correctly for the '{DetectedRuntime.DetectedRuntimeFramework}' framework.");
+                return defaultValue;
             }
-            return default;
+
+            var value = JsonSerializer.Deserialize<T>(configSection.GetNodeStructuredText());
+            return value;
         }
 
         public object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
