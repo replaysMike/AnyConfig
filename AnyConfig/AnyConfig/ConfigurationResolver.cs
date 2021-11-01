@@ -31,7 +31,6 @@ namespace AnyConfig
         private static IConfiguration _appConfiguration;
         private ConfigProvider _configProvider = new ConfigProvider();
         private static readonly ConcurrentDictionary<string, CachedConfiguration> _cachedConfigurationFiles = new ConcurrentDictionary<string, CachedConfiguration>();
-        private static readonly ConcurrentDictionary<ObjectCacheKey, object> _cachedConfigurationValues = new ConcurrentDictionary<ObjectCacheKey, object>();
 
         /// <summary>
         /// Get the pre-configured IConfiguration. To set, see <see cref="SetAppConfiguration"/>
@@ -402,8 +401,6 @@ namespace AnyConfig
             // for .net core configs such as appsettings.json we can serialize from json directly
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
 
-            if (_cachedConfigurationFiles.ContainsKey(filename))
-                return _cachedConfigurationFiles[filename];
             var configuration = _configProvider.GetConfiguration(Path.GetFileName(filename), Path.GetDirectoryName(filename));
             return configuration;
         }
@@ -491,7 +488,7 @@ namespace AnyConfig
 
             if (!string.IsNullOrEmpty(settingName))
             {
-                if(!configuration.Providers.Any())
+                if (!configuration.Providers.Any())
                     throw new ConfigurationMissingException($"Could not resolve a json configuration provider!");
                 if (configuration.Providers
                         .Where(x => x?.GetType() == typeof(JsonConfigurationProvider))
@@ -523,13 +520,14 @@ namespace AnyConfig
 
         public object LoadXmlConfiguration(object defaultValue, Type type, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            // if we were injected an IConfiguration, simply use it
+            if (_appConfiguration is not null)
+                return _appConfiguration.GetValue(type, settingName, defaultValue);
+
             // for .net framework configs such as app.config and web.config we need to serialize individual values
             filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
-                if (_appConfiguration is not null)
-                    return _appConfiguration.GetValue(type, settingName, defaultValue);
-
                 object value = null;
                 if (!string.IsNullOrEmpty(filename))
                     value = _configProvider.Get(type, settingName, ConfigProvider.Empty, ConfigSource.XmlFile, throwsException, Filename => filename);
@@ -565,12 +563,14 @@ namespace AnyConfig
 
         public T LoadXmlConfiguration<T>(T defaultValue, string settingName = null, string filename = null, string sectionName = null, bool throwsException = false)
         {
+            // if we were injected an IConfiguration, simply use it
+            if (_appConfiguration is not null)
+                return _appConfiguration.GetValue(settingName, defaultValue);
+
             // for .net framework configs such as app.config and web.config we need to serialize individual values
             filename = ResolveFilenamePath(filename);
             if (!string.IsNullOrEmpty(settingName))
             {
-                if (_appConfiguration is not null)
-                    return _appConfiguration.GetValue(settingName, defaultValue);
 
                 var valueExists = false;
                 object value = defaultValue;

@@ -13,7 +13,7 @@ namespace AnyConfig
     public partial class ConfigProvider
     {
         public static ConfigValueNotSet Empty => ConfigValueNotSet.Instance;
-        public static string LastResolvedConfigurationFilename { get; private set; }
+        public string LastResolvedConfigurationFilename { get; internal set; }
         private static CachedDataProvider<object> _cachedObjects = new CachedDataProvider<object>();
         private static CachedFileProvider _cachedFiles = new CachedFileProvider();
 
@@ -86,7 +86,7 @@ namespace AnyConfig
                 return configurationRoot;
             });
 
-            return configuration;
+            return configuration as IConfigurationRoot;
         }
 
         /// <summary>
