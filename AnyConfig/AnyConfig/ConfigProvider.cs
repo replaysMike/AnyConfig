@@ -63,10 +63,10 @@ namespace AnyConfig
             }
 
             var filePath = Path.Combine(path, filename);
-            var configurationFileContents = _cachedFiles.AddOrGetFile(filePath);
             var configuration = _cachedObjects.AddOrGet(filePath, () => {
                 var jsonParser = new JsonParser();
-                var rootNode = jsonParser.Parse(_cachedFiles.AddOrGetFile(filePath));
+                var fileContents = _cachedFiles.AddOrGetFile(filePath);
+                var rootNode = jsonParser.Parse(fileContents);
 
                 var configurationRoot = new ConfigurationRoot(filePath);
                 var provider = new JsonConfigurationProvider(filePath);

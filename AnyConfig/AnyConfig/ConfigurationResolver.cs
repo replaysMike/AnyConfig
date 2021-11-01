@@ -474,14 +474,6 @@ namespace AnyConfig
                 return _appConfiguration.GetValue(settingName, defaultValue);
 
             filename = ResolveFilenamePath(filename ?? DotNetCoreSettingsFilename);
-
-            var cacheKey = new ObjectCacheKey
-            {
-                Filename = filename,
-                OptionName = settingName,
-                Type = typeof(T)
-            };
-
             var configuration = GetConfiguration(filename, sectionName);
             if (configuration == null)
                 throw new ConfigurationMissingException($"Could not load configuration from file named '{filename}'!");
