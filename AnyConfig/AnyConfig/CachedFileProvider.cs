@@ -1,12 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.IO;
+﻿using System.IO;
 
 namespace AnyConfig
 {
     internal class CachedFileProvider : CachedDataProvider<string>
     {
-        internal static ConcurrentDictionary<string, string> _cachedConfigurations = new ConcurrentDictionary<string, string>();
-
         /// <summary>
         /// Add file to cache and return its contents, or get cached file contents
         /// </summary>

@@ -1,6 +1,6 @@
 ﻿using AnyConfig.Exceptions;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace AnyConfig
 {
@@ -10,13 +10,22 @@ namespace AnyConfig
     /// <typeparam name="T"></typeparam>
     internal class CachedDataProvider<T>
     {
-        internal static ConcurrentDictionary<string, T> _cachedObjects = new ConcurrentDictionary<string, T>();
+        private static object _dataLock = new object();
+        internal static Dictionary<string, T> _cachedObjects = new Dictionary<string, T>();
 
         /// <summary>
         /// Returns the number of items in the cache
         /// </summary>
-        internal int Count => _cachedObjects.Count;
-
+        internal int Count
+        {
+            get
+            {
+                lock (_dataLock)
+                {
+                    return _cachedObjects.Count;
+                }
+            }
+        }
 
         /// <summary>
         /// Add file to cache and return its contents, or get cached file contents
@@ -25,13 +34,15 @@ namespace AnyConfig
         /// <returns></returns>
         internal virtual object AddOrGet(string key, Func<T> addMethod)
         {
-            if (_cachedObjects.ContainsKey(key))
-                return _cachedObjects[key];
+            lock (_dataLock)
+            {
+                if (_cachedObjects.ContainsKey(key))
+                    return _cachedObjects[key];
 
-            var contents = addMethod();
-            if (_cachedObjects.TryAdd(key, contents))
+                var contents = addMethod();
+                _cachedObjects.Add(key, contents);
                 return contents;
-
+            }
             throw new ConfigurationException($"Failed to add object named '{key}' to the cache!");
         }
 
@@ -42,7 +53,10 @@ namespace AnyConfig
         /// <returns></returns>
         internal bool Remove(string key)
         {
-            return _cachedObjects.TryRemove(key, out var _);
+            lock (_dataLock)
+            {
+                return _cachedObjects.Remove(key);
+            }
         }
 
         /// <summary>
@@ -50,7 +64,10 @@ namespace AnyConfig
         /// </summary>
         internal void ClearCache()
         {
-            _cachedObjects.Clear();
+            lock (_dataLock)
+            {
+                _cachedObjects.Clear();
+            }
         }
 
         /// <summary>
@@ -58,6 +75,12 @@ namespace AnyConfig
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        internal bool ContainsKey(string key) => _cachedObjects.ContainsKey(key);
+        internal bool ContainsKey(string key)
+        {
+            lock (_dataLock)
+            {
+                return _cachedObjects.ContainsKey(key);
+            }
+        }
     }
 }
