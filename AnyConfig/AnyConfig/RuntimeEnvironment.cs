@@ -32,6 +32,8 @@ namespace AnyConfig
                 info.DetectedRuntimeFramework = RuntimeFramework.DotNetCore;
             if (info.DetectedRuntimeFrameworkDescription.Contains(".NET 5"))
                 info.DetectedRuntimeFramework = RuntimeFramework.DotNet5;
+            if (info.DetectedRuntimeFrameworkDescription.Contains(".NET 6"))
+                info.DetectedRuntimeFramework = RuntimeFramework.DotNet6;
 
 #if NETFRAMEWORK
             if (entryAssembly == null)

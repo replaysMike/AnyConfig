@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using AnyConfig.Exceptions;
-using AnyConfig.Scaffolding;
-using AnyConfig.Tests.Models;
+﻿using AnyConfig.Exceptions;
 using NLog.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;

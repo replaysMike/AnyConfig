@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net48;net5</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net48;net5;net6</TargetFrameworks>
 		<Product>AnyConfig</Product>
 		<ProductName>AnyConfig</ProductName>
 		<Authors>Michael Brown</Authors>
@@ -28,7 +28,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
-		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" PrivateAssets="all" Condition="'$(TargetFramework)'!='net5'" />
+		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" PrivateAssets="all" Condition="'$(TargetFramework)'!='net5' And '$(TargetFramework)'!='net6'" />
 		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
 		<PackageReference Include="TypeSupport" Version="1.1.12" PrivateAssets="all" />

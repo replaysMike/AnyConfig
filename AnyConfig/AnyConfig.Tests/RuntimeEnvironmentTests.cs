@@ -14,6 +14,8 @@ namespace AnyConfig.Tests
             Assert.AreEqual(RuntimeFramework.DotNetFramework, detectedRuntime.DetectedRuntimeFramework);
 #elif NET5_0
             Assert.AreEqual(RuntimeFramework.DotNet5, detectedRuntime.DetectedRuntimeFramework);
+#elif NET6_0
+            Assert.AreEqual(RuntimeFramework.DotNet6, detectedRuntime.DetectedRuntimeFramework);
 #elif NETCOREAPP
             Assert.AreEqual(RuntimeFramework.DotNetCore, detectedRuntime.DetectedRuntimeFramework);
 #else

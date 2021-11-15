@@ -17,6 +17,10 @@
         /// <summary>
         /// .Net 5
         /// </summary>
-        DotNet5
+        DotNet5,
+        /// <summary>
+        /// .Net 6
+        /// </summary>
+        DotNet6
     }
 }

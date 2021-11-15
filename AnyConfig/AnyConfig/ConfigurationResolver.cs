@@ -103,11 +103,12 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet6:
                 case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
+                default:
                     return LoadJsonConfiguration<T>(default);
                 case RuntimeFramework.DotNetFramework:
-                default:
                     return LoadXmlConfiguration<T>(default);
             }
 
