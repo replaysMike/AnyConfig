@@ -145,11 +145,12 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet6:
                 case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
+                default:
                     return LoadJsonConfiguration<T>(defaultValue, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
-                default:
                     return LoadXmlConfiguration<T>(defaultValue, settingName, null, null, throwsException);
             }
 
@@ -189,11 +190,12 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet6:
                 case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
+                default:
                     return LoadJsonConfiguration(defaultValue, type, settingName, null, null, throwsException);
                 case RuntimeFramework.DotNetFramework:
-                default:
                     return LoadXmlConfiguration(defaultValue, type, settingName, null, null, throwsException);
             }
 
@@ -223,11 +225,12 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet6:
                 case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
+                default:
                     return LoadJsonConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
-                default:
                     return LoadXmlConfiguration<T>(defaultValue, null, null, nameOfSection, throwsException);
             }
 
@@ -259,11 +262,12 @@ namespace AnyConfig
             // if on the .net core platform, resolve a configuration from appsettings.json
             switch (DetectedRuntime.DetectedRuntimeFramework)
             {
+                case RuntimeFramework.DotNet6:
                 case RuntimeFramework.DotNet5:
                 case RuntimeFramework.DotNetCore:
+                default:
                     return LoadJsonConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
                 case RuntimeFramework.DotNetFramework:
-                default:
                     return LoadXmlConfiguration(defaultValue, type, null, null, nameOfSection, throwsException);
             }
 
@@ -484,7 +488,7 @@ namespace AnyConfig
                 // if we were injected an IConfiguration, simply use it
                 if (_appConfiguration is not null)
                     return _appConfiguration.GetValue(settingName, defaultValue);
-                
+
                 configuration = LoadConfigurationFromFile(filename, sectionName, out configurationFilename);
                 if (!configuration.Providers.Any())
                     throw new ConfigurationMissingException($"Could not resolve a json configuration provider!");
