@@ -30,7 +30,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" PrivateAssets="all" Condition="'$(TargetFramework)'!='net5' And '$(TargetFramework)'!='net6'" />
 		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="5.0.0" PrivateAssets="all" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="6.0.1" PrivateAssets="all" />
 		<PackageReference Include="TypeSupport" Version="1.1.12" PrivateAssets="all" />
 	</ItemGroup>
 
